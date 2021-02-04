@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from microcontroller.views import MicroControllerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/micro-controller/', MicroControllerView.as_view(), name='api-create-micro-controller')
 ]
