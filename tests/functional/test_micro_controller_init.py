@@ -13,15 +13,15 @@ class TestMicroControllerInitialization:
 
         # the micro controller sends a POST request to initialize its hard configs on the server
         hard_configs = {
-            'id': uuid.uuid4(),
-            'watering_stations': num_watering_stations
+            'uuid': uuid.uuid4(),
+            'num_watering_stations': num_watering_stations
         }
 
         resp = api_client.post(reverse('api-create-micro-controller'), data=hard_configs)
         assert resp.status_code == status.HTTP_201_CREATED
 
         # the MC then sends a GET request to retrieve the soft configs from the server
-        resp = api_client.get(reverse('api-configs'))
+        resp = api_client.get(reverse('api-get-watering-stations'))
         assert resp.status_code == status.HTTP_200_OK
         soft_configs = resp.data
 
