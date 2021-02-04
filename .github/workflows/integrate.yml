@@ -1,0 +1,45 @@
+name: Integrate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nelonoel/branch-name@v1.0.1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install firefox
+        run: sudo apt install firefox
+
+      - name: Install geckodriver
+        run: |
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.28.0/geckodriver-v0.28.0-linux64.tar.gz
+          tar -xvzf geckodriver*
+          sudo mv geckodriver /usr/local/bin
+          geckodriver --version
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Unit tests
+        run: make test-u
+
+      - name: Integration tests
+        run: make test-i
+
+      - name: Functional tests
+        run: make test-f
+
