@@ -24,6 +24,10 @@ class TestMicroControllerInitialization:
         # the MC then sends a GET request to retrieve the soft configs from the server
         resp = api_client.get(reverse('api-get-watering-stations', kwargs={'pk': pk}))
         assert resp.status_code == status.HTTP_200_OK
+        for i in range(num_watering_stations):
+            assert 'moisture_threshold' in resp.data[i]
+            assert 'watering_duration' in resp.data[i]
+
         soft_configs = resp.data
 
         assert False, 'Finish the test'
