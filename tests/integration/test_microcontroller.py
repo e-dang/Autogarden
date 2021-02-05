@@ -24,7 +24,7 @@ def data_POST_api_create_micro_controller():
 @pytest.fixture
 def data_GET_api_get_watering_stations(micro_controller_factory):
     num_watering_stations = 4
-    micro_controller = micro_controller_factory(num_watering_stations=num_watering_stations)
+    micro_controller = micro_controller_factory(watering_stations=num_watering_stations)
     url = reverse('api-get-watering-stations', kwargs={'pk': micro_controller.pk})
 
     return num_watering_stations, micro_controller, url
@@ -92,18 +92,6 @@ class TestMicroControllerModel:
 
 
 @pytest.mark.integration
-class TestMicroControllerManager:
-    @pytest.mark.django_db
-    def test_create_adds_num_watering_stations_to_micro_controller_instance(self):
-        num_watering_stations = 16
-
-        micro_controller = MicroController.objects.create(
-            uuid=uuid.uuid4(), num_watering_stations=num_watering_stations)
-
-        assert micro_controller.watering_stations.count() == num_watering_stations
-
-
-@pytest.mark.integration
 class TestMicroControllerSerializer:
     @pytest.mark.django_db
     def test_serializer_requires_num_watering_stations(self):
@@ -111,3 +99,12 @@ class TestMicroControllerSerializer:
 
         assert serializer.is_valid() is False
         assert serializer.errors['num_watering_stations'][0].code == 'required'
+
+    @pytest.mark.django_db
+    def test_create_adds_num_watering_stations_to_micro_controller_instance(self):
+        num_watering_stations = 16
+        serializer = MicroControllerSerializer()
+
+        micro_controller = serializer.create({'uuid': uuid.uuid4(), 'num_watering_stations': num_watering_stations})
+
+        assert micro_controller.watering_stations.count() == num_watering_stations

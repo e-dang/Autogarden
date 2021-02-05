@@ -16,6 +16,12 @@ class MicroControllerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(NEGATIVE_NUM_WATERING_STATIONS_ERR)
         return value
 
+    def create(self, validated_data):
+        micro_controller = MicroController.objects.create(uuid=validated_data['uuid'])
+        for _ in range(validated_data['num_watering_stations']):
+            micro_controller.watering_stations.create()
+        return micro_controller
+
 
 class WateringStationSerializer(serializers.ModelSerializer):
     class Meta:

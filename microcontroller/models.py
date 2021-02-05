@@ -1,12 +1,18 @@
+from datetime import timedelta
+
 from django.db import models
 
-from .managers import MicroControllerManager
+
+def _default_moisture_threshold():
+    return 50
+
+
+def _default_watering_duration():
+    return timedelta(minutes=1)
 
 
 class MicroController(models.Model):
     uuid = models.UUIDField(unique=True)
-
-    objects = MicroControllerManager()
 
 
 class WateringStation(models.Model):
