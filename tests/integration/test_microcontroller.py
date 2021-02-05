@@ -22,8 +22,13 @@ def data_POST_api_create_micro_controller():
 
 @pytest.mark.integration
 class TestViews:
-    def test_api_create_micro_controller_view_has_correct_url(self):
-        assert reverse('api-create-micro-controller') == '/api/micro-controller/'
+    @pytest.mark.parametrize('view, kwargs, expected', [
+        ('api-create-micro-controller', {}, '/api/micro-controller/'),
+        ('api-get-watering-stations', {'pk': 0}, '/api/micro-controller/0/watering-stations/'),
+    ],
+        ids=['api-create-micro-controller', 'garden'])
+    def test_view_has_correct_url(self, view, kwargs, expected):
+        assert reverse(view, kwargs=kwargs) == expected
 
     @pytest.mark.django_db
     def test_POST_api_create_micro_controller_creates_micro_controller_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_create_micro_controller):

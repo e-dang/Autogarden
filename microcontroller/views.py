@@ -11,3 +11,8 @@ class MicroControllerView(APIView):
         if serializer.is_valid():
             micro_controller = serializer.save()
         return Response({'pk': micro_controller.pk}, status=HTTP_201_CREATED)
+
+
+class WateringStationView(APIView):
+    def get(self, request, pk):
+        pass

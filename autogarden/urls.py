@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from microcontroller.views import MicroControllerView
+from microcontroller.views import MicroControllerView, WateringStationView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/micro-controller/', MicroControllerView.as_view(), name='api-create-micro-controller')
+    path('api/micro-controller/', MicroControllerView.as_view(), name='api-create-micro-controller'),
+    path('api/micro-controller/<int:pk>/watering-stations/',
+         WateringStationView.as_view(), name='api-get-watering-stations')
 ]
