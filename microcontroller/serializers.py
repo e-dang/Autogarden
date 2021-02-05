@@ -26,4 +26,4 @@ class MicroControllerSerializer(serializers.ModelSerializer):
 class WateringStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = WateringStation
-        fields = []
+        fields = ['moisture_threshold', 'watering_duration']
