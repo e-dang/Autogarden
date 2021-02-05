@@ -18,13 +18,13 @@ class TestMicroControllerInitialization:
             'num_watering_stations': num_watering_stations
         }
 
-        init_url = reverse('api-create-micro-controller')
+        init_url = reverse('api-micro-controller')
         resp = api_client.post(init_url, data=mc_configs)
         assert resp.status_code == status.HTTP_201_CREATED
         pk = int(resp.data['pk'])  # should not raise
 
         # the MC then sends a GET request to retrieve the watering station configs from the server
-        watering_station_url = reverse('api-get-watering-stations', kwargs={'pk': pk})
+        watering_station_url = reverse('api-watering-stations', kwargs={'pk': pk})
         resp = api_client.get(watering_station_url)
         assert resp.status_code == status.HTTP_200_OK
         for i in range(num_watering_stations):

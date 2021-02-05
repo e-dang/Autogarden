@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from microcontroller.views import MicroControllerView, WateringStationView
 
+API_PREFIX = 'api/'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/micro-controller/', MicroControllerView.as_view(), name='api-create-micro-controller'),
-    path('api/micro-controller/<int:pk>/watering-stations/',
-         WateringStationView.as_view(), name='api-get-watering-stations')
+    path(API_PREFIX + 'micro-controller/', MicroControllerView.as_view(), name='api-micro-controller'),
+    path(API_PREFIX + 'micro-controller/<int:pk>/watering-stations/',
+         WateringStationView.as_view(), name='api-watering-stations')
 ]

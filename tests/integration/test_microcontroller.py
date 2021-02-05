@@ -10,9 +10,9 @@ from rest_framework.reverse import reverse
 
 
 @pytest.fixture
-def data_POST_api_create_micro_controller():
+def data_POST_api_micro_controller():
     num_watering_stations = 4
-    url = reverse('api-create-micro-controller')
+    url = reverse('api-micro-controller')
     data = {
         'uuid': uuid.uuid4(),
         'num_watering_stations': num_watering_stations
@@ -22,10 +22,10 @@ def data_POST_api_create_micro_controller():
 
 
 @pytest.fixture
-def data_GET_api_get_watering_stations(micro_controller_factory):
+def data_GET_api_watering_stations(micro_controller_factory):
     num_watering_stations = 4
     micro_controller = micro_controller_factory(watering_stations=num_watering_stations)
-    url = reverse('api-get-watering-stations', kwargs={'pk': micro_controller.pk})
+    url = reverse('api-watering-stations', kwargs={'pk': micro_controller.pk})
 
     return num_watering_stations, micro_controller, url
 
@@ -33,16 +33,16 @@ def data_GET_api_get_watering_stations(micro_controller_factory):
 @pytest.mark.integration
 class TestViews:
     @pytest.mark.parametrize('view, kwargs, expected', [
-        ('api-create-micro-controller', {}, '/api/micro-controller/'),
-        ('api-get-watering-stations', {'pk': 0}, '/api/micro-controller/0/watering-stations/'),
+        ('api-micro-controller', {}, '/api/micro-controller/'),
+        ('api-watering-stations', {'pk': 0}, '/api/micro-controller/0/watering-stations/'),
     ],
-        ids=['api-create-micro-controller', 'garden'])
+        ids=['api-micro-controller', 'garden'])
     def test_view_has_correct_url(self, view, kwargs, expected):
         assert reverse(view, kwargs=kwargs) == expected
 
     @pytest.mark.django_db
-    def test_POST_api_create_micro_controller_creates_micro_controller_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_create_micro_controller):
-        num_watering_stations, url, data = data_POST_api_create_micro_controller
+    def test_POST_api_micro_controller_creates_micro_controller_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_micro_controller):
+        num_watering_stations, url, data = data_POST_api_micro_controller
 
         api_client.post(url, data=data)
 
@@ -51,8 +51,8 @@ class TestViews:
         assert micro_controller.watering_stations.count() == num_watering_stations
 
     @pytest.mark.django_db
-    def test_POST_api_create_micro_controller_returns_201_response_with_pk_data(self, api_client, data_POST_api_create_micro_controller):
-        _, url, data = data_POST_api_create_micro_controller
+    def test_POST_api_micro_controller_returns_201_response_with_pk_data(self, api_client, data_POST_api_micro_controller):
+        _, url, data = data_POST_api_micro_controller
 
         resp = api_client.post(url, data=data)
 
@@ -60,8 +60,8 @@ class TestViews:
         assert resp.data['pk'] == MicroController.objects.get(uuid=data['uuid']).pk
 
     @pytest.mark.django_db
-    def test_POST_api_create_micro_controller_returns_409_response_if_micro_controller_with_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_create_micro_controller):
-        _, url, data = data_POST_api_create_micro_controller
+    def test_POST_api_micro_controller_returns_409_response_if_micro_controller_with_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_micro_controller):
+        _, url, data = data_POST_api_micro_controller
         micro_controller_factory(uuid=data['uuid'])
 
         resp = api_client.post(url, data=data)
@@ -69,8 +69,8 @@ class TestViews:
         assert resp.status_code == status.HTTP_409_CONFLICT
 
     @pytest.mark.django_db
-    def test_POST_api_create_micro_controller_returns_pk_of_micro_controller_if_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_create_micro_controller):
-        _, url, data = data_POST_api_create_micro_controller
+    def test_POST_api_micro_controller_returns_pk_of_micro_controller_if_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_micro_controller):
+        _, url, data = data_POST_api_micro_controller
         micro_controller = micro_controller_factory(uuid=data['uuid'])
 
         resp = api_client.post(url, data=data)
@@ -78,16 +78,16 @@ class TestViews:
         assert int(resp.data['pk']) == micro_controller.pk
 
     @pytest.mark.django_db
-    def test_GET_api_get_watering_stations_returns_200_response(self, api_client, data_GET_api_get_watering_stations):
-        _, _, url = data_GET_api_get_watering_stations
+    def test_GET_api_watering_stations_returns_200_response(self, api_client, data_GET_api_watering_stations):
+        _, _, url = data_GET_api_watering_stations
 
         resp = api_client.get(url)
 
         assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_GET_api_get_watering_stations_returns_serialized_watering_station_data_belonging_to_micro_controller(self, api_client, data_GET_api_get_watering_stations):
-        num_watering_stations, micro_controller, url = data_GET_api_get_watering_stations
+    def test_GET_api_watering_stations_returns_serialized_watering_station_data_belonging_to_micro_controller(self, api_client, data_GET_api_watering_stations):
+        num_watering_stations, micro_controller, url = data_GET_api_watering_stations
 
         resp = api_client.get(url)
 
