@@ -1,8 +1,9 @@
 import uuid
-
+from datetime import timedelta
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
+from microcontroller.models import MicroController
 
 
 @pytest.mark.functional
@@ -11,29 +12,63 @@ class TestMicroControllerInitialization:
     def test_micro_controller_can_setup_hard_configs_and_get_soft_configs(self, api_client):
         num_watering_stations = 16
 
-        # the micro controller sends a POST request to initialize its hard configs on the server
-        hard_configs = {
+        # the micro controller sends a POST request to initialize its configs on the server
+        mc_configs = {
             'uuid': uuid.uuid4(),
             'num_watering_stations': num_watering_stations
         }
 
-        resp = api_client.post(reverse('api-create-micro-controller'), data=hard_configs)
+        init_url = reverse('api-create-micro-controller')
+        resp = api_client.post(init_url, data=mc_configs)
         assert resp.status_code == status.HTTP_201_CREATED
         pk = int(resp.data['pk'])  # should not raise
 
-        # the MC then sends a GET request to retrieve the soft configs from the server
-        resp = api_client.get(reverse('api-get-watering-stations', kwargs={'pk': pk}))
+        # the MC then sends a GET request to retrieve the watering station configs from the server
+        watering_station_url = reverse('api-get-watering-stations', kwargs={'pk': pk})
+        resp = api_client.get(watering_station_url)
         assert resp.status_code == status.HTTP_200_OK
         for i in range(num_watering_stations):
             assert 'moisture_threshold' in resp.data[i]
             assert 'watering_duration' in resp.data[i]
 
-        soft_configs = resp.data
+        watering_station_data = resp.data
 
-        assert False, 'Finish the test'
+        # sometime later a user changes the watering station and when the MC sends another GET request to the server
+        # the MC recieves the new updated watering station configs
+        mt_diff = 1
+        wd_diff = timedelta(minutes=1)
+        micro_controller = MicroController.objects.get(pk=pk)
+        for watering_station in micro_controller.watering_stations.all():
+            watering_station.moisture_threshold += mt_diff
+            watering_station.watering_duration += wd_diff
+            watering_station.save()
 
-        # sometime later a user changes the soft configs and when the MC sends another GET request to the server
-        # the MC recieves the new updated soft configs
+        resp = api_client.get(watering_station_url)
+        assert resp.status_code == status.HTTP_200_OK
+        for i in range(num_watering_stations):
+            assert resp.data[i]['moisture_threshold'] == watering_station_data[i]['moisture_threshold'] + mt_diff
+            assert resp.data[i]['watering_duration'] == self.add_time_delta(
+                watering_station_data[i]['watering_duration'], wd_diff)
 
-        # the MC unexpectedly crashes which causes it to be logged. It sends the same login credentials, POST, and GET
-        # requests as before and recieves the same updated soft configs
+        watering_station_data = resp.data
+
+        # the MC unexpectedly crashes which causes it to repeat the same operations as before. This time it does not
+        # recieve a HTTP_201_CREATED status code, but recieves the same pk.
+        resp = api_client.post(init_url, data=mc_configs)
+        assert resp.status_code == status.HTTP_409_CONFLICT
+        assert pk == int(resp.data['pk'])
+
+        # it then makes a request for the watering station configs and recieves the same updated watering station
+        # configs as before
+        resp = api_client.get(watering_station_url)
+        assert resp.status_code == status.HTTP_200_OK
+        for i in range(num_watering_stations):
+            assert resp.data[i] == watering_station_data[i]
+
+    def add_time_delta(self, duration, increment):
+        hours, minutes, seconds = duration.split(':')
+        duration = timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds))
+        duration = duration + increment
+        hours, remainder = divmod(duration.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return '{:02}:{:02}:{:02}'.format(hours, minutes, seconds)
