@@ -60,6 +60,24 @@ class TestViews:
         assert resp.data['pk'] == MicroController.objects.get(uuid=data['uuid']).pk
 
     @pytest.mark.django_db
+    def test_POST_api_create_micro_controller_returns_409_response_if_micro_controller_with_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_create_micro_controller):
+        _, url, data = data_POST_api_create_micro_controller
+        micro_controller_factory(uuid=data['uuid'])
+
+        resp = api_client.post(url, data=data)
+
+        assert resp.status_code == status.HTTP_409_CONFLICT
+
+    @pytest.mark.django_db
+    def test_POST_api_create_micro_controller_returns_pk_of_micro_controller_if_uuid_already_exists(self, api_client, micro_controller_factory, data_POST_api_create_micro_controller):
+        _, url, data = data_POST_api_create_micro_controller
+        micro_controller = micro_controller_factory(uuid=data['uuid'])
+
+        resp = api_client.post(url, data=data)
+
+        assert int(resp.data['pk']) == micro_controller.pk
+
+    @pytest.mark.django_db
     def test_GET_api_get_watering_stations_returns_200_response(self, api_client, data_GET_api_get_watering_stations):
         _, _, url = data_GET_api_get_watering_stations
 

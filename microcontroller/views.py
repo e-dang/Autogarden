@@ -8,10 +8,15 @@ from .serializers import MicroControllerSerializer, WateringStationSerializer
 
 class MicroControllerView(APIView):
     def post(self, request):
-        serializer = MicroControllerSerializer(data=request.data)
-        if serializer.is_valid():
-            micro_controller = serializer.save()
-        return Response({'pk': micro_controller.pk}, status=status.HTTP_201_CREATED)
+        try:
+            micro_controller = MicroController.objects.get(uuid=request.POST['uuid'])
+        except MicroController.DoesNotExist:
+            serializer = MicroControllerSerializer(data=request.data)
+            if serializer.is_valid():
+                micro_controller = serializer.save()
+            return Response({'pk': micro_controller.pk}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'pk': micro_controller.pk}, status=status.HTTP_409_CONFLICT)
 
 
 class WateringStationView(APIView):
