@@ -9,7 +9,7 @@ from .serializers import MicroControllerSerializer, WateringStationSerializer
 class MicroControllerView(APIView):
     def post(self, request):
         try:
-            micro_controller = MicroController.objects.get(uuid=request.POST['uuid'])
+            micro_controller = MicroController.objects.get(uuid=request.data['uuid'])
         except MicroController.DoesNotExist:
             serializer = MicroControllerSerializer(data=request.data)
             if serializer.is_valid():
