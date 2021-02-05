@@ -19,9 +19,10 @@ class TestMicroControllerInitialization:
 
         resp = api_client.post(reverse('api-create-micro-controller'), data=hard_configs)
         assert resp.status_code == status.HTTP_201_CREATED
+        pk = int(resp.data['pk'])  # should not raise
 
         # the MC then sends a GET request to retrieve the soft configs from the server
-        resp = api_client.get(reverse('api-get-watering-stations'))
+        resp = api_client.get(reverse('api-get-watering-stations'), kwargs={'pk': pk})
         assert resp.status_code == status.HTTP_200_OK
         soft_configs = resp.data
 
