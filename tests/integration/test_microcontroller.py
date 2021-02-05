@@ -5,6 +5,19 @@ from django.db.utils import IntegrityError
 from microcontroller.models import MicroController
 from microcontroller.serializers import MicroControllerSerializer
 from rest_framework.reverse import reverse
+from rest_framework.status import HTTP_201_CREATED
+
+
+@pytest.fixture
+def data_POST_api_create_micro_controller():
+    num_watering_stations = 4
+    url = reverse('api-create-micro-controller')
+    data = {
+        'uuid': uuid.uuid4(),
+        'num_watering_stations': num_watering_stations
+    }
+
+    return num_watering_stations, url, data
 
 
 @pytest.mark.integration
@@ -13,20 +26,23 @@ class TestViews:
         assert reverse('api-create-micro-controller') == '/api/micro-controller/'
 
     @pytest.mark.django_db
-    def test_POST_api_create_micro_controller_creates_micro_controller_obj_with_specified_num_watering_stations(self, api_client):
-        num_watering_stations = 4
-        url = reverse('api-create-micro-controller')
-        data = {
-            'uuid': uuid.uuid4(),
-            'num_watering_stations': num_watering_stations
-        }
+    def test_POST_api_create_micro_controller_creates_micro_controller_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_create_micro_controller):
+        num_watering_stations, url, data = data_POST_api_create_micro_controller
+
+        api_client.post(url, data=data)
+
+        assert MicroController.objects.count() == 1
+        micro_controller = MicroController.objects.get(uuid=data['uuid'])
+        assert micro_controller.watering_stations.count() == num_watering_stations
+
+    @pytest.mark.django_db
+    def test_POST_api_create_micro_controller_returns_201_response_with_pk_data(self, api_client, data_POST_api_create_micro_controller):
+        _, url, data = data_POST_api_create_micro_controller
 
         resp = api_client.post(url, data=data)
 
-        assert resp.status_code == 201
-        assert MicroController.objects.count() == 1
-        micro_controller = MicroController.objects.first()
-        assert micro_controller.watering_stations.count() == num_watering_stations
+        assert resp.status_code == HTTP_201_CREATED
+        assert resp.data['pk'] == MicroController.objects.get(uuid=data['uuid']).pk
 
 
 @pytest.mark.integration

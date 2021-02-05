@@ -9,5 +9,5 @@ class MicroControllerView(APIView):
     def post(self, request):
         serializer = MicroControllerSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-        return Response(status=HTTP_201_CREATED)
+            micro_controller = serializer.save()
+        return Response({'pk': micro_controller.pk}, status=HTTP_201_CREATED)
