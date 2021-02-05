@@ -3,9 +3,10 @@ import uuid
 import pytest
 from django.db.utils import IntegrityError
 from microcontroller.models import MicroController
-from microcontroller.serializers import MicroControllerSerializer
+from microcontroller.serializers import (MicroControllerSerializer,
+                                         WateringStationSerializer)
+from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.status import HTTP_201_CREATED
 
 
 @pytest.fixture
@@ -18,6 +19,15 @@ def data_POST_api_create_micro_controller():
     }
 
     return num_watering_stations, url, data
+
+
+@pytest.fixture
+def data_GET_api_get_watering_stations(micro_controller_factory):
+    num_watering_stations = 4
+    micro_controller = micro_controller_factory(num_watering_stations=num_watering_stations)
+    url = reverse('api-get-watering-stations', kwargs={'pk': micro_controller.pk})
+
+    return num_watering_stations, micro_controller, url
 
 
 @pytest.mark.integration
@@ -46,8 +56,27 @@ class TestViews:
 
         resp = api_client.post(url, data=data)
 
-        assert resp.status_code == HTTP_201_CREATED
+        assert resp.status_code == status.HTTP_201_CREATED
         assert resp.data['pk'] == MicroController.objects.get(uuid=data['uuid']).pk
+
+    @pytest.mark.django_db
+    def test_GET_api_get_watering_stations_returns_200_response(self, api_client, data_GET_api_get_watering_stations):
+        _, _, url = data_GET_api_get_watering_stations
+
+        resp = api_client.get(url)
+
+        assert resp.status_code == status.HTTP_200_OK
+
+    @pytest.mark.django_db
+    def test_GET_api_get_watering_stations_returns_serialized_watering_station_data_belonging_to_micro_controller(self, api_client, data_GET_api_get_watering_stations):
+        num_watering_stations, micro_controller, url = data_GET_api_get_watering_stations
+
+        resp = api_client.get(url)
+
+        assert len(resp.data) == num_watering_stations
+        watering_stations = list(micro_controller.watering_stations.all())
+        for i, watering_station in enumerate(resp.data):
+            assert watering_station == WateringStationSerializer(watering_stations[i]).data
 
 
 @pytest.mark.integration

@@ -11,3 +11,6 @@ class MicroController(models.Model):
 
 class WateringStation(models.Model):
     micro_controller = models.ForeignKey(MicroController, related_name='watering_stations', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['id']
