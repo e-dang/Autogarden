@@ -9,6 +9,18 @@ from rest_framework.serializers import ValidationError
 
 @pytest.mark.unit
 class TestMicroControllerSerializer:
+    @pytest.mark.parametrize('micro_controller_factory, field', [
+        (None, 'uuid'),
+    ],
+        indirect=['micro_controller_factory'],
+        ids=['uuid'])
+    def test_field_is_serialized(self, micro_controller_factory, field):
+        micro_controller = micro_controller_factory.build()
+
+        serializer = MicroControllerSerializer(micro_controller)
+
+        assert field in serializer.data
+
     def test_validate_num_watering_stations_raises_validation_error_when_value_is_negative(self):
         value = -1
         serializer = MicroControllerSerializer()
