@@ -12,7 +12,7 @@ public:
 
     bool appendChild(Component* component)
     {
-        if (component != nullptr && component->_setInputPins(this))
+        if (component != nullptr && component->_setInputPins(_getOutputPins()))
         {
             _mChildren.push_back(component);
             component->_setParent(this);
@@ -46,12 +46,10 @@ public:
 
     virtual void run() = 0;
 
-    virtual bool hasNumAvailableOutputPins(const int& requestedNum, const PinMode& pinMode) = 0;
-
-    virtual std::vector<PinView> getNumAvailableOutputPins(const int& requestedNum, const PinMode& pinMode) = 0;
-
 protected:
-    virtual bool _setInputPins(Component* parent) = 0;
+    virtual bool _setInputPins(IOutputPinSet* parentOutputPins) = 0;
+
+    virtual IOutputPinSet* _getOutputPins() = 0;
 
     bool _setParent(Component* component)
     {
