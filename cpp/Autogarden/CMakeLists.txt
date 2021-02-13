@@ -17,6 +17,7 @@ add_executable(test_autogarden  tests/test_microcontroller.cpp
                                 tests/test_terminal_pin_set.cpp
                                 tests/test_usage.cpp
                                 tests/test_output_pin_set.cpp
+                                tests/test_input_pin_set.cpp
                                 src/Arduino.cpp)
 
 target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
