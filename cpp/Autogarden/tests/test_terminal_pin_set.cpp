@@ -13,13 +13,13 @@ class TerminalPinSetTest : public Test
 protected:
     int size = 3;
     std::vector<NiceMock<MockTerminalPin>> pinsOrig;
-    std::vector<NiceMock<MockTerminalPin>*> pins;
-    std::unique_ptr<TerminalPinSet<NiceMock<MockTerminalPin>>> pinSet;
+    std::vector<ITerminalPin*> pins;
+    std::unique_ptr<TerminalPinSet> pinSet;
 
-    TerminalPinSetTest() : pinsOrig(size), pins()
+    TerminalPinSetTest() : pinsOrig(size)
     {
         std::for_each(pinsOrig.begin(), pinsOrig.end(), [this](auto& pin) { this->pins.push_back(&pin); });
-        pinSet = std::make_unique<TerminalPinSet<NiceMock<MockTerminalPin>>>(std::move(pinsOrig));
+        pinSet = std::make_unique<TerminalPinSet>(std::move(pins));
     }
 };
 
@@ -28,7 +28,7 @@ TEST_F(TerminalPinSetTest, refresh)
     for (size_t i = 0; i < pins.size(); i++)
     {
         auto isOdd = static_cast<bool>(i % 2);
-        auto& pin  = *pins[i];
+        auto& pin  = pinsOrig[i];
         ON_CALL(pin, isStale()).WillByDefault(Return(isOdd));
         if (isOdd)
             EXPECT_CALL(pin, refresh());
