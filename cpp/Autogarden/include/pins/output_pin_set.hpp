@@ -36,7 +36,7 @@ public:
         std::vector<PinView> pinViews;
         pinViews.reserve(requestedNum);
         for (int i = 0; i < size(); i++) {
-            auto pin = _at(i);
+            auto pin = _mPins.at(i);
             if (!pin->isConnected() && pin->getMode() == pinMode) {
                 pinViews.push_back(_createPinView(pin));
                 pin->setIsConnected(true);
@@ -49,9 +49,8 @@ public:
     }
 
     int getNumAvailable(const PinMode& pinMode) const override {
-        return std::count_if(_mPins.cbegin(), _mPins.cend(), [&pinMode](const T& pin) {
-            return !ptr(pin)->isConnected() && ptr(pin)->getMode() == pinMode;
-        });
+        return std::count_if(_mPins.cbegin(), _mPins.cend(),
+                             [&pinMode](const T& pin) { return !pin->isConnected() && pin->getMode() == pinMode; });
     }
 
     bool hasNumAvailable(const int& requestedNum, const PinMode& pinMode) const override {
@@ -61,7 +60,7 @@ public:
     std::vector<uint8_t> getPinNumbers() const override {
         std::vector<uint8_t> pinNumbers;
         std::transform(_mPins.cbegin(), _mPins.cend(), std::back_inserter(pinNumbers),
-                       [](const T& pin) { return ptr(pin)->getPin(); });
+                       [](const T& pin) { return pin->getPin(); });
         return pinNumbers;
     }
 
@@ -70,20 +69,12 @@ public:
     }
 
     int getPinValue(const int& idx) const override {
-        return _at(idx)->getValue();
+        return _mPins.at(idx)->getValue();
     }
 
 protected:
     virtual PinView _createPinView(IPin* pin) override {
         return PinView(pin);
-    }
-
-    typename std::conditional<std::is_pointer<T>::value, const T, const T*>::type _at(const int& idx) const {
-        return ptr(_mPins.at(idx));
-    }
-
-    typename std::conditional<std::is_pointer<T>::value, T, T*>::type _at(const int& idx) {
-        return ptr(_mPins.at(idx));
     }
 
 protected:
