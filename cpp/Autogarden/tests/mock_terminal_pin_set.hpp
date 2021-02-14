@@ -2,8 +2,7 @@
 
 #include <pins/terminal_pin_set.hpp>
 
-class MockTerminalPinSet : public ITerminalPinSet
-{
+class MockTerminalPinSet : public ITerminalPinSet {
 public:
     MOCK_METHOD(int, size, (), (const, override));
     MOCK_METHOD(std::vector<PinView>, getNextAvailable, (const int& requestedNum, const PinMode& pinMode), (override));

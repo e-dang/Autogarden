@@ -5,7 +5,6 @@
 #include <pins/input_pin_set.hpp>
 
 #include "mock_terminal_pin.hpp"
-// #include "mock_pin_view.hpp"
 
 using namespace ::testing;
 

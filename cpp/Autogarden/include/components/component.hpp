@@ -3,17 +3,14 @@
 #include <pins/pins.hpp>
 #include <string>
 
-class Component
-{
+class Component {
 public:
     Component(const std::string& id) : __mId(id), _pParent(nullptr), _mChildren(0) {}
 
     virtual ~Component() = default;
 
-    bool appendChild(Component* component)
-    {
-        if (component != nullptr && component->_setInputPins(_getOutputPins()))
-        {
+    bool appendChild(Component* component) {
+        if (component != nullptr && component->_setInputPins(_getOutputPins())) {
             _mChildren.push_back(component);
             component->_setParent(this);
             return true;
@@ -21,13 +18,11 @@ public:
         return false;
     }
 
-    Component* getChild(const std::string& id)
-    {
+    Component* getChild(const std::string& id) {
         if (__mId == id)
             return this;
 
-        for (int i = 0; i < getNumChildren(); i++)
-        {
+        for (int i = 0; i < getNumChildren(); i++) {
             auto component = _mChildren[i]->getChild(id);
             if (component != nullptr)
                 return component;
@@ -36,13 +31,21 @@ public:
         return nullptr;
     }
 
-    std::string getId() const { return __mId; }
+    std::string getId() const {
+        return __mId;
+    }
 
-    Component* getParent() { return _pParent; }
+    Component* getParent() {
+        return _pParent;
+    }
 
-    int getNumChildren() const { return static_cast<int>(_mChildren.size()); }
+    int getNumChildren() const {
+        return static_cast<int>(_mChildren.size());
+    }
 
-    bool hasParent() { return getParent() != nullptr; }
+    bool hasParent() {
+        return getParent() != nullptr;
+    }
 
     virtual void run() = 0;
 
@@ -51,10 +54,8 @@ protected:
 
     virtual IOutputPinSet* _getOutputPins() = 0;
 
-    bool _setParent(Component* component)
-    {
-        if (component != nullptr)
-        {
+    bool _setParent(Component* component) {
+        if (component != nullptr) {
             _pParent = component;
             return true;
         }

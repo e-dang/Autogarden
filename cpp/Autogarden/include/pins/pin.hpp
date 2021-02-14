@@ -2,15 +2,9 @@
 
 #include <stdint.h>
 
-enum PinMode
-{
-    Digital,
-    AnalogInput,
-    AnalogOutput
-};
+enum PinMode { Digital, AnalogInput, AnalogOutput };
 
-class IPin
-{
+class IPin {
 public:
     virtual ~IPin() = default;
 
@@ -30,20 +24,29 @@ protected:
     virtual int _scaleValue(const int& value) = 0;
 };
 
-class Pin : virtual public IPin
-{
+class Pin : virtual public IPin {
 public:
     Pin(const uint8_t& pin, const int& value = LOW) : __mValue(value), __mPin(pin), __mIsConnected(false) {}
 
-    uint8_t getPin() const { return __mPin; }
+    uint8_t getPin() const {
+        return __mPin;
+    }
 
-    bool isConnected() const { return __mIsConnected; }
+    bool isConnected() const {
+        return __mIsConnected;
+    }
 
-    void setIsConnected(const bool& value) { __mIsConnected = value; }
+    void setIsConnected(const bool& value) {
+        __mIsConnected = value;
+    }
 
-    int getValue() const { return __mValue; }
+    int getValue() const {
+        return __mValue;
+    }
 
-    virtual void setValue(const int& value) { __mValue = _scaleValue(value); }
+    virtual void setValue(const int& value) {
+        __mValue = _scaleValue(value);
+    }
 
 private:
     int __mValue;

@@ -2,8 +2,7 @@
 
 #include <pins/terminal_pin.hpp>
 
-class MockTerminalPin : public ITerminalPin
-{
+class MockTerminalPin : public ITerminalPin {
 public:
     MOCK_METHOD(uint8_t, getPin, (), (const, override));
     MOCK_METHOD(bool, isConnected, (), (const, override));

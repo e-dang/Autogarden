@@ -2,8 +2,7 @@
 
 #include <stdint.h>
 
-class ArduinoInterface
-{
+class ArduinoInterface {
 public:
     virtual ~ArduinoInterface() = default;
 
@@ -21,23 +20,24 @@ public:
     virtual void _pinMode(const uint8_t& pin, const int& direction) const = 0;
 };
 
-class Arduino : public ArduinoInterface
-{
+class Arduino : public ArduinoInterface {
 public:
     virtual ~Arduino() = default;
 
     void _digitalWrite(const uint8_t& pin, const int& value) const override {}
 
-    int _digitalRead(const uint8_t& pin) const override { return 0; }
+    int _digitalRead(const uint8_t& pin) const override {
+        return 0;
+    }
 
     void _analogWrite(const uint8_t& pin, const int& value) const override {}
 
-    int _analogRead(const uint8_t& pin) const override { return 0; }
+    int _analogRead(const uint8_t& pin) const override {
+        return 0;
+    }
 
     void _shiftOut(const uint8_t& dataPin, const uint8_t& clockPin, const int& direction,
-                   const int& data) const override
-    {
-    }
+                   const int& data) const override {}
 
     void _pinMode(const uint8_t& pin, const int& direction) const override {}
 };

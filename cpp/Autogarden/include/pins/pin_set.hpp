@@ -2,8 +2,7 @@
 
 #include <pins/pin.hpp>
 
-class PinSet
-{
+class PinSet {
 public:
     virtual ~PinSet() = default;
 

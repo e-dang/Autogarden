@@ -8,8 +8,7 @@
 
 using namespace ::testing;
 
-class AnalogInputPinTest : public Test
-{
+class AnalogInputPinTest : public Test {
 protected:
     uint8_t pinNum = 1;
     int value      = 200;
@@ -18,29 +17,34 @@ protected:
     AnalogInputPinTest() : pin(std::make_unique<AnalogInputPin>(pinNum, value)) {}
 };
 
-TEST_F(AnalogInputPinTest, getPin) { EXPECT_EQ(pin->getPin(), pinNum); }
+TEST_F(AnalogInputPinTest, getPin) {
+    EXPECT_EQ(pin->getPin(), pinNum);
+}
 
-TEST_F(AnalogInputPinTest, isConnectedIsInitiallyFalse) { EXPECT_FALSE(pin->isConnected()); }
+TEST_F(AnalogInputPinTest, isConnectedIsInitiallyFalse) {
+    EXPECT_FALSE(pin->isConnected());
+}
 
-TEST_F(AnalogInputPinTest, isConnectedReturnsTrueAfterCallingsetIsConnectedWithTrue)
-{
+TEST_F(AnalogInputPinTest, isConnectedReturnsTrueAfterCallingsetIsConnectedWithTrue) {
     pin->setIsConnected(true);
     EXPECT_TRUE(pin->isConnected());
 }
 
-TEST_F(AnalogInputPinTest, getValue) { EXPECT_EQ(pin->getValue(), value); }
+TEST_F(AnalogInputPinTest, getValue) {
+    EXPECT_EQ(pin->getValue(), value);
+}
 
-TEST_F(AnalogInputPinTest, setValueSetsValue)
-{
+TEST_F(AnalogInputPinTest, setValueSetsValue) {
     auto value = 100;
     pin->setValue(value);
     EXPECT_EQ(pin->getValue(), value);
 }
 
-TEST_F(AnalogInputPinTest, getModeReturnsAnalogOutput) { EXPECT_EQ(pin->getMode(), PinMode::AnalogInput); }
+TEST_F(AnalogInputPinTest, getModeReturnsAnalogOutput) {
+    EXPECT_EQ(pin->getMode(), PinMode::AnalogInput);
+}
 
-TEST_F(AnalogInputPinTest, refreshCallsAnalogWrite)
-{
+TEST_F(AnalogInputPinTest, refreshCallsAnalogWrite) {
     MockArduino mockArduino;
     setMockArduino(&mockArduino);
 
@@ -51,8 +55,7 @@ TEST_F(AnalogInputPinTest, refreshCallsAnalogWrite)
     setMockArduino(nullptr);
 }
 
-TEST_F(AnalogInputPinTest, refreshAndSetValueToggleIsStale)
-{
+TEST_F(AnalogInputPinTest, refreshAndSetValueToggleIsStale) {
     ASSERT_FALSE(pin->isStale());
 
     pin->setValue(0);

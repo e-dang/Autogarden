@@ -2,8 +2,7 @@
 #include <Arduino.h>
 #include <gmock/gmock.h>
 
-class MockArduino : public ArduinoInterface
-{
+class MockArduino : public ArduinoInterface {
 public:
     MOCK_METHOD(void, _digitalWrite, (const uint8_t& pin, const int& value), (const, override));
     MOCK_METHOD(int, _digitalRead, (const uint8_t& pin), (const, override));
