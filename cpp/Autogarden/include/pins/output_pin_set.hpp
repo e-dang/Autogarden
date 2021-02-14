@@ -4,7 +4,6 @@
 #include <pins/pin_set.hpp>
 #include <pins/pin_view.hpp>
 #include <type_traits>
-#include <utils.hpp>
 #include <vector>
 
 class IOutputPinSet : public PinSet {
