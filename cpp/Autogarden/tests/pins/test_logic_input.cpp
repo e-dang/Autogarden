@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
-#include <mock_output_pin.hpp>
+#include <mock_output.hpp>
 #include <mock_signal.hpp>
 #include <pins/logic_input.hpp>
 

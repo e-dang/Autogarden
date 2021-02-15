@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <mock_logic_input.hpp>
-#include <mock_output_pin.hpp>
+#include <mock_output.hpp>
 #include <pins/logic_input_pinset.hpp>
 #include <pins/output_pinset.hpp>
 

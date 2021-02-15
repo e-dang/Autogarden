@@ -7,6 +7,8 @@ class OutputPinSet : virtual public IOutputPinSet {
 public:
     OutputPinSet(std::vector<T> pins) : __mPins(pins) {}
 
+    virtual ~OutputPinSet() = default;
+
     void connect(ILogicInputPinSet* inputPins) override {
         iter = __mPins.begin();
         for (auto& pin : *inputPins) {
