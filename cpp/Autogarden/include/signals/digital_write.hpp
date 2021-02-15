@@ -10,6 +10,8 @@ class DigitalWrite : public ISignal {
 public:
     DigitalWrite(const int& value) : __mValue(value) {}
 
+    ~DigitalWrite() = default;
+
     void execute(const ITerminalPin* pin) override {
         if (pin->getMode() != PinMode::DigitalOutput)
             throw std::runtime_error("Pinmode must be DigitalOutput to write to this pin");
