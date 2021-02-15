@@ -12,12 +12,21 @@ class DigitalReadTest : public Test {
 protected:
     const int pinNum = 1;
     const int value  = HIGH;
+    PinMode mode     = PinMode::DigitalInput;
     NiceMock<MockTerminalPin> mockTerminalPin;
     NiceMock<MockArduino> mockArduino;
     DigitalRead signal;
 
-    DigitalReadTest() {
-        ON_CALL(mockTerminalPin, getMode()).WillByDefault(Return(PinMode::DigitalInput));
+    void SetUp() {
+        ON_CALL(mockTerminalPin, getMode()).WillByDefault(Return(mode));
+    }
+};
+
+class ParametrizedDigitalReadTest : public DigitalReadTest, public WithParamInterface<PinMode> {
+protected:
+    void SetUp() {
+        mode = GetParam();
+        DigitalReadTest::SetUp();
     }
 };
 
@@ -41,3 +50,17 @@ TEST_F(DigitalReadTest, getValue_returns_the_return_value_from_digitalRead) {
 
     EXPECT_EQ(signal.getValue(), value);
 }
+
+TEST_P(ParametrizedDigitalReadTest, execute_throw_runtime_error_if_pin_mode_is_not_digital_input) {
+    try {
+        signal.execute(&mockTerminalPin);
+        FAIL() << "Expected std::runtime_error";
+    } catch (std::runtime_error& error) {
+        EXPECT_STREQ(error.what(), "Pinmode must be DigitalInput to write to this pin");
+    } catch (...) {
+        FAIL() << "Expected std::runtime_error";
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(DigitalReadTest, ParametrizedDigitalReadTest,
+                         Values(PinMode::DigitalOutput, PinMode::AnalogOutput, PinMode::AnalogInput));

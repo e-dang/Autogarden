@@ -7,18 +7,50 @@
 
 using namespace ::testing;
 
-TEST(DigitalWrite, execute_calls_digitalWrite_on_arduino_interface) {
+class DigitalWriteTest : public Test {
+protected:
     const int pinNum = 1;
-    const auto value = HIGH;
+    const int value  = HIGH;
+    PinMode mode     = PinMode::DigitalOutput;
     NiceMock<MockTerminalPin> mockTerminalPin;
     MockArduino mockArduino;
+    DigitalWrite signal;
+
+    DigitalWriteTest() : signal(value) {}
+
+    void SetUp() {
+        ON_CALL(mockTerminalPin, getMode()).WillByDefault(Return(mode));
+    }
+};
+
+class ParametrizedDigitalWriteTest : public DigitalWriteTest, public WithParamInterface<PinMode> {
+protected:
+    void SetUp() {
+        mode = GetParam();
+        DigitalWriteTest::SetUp();
+    }
+};
+
+TEST_F(DigitalWriteTest, execute_calls_digitalWrite_on_arduino_interface) {
     setMockArduino(&mockArduino);
     EXPECT_CALL(mockArduino, _digitalWrite(pinNum, value));
     EXPECT_CALL(mockTerminalPin, getPinNum()).WillRepeatedly(Return(pinNum));
-
-    DigitalWrite signal(value);
 
     signal.execute(&mockTerminalPin);
 
     setMockArduino(nullptr);
 }
+
+TEST_P(ParametrizedDigitalWriteTest, execute_throw_runtime_error_if_pin_mode_is_not_digital_output) {
+    try {
+        signal.execute(&mockTerminalPin);
+        FAIL() << "Expected std::runtime_error";
+    } catch (std::runtime_error& error) {
+        EXPECT_STREQ(error.what(), "Pinmode must be DigitalOutput to write to this pin");
+    } catch (...) {
+        FAIL() << "Expected std::runtime_error";
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(DigitalWriteTest, ParametrizedDigitalWriteTest,
+                         Values(PinMode::AnalogOutput, PinMode::DigitalInput, PinMode::AnalogInput));
