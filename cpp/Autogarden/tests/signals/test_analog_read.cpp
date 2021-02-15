@@ -3,27 +3,27 @@
 
 #include <mock_arduino.hpp>
 #include <mock_terminal.hpp>
-#include <signals/digital_read.hpp>
+#include <signals/analog_read.hpp>
 
 using namespace ::testing;
 using ::testing::_;
 
-class DigitalReadTest : public Test {
+class AnalogReadTest : public Test {
 protected:
     const int pinNum = 1;
-    const int value  = HIGH;
+    const int value  = 255;
     NiceMock<MockTerminalPin> mockTerminalPin;
     NiceMock<MockArduino> mockArduino;
-    DigitalRead signal;
+    AnalogRead signal;
 
-    DigitalReadTest() {
-        ON_CALL(mockTerminalPin, getMode()).WillByDefault(Return(PinMode::DigitalInput));
+    AnalogReadTest() {
+        ON_CALL(mockTerminalPin, getMode()).WillByDefault(Return(PinMode::AnalogInput));
     }
 };
 
-TEST_F(DigitalReadTest, execute_calls_digitalRead_on_arduino_interface) {
+TEST_F(AnalogReadTest, execute_calls_analogRead_on_arduino_interface) {
     setMockArduino(&mockArduino);
-    EXPECT_CALL(mockArduino, _digitalRead(pinNum));
+    EXPECT_CALL(mockArduino, _analogRead(pinNum));
     EXPECT_CALL(mockTerminalPin, getPinNum()).WillRepeatedly(Return(pinNum));
 
     signal.execute(&mockTerminalPin);
@@ -31,9 +31,9 @@ TEST_F(DigitalReadTest, execute_calls_digitalRead_on_arduino_interface) {
     setMockArduino(nullptr);
 }
 
-TEST_F(DigitalReadTest, getValue_returns_the_return_value_from_digitalRead) {
+TEST_F(AnalogReadTest, getValue_returns_the_return_value_from_analogRead) {
     setMockArduino(&mockArduino);
-    ON_CALL(mockArduino, _digitalRead(_)).WillByDefault(Return(value));
+    ON_CALL(mockArduino, _analogRead(_)).WillByDefault(Return(value));
 
     signal.execute(&mockTerminalPin);
 

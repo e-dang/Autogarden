@@ -19,6 +19,7 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/pins/test_terminal_pinset.cpp
                                 tests/signals/test_digital_write.cpp
                                 tests/signals/test_digital_read.cpp
+                                tests/signals/test_analog_read.cpp
 )
 
 target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
