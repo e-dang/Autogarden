@@ -5,10 +5,12 @@ project(Autogarden)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(GTest MODULE REQUIRED)
+find_package(GTest REQUIRED CONFIG)
 
-add_executable(test_autogarden tests/test_autogarden.cpp)
+include_directories(include tests/mocks)
 
-target_link_libraries(test_autogarden PRIVATE GTest::GTest)
+add_executable(test_autogarden  src/Arduino.cpp)
 
-gtest_discover_tests(test_autogarden)
+target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
+
+target_link_libraries(test_autogarden PUBLIC GTest::gtest GTest::gmock GTest::gmock_main)
