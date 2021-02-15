@@ -1,7 +1,5 @@
 #include <Arduino.h>
 
-#include <iostream>
-
 void setMockArduino(ArduinoInterface* mockArduino) {
     ::arduino = mockArduino;
 }
