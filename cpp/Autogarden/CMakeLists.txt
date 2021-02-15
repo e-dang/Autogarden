@@ -9,7 +9,8 @@ find_package(GTest REQUIRED CONFIG)
 
 include_directories(include tests/mocks)
 
-add_executable(test_autogarden  src/Arduino.cpp)
+add_executable(test_autogarden  src/Arduino.cpp
+                                tests/pins/test_terminal.cpp)
 
 target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
 
