@@ -5,24 +5,24 @@
 
 class LogicOutputPin : public OutputPin, public ILogicOutputPin {
 public:
-    LogicOutputPin(const int& pinNum, const PinMode& pinMode) : OutputPin(pinNum, pinMode), __mSignal(nullptr) {}
+    LogicOutputPin(const int& pinNum, const PinMode& pinMode) : OutputPin(pinNum, pinMode), __pSignal(nullptr) {}
 
     ~LogicOutputPin() = default;
 
     void processSignal(ISignal* signal) override {
-        __mSignal = signal;
+        __pSignal = signal;
     }
 
     ISignal* popSignal() override {
-        auto signal = __mSignal;
-        __mSignal   = nullptr;
+        auto signal = __pSignal;
+        __pSignal   = nullptr;
         return signal;
     }
 
     bool hasSignal() const override {
-        return __mSignal != nullptr;
+        return __pSignal != nullptr;
     }
 
 private:
-    ISignal* __mSignal;
+    ISignal* __pSignal;
 };
