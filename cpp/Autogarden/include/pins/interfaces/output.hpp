@@ -6,7 +6,9 @@ class IOutputPin : virtual public IPin {
 public:
     virtual ~IOutputPin() = default;
 
-    virtual bool isConnected() = 0;
+    virtual bool isConnected() const = 0;
 
-    virtual void setIsConnected(const bool& state) = 0;
+    virtual void connect() = 0;
+
+    virtual void disconnect() = 0;
 };

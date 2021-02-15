@@ -8,11 +8,11 @@ public:
 
     virtual ~Pin() = default;
 
-    int getPinNum() override {
+    int getPinNum() const override {
         return __mPinNum;
     }
 
-    PinMode getMode() override {
+    PinMode getMode() const override {
         return __mPinMode;
     }
 
