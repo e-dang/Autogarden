@@ -25,7 +25,7 @@ public:
         throw std::runtime_error("Pin mode not recongized - " + std::to_string(mode));
     }
 
-    void processSignal(ISignal* signal) const override {
+    void processSignal(ISignal* signal) override {
         signal->execute(this);
     }
 };

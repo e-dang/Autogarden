@@ -8,7 +8,7 @@ class IPin {
 public:
     virtual ~IPin() = default;
 
-    virtual void processSignal(ISignal* signal) const = 0;
+    virtual void processSignal(ISignal* signal) = 0;
 
     virtual int getPinNum() const = 0;
 

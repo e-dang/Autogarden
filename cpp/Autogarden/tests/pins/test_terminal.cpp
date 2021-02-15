@@ -37,11 +37,7 @@ TEST_P(ParametrizedTerminalPinTest, initialize_calls_pinMode_on_arduino_interfac
     setMockArduino(nullptr);
 }
 
-INSTANTIATE_TEST_SUITE_P(TerminalPinTest, ParametrizedTerminalPinTest,
-                         Values(PinMode::DigitalOutput, PinMode::AnalogOutput, PinMode::DigitalInput,
-                                PinMode::AnalogInput));
-
-TEST_F(TerminalPinTest, intialize_throws_runtime_error_when_pin_mode_undefined) {
+TEST_F(TerminalPinTest, initialize_throws_runtime_error_when_pin_mode_undefined) {
     TerminalPin pin(pinNum, PinMode::Undefined);
 
     try {
@@ -54,14 +50,14 @@ TEST_F(TerminalPinTest, intialize_throws_runtime_error_when_pin_mode_undefined) 
     }
 }
 
-TEST_F(TerminalPinTest, processSignal_calls_execute_on_signal) {
+TEST_P(ParametrizedTerminalPinTest, processSignal_calls_execute_on_signal) {
     MockSignal signal;
     EXPECT_CALL(signal, execute(pin.get()));
 
     pin->processSignal(&signal);
 }
 
-TEST_F(TerminalPinTest, getMode_returns_mode) {
+TEST_P(ParametrizedTerminalPinTest, getMode_returns_mode) {
     EXPECT_EQ(pin->getMode(), mode);
 }
 
@@ -79,3 +75,7 @@ TEST_F(TerminalPinTest, connect_and_disconnect_toggle_isConnected) {
 TEST_F(TerminalPinTest, getPinNum_returns_pinNum) {
     EXPECT_EQ(pin->getPinNum(), pinNum);
 }
+
+INSTANTIATE_TEST_SUITE_P(TerminalPinTest, ParametrizedTerminalPinTest,
+                         Values(PinMode::DigitalOutput, PinMode::AnalogOutput, PinMode::DigitalInput,
+                                PinMode::AnalogInput));
