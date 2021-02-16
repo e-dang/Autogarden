@@ -21,6 +21,7 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/signals/test_digital_read.cpp
                                 tests/signals/test_analog_read.cpp
                                 tests/signals/test_analog_write.cpp
+                                tests/components/test_microcontroller.cpp
 )
 
 target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
