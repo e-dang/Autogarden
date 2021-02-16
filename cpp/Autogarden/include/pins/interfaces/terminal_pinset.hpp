@@ -5,5 +5,7 @@
 
 class ITerminalPinSet : virtual public IOutputPinSet {
 public:
+    virtual ~ITerminalPinSet() = default;
+
     virtual ITerminalPin* at(const int& idx) = 0;
 };
