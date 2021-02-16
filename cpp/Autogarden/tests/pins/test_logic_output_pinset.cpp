@@ -9,14 +9,15 @@ using namespace ::testing;
 
 TEST(LogicOutputPinSetTest, at) {
     const auto size = 5;
-    std::vector<MockLogicOutputPin> mockPins(size);
-    std::vector<ILogicOutputPin*> pinPtrs;
+    std::vector<MockLogicOutputPin*> mockPins(size);
+    std::vector<std::unique_ptr<ILogicOutputPin>> pinPtrs;
     for (auto& mockPin : mockPins) {
-        pinPtrs.push_back(&mockPin);
+        mockPin = new MockLogicOutputPin();
+        pinPtrs.emplace_back(mockPin);
     }
-    LogicOutputPinSet pinSet(pinPtrs);
+    LogicOutputPinSet pinSet(std::move(pinPtrs));
 
     for (int i = 0; i < size; i++) {
-        EXPECT_EQ(pinSet.at(i), pinPtrs[i]);
+        EXPECT_EQ(pinSet.at(i), mockPins[i]);
     }
 }

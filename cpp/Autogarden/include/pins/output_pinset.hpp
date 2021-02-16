@@ -5,20 +5,20 @@
 template <typename T>
 class OutputPinSet : virtual public IOutputPinSet {
 public:
-    OutputPinSet(std::vector<T> pins) : __mPins(pins) {}
+    OutputPinSet(std::vector<T>&& pins) : __mPins(std::move(pins)) {}
 
     virtual ~OutputPinSet() = default;
 
     void connect(ILogicInputPinSet* inputPins) override {
-        iter = __mPins.begin();
+        auto iter = __mPins.begin();
         for (auto& pin : *inputPins) {
-            _connect(pin);
+            _connect(pin, iter);
         }
     }
 
     void connect(ILogicInputPin* pin) override {
-        iter = __mPins.begin();
-        _connect(pin);
+        auto iter = __mPins.begin();
+        _connect(pin, iter);
     }
 
     int size() const override {
@@ -26,11 +26,10 @@ public:
     }
 
 protected:
-    void _connect(ILogicInputPin* pin) {
-        while (iter != __mPins.end() && !pin->connect(*iter++)) continue;
+    void _connect(ILogicInputPin* pin, typename std::vector<T>::iterator& iter) {
+        while (iter != __mPins.end() && !pin->connect((*iter++).get())) continue;
     }
 
 protected:
     std::vector<T> __mPins;
-    typename std::vector<T>::iterator iter;
 };

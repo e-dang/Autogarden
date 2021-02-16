@@ -4,11 +4,12 @@
 #include <pins/output_pinset.hpp>
 // #include <vector>
 
-class LogicOutputPinSet : public ILogicOutputPinSet, public OutputPinSet<ILogicOutputPin*> {
+class LogicOutputPinSet : public ILogicOutputPinSet, public OutputPinSet<std::unique_ptr<ILogicOutputPin>> {
 public:
-    LogicOutputPinSet(std::vector<ILogicOutputPin*> pins) : OutputPinSet<ILogicOutputPin*>(pins) {}
+    LogicOutputPinSet(std::vector<std::unique_ptr<ILogicOutputPin>>&& pins) :
+        OutputPinSet<std::unique_ptr<ILogicOutputPin>>(std::move(pins)) {}
 
     ILogicOutputPin* at(const int& idx) override {
-        return __mPins[idx];
+        return __mPins[idx].get();
     };
 };

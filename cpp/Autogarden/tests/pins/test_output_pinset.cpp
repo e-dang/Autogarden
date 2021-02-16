@@ -13,27 +13,29 @@ class OutputPinSetTest : public Test {
 protected:
     int size = 5;
     std::vector<MockOutputPin*> mockPins;
+    std::vector<std::unique_ptr<MockOutputPin>> tempMockPins;
     std::vector<MockLogicInputPin> mockInputPins;
     std::vector<ILogicInputPin*> mockInputPinPtrs;
     std::unique_ptr<LogicInputPinSet> inputPinSet;
-    std::unique_ptr<OutputPinSet<MockOutputPin*>> pinSet;
+    std::unique_ptr<OutputPinSet<std::unique_ptr<MockOutputPin>>> pinSet;
 
     OutputPinSetTest() : mockInputPins(size) {}
 
     void SetUp() {
         for (int i = 0; i < size; i++) {
-            mockPins.push_back(new MockOutputPin());
+            tempMockPins.emplace_back(new MockOutputPin());
+            mockPins.push_back(tempMockPins[i].get());
             mockInputPinPtrs.push_back(&mockInputPins[i]);
         }
         inputPinSet = std::make_unique<LogicInputPinSet>(mockInputPinPtrs);
-        pinSet      = std::make_unique<OutputPinSet<MockOutputPin*>>(mockPins);
+        pinSet      = std::make_unique<OutputPinSet<std::unique_ptr<MockOutputPin>>>(std::move(tempMockPins));
     }
 
-    ~OutputPinSetTest() {
-        for (auto& pin : mockPins) {
-            delete pin;
-        }
-    }
+    // ~OutputPinSetTest() {
+    //     for (auto& pin : mockPins) {
+    //         delete pin;
+    //     }
+    // }
 };
 
 TEST_F(OutputPinSetTest, size_returns_num_pins) {
