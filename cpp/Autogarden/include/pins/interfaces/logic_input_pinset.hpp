@@ -1,7 +1,7 @@
 #pragma once
 
 #include <pins/interfaces/logic_input.hpp>
-
+#include <vector>
 class ILogicInputPinSet {
 public:
     typedef std::vector<ILogicInputPin*>::iterator iterator;

@@ -12,13 +12,12 @@ protected:
     std::string id = "valve";
     int onSig      = HIGH;
     int offSig     = LOW;
-    std::unique_ptr<MockLogicInputPin> mockInputPin;
+    NiceMock<MockLogicInputPin>* mockInputPin;
     std::unique_ptr<Valve> valve;
 
-    ValveTest() : mockInputPin(new MockLogicInputPin()) {}
-
     void SetUp() {
-        valve = std::make_unique<Valve>(id, onSig, offSig, mockInputPin.get());
+        mockInputPin = new NiceMock<MockLogicInputPin>();
+        valve        = std::make_unique<Valve>(id, mockInputPin, onSig, offSig);
     }
 };
 

@@ -1,6 +1,8 @@
 #pragma once
 
-class IValve {
+#include <components/component.hpp>
+
+class IValve : virtual public Component {
 public:
     virtual ~IValve() = default;
 

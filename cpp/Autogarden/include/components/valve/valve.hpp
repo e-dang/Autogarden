@@ -4,11 +4,10 @@
 #include <components/valve/interfaces/valve.hpp>
 #include <signals/signals.hpp>
 
-class Valve : public Component, public IValve {
+class Valve : public IValve {
 public:
-    Valve(const std::string& id, const int& onValue = HIGH, const int& offValue = LOW,
-          ILogicInputPin* inputPin = nullptr) :
-        Component(id), __mOnValue(onValue), __mOffValue(offValue), __pPin(inputPin) {}
+    Valve(const std::string& id, ILogicInputPin* inputPin, const int& onValue = HIGH, const int& offValue = LOW) :
+        Component(id), __pPin(inputPin), __mOnValue(onValue), __mOffValue(offValue) {}
 
     bool open() override {
         return _performAction(__mOnValue);
@@ -23,7 +22,7 @@ protected:
         if (parentOutputPins == nullptr)
             return false;
 
-        parentOutputPins->connect(__pPin);
+        parentOutputPins->connect(__pPin.get());
         return true;
     }
 
@@ -43,5 +42,5 @@ protected:
 private:
     int __mOnValue;
     int __mOffValue;
-    ILogicInputPin* __pPin;
+    std::unique_ptr<ILogicInputPin> __pPin;
 };
