@@ -4,6 +4,7 @@
 
 #include <pins/interfaces/terminal.hpp>
 #include <pins/output.hpp>
+#include <signals/signals.hpp>
 #include <string>
 
 class TerminalPin : public OutputPin, public ITerminalPin {
