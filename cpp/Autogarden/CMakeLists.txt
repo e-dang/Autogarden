@@ -4,11 +4,12 @@ project(Autogarden)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+set(CMAKE_BUILD_TYPE Debug)
 find_package(GTest REQUIRED CONFIG)
 
 include_directories(include tests/mocks)
 
+add_executable(main src/Arduino.cpp src/main.cpp)
 add_executable(test_autogarden  src/Arduino.cpp
                                 tests/pins/test_terminal.cpp
                                 tests/pins/test_logic_output.cpp
@@ -23,8 +24,10 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/signals/test_analog_write.cpp
                                 tests/components/test_microcontroller.cpp
                                 tests/components/test_valve.cpp
+                                tests/test_usage.cpp
 )
 
 target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
+target_compile_definitions(main PUBLIC LOW=0 HIGH=1)
 
 target_link_libraries(test_autogarden PUBLIC GTest::gtest GTest::gmock GTest::gmock_main)
