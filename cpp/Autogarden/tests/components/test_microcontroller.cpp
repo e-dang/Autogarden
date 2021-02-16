@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <components/microcontroller.hpp>
+#include <components/microcontroller/microcontroller.hpp>
 #include <mock_terminal_pinset.hpp>
 
 using namespace ::testing;
