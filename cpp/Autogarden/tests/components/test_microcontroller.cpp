@@ -9,10 +9,9 @@ using namespace ::testing;
 class MicroControllerTest : public Test {
 protected:
     std::string id = "controller";
-    MockTerminalPinSet mockPinSet;
     MicroController controller;
 
-    MicroControllerTest() : mockPinSet(), controller(id, &mockPinSet) {}
+    MicroControllerTest() : controller(id, new MockTerminalPinSet()) {}
 };
 
 void AssertHasNoParent(const Component* obj) {
@@ -37,8 +36,7 @@ TEST_F(MicroControllerTest, getChild_returns_nullptr_when_no_child_is_found) {
 }
 
 TEST_F(MicroControllerTest, controller_cannot_be_child_of_another_component) {
-    MockTerminalPinSet otherMockPinSet;
-    MicroController otherController("otherController", &otherMockPinSet);
+    MicroController otherController("otherController", new MockTerminalPinSet());
 
     EXPECT_FALSE(controller.appendChild(&otherController));
     AssertHasNoParent(&otherController);

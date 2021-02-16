@@ -12,7 +12,7 @@ protected:
     }
 
     IOutputPinSet* _getOutputPins() override {
-        return __mPins;
+        return __mPins.get();
     }
 
     bool _propagateSignal() override {
@@ -20,5 +20,5 @@ protected:
     }
 
 private:
-    ITerminalPinSet* __mPins;
+    std::unique_ptr<ITerminalPinSet> __mPins;
 };
