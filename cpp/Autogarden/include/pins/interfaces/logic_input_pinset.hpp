@@ -4,7 +4,7 @@
 #include <vector>
 class ILogicInputPinSet {
 public:
-    typedef std::vector<ILogicInputPin*>::iterator iterator;
+    typedef std::vector<std::unique_ptr<ILogicInputPin>>::iterator iterator;
 
     virtual ~ILogicInputPinSet() = default;
 

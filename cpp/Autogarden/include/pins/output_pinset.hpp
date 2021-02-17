@@ -12,7 +12,7 @@ public:
     void connect(ILogicInputPinSet* inputPins) override {
         auto iter = __mPins.begin();
         for (auto& pin : *inputPins) {
-            _connect(pin, iter);
+            _connect(pin.get(), iter);
         }
     }
 

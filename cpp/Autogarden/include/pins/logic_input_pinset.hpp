@@ -5,7 +5,7 @@
 
 class LogicInputPinSet : public ILogicInputPinSet {
 public:
-    LogicInputPinSet(std::vector<ILogicInputPin*> pins) : __mPins(pins) {}
+    LogicInputPinSet(std::vector<std::unique_ptr<ILogicInputPin>>&& pins) : __mPins(std::move(pins)) {}
 
     virtual ~LogicInputPinSet() = default;
 
@@ -18,7 +18,7 @@ public:
     }
 
     ILogicInputPin* at(const int& idx) override {
-        return __mPins[idx];
+        return __mPins[idx].get();
     }
 
     int size() const override {
@@ -26,5 +26,5 @@ public:
     }
 
 private:
-    std::vector<ILogicInputPin*> __mPins;
+    std::vector<std::unique_ptr<ILogicInputPin>> __mPins;
 };
