@@ -36,15 +36,17 @@ TEST_P(ParametrizedLogicInputPinTest,
     EXPECT_CALL(mockOutputPin, processSignal(&mockSignal)).WillRepeatedly(Return(true));
 
     EXPECT_TRUE(pin->connect(&mockOutputPin));
+    ASSERT_EQ(pin->getOutputPin(), &mockOutputPin);
     EXPECT_TRUE(pin->processSignal(&mockSignal));
 }
 
 TEST_P(ParametrizedLogicInputPinTest, processSignal_returns_false_if_pin_has_not_been_connected) {
     MockSignal mockSignal;
+    ASSERT_EQ(pin->getOutputPin(), nullptr);
     EXPECT_FALSE(pin->processSignal(&mockSignal));
 }
 
-TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_connected) {
+TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_already_connected) {
     NiceMock<MockOutputPin> mockOutputPin;
     EXPECT_CALL(mockOutputPin, isConnected()).WillRepeatedly(Return(true));
     EXPECT_CALL(mockOutputPin, getMode()).WillRepeatedly(Return(mode));
@@ -66,6 +68,10 @@ TEST_P(ParametrizedLogicInputPinTest, getMode_returns_mode) {
 
 TEST_F(LogicInputPinTest, getPinNum_returns_pinNum) {
     EXPECT_EQ(pin->getPinNum(), pinNum);
+}
+
+TEST_F(LogicInputPinTest, output_pin_is_initially_a_nullptr) {
+    EXPECT_EQ(pin->getOutputPin(), nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(LogicInputPinTest, ParametrizedLogicInputPinTest,

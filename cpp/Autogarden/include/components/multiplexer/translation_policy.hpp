@@ -13,18 +13,18 @@ public:
     ~MultiplexerTranslationPolicy() = default;
 
     bool translate(ILogicInputPinSet* inputPins, ILogicOutputPinSet* outputPins, ILogicInputPin* sigPin) override {
-        const auto channelSignal = _getChannelSignalFromInputs(outputPins);
+        const auto channelSignal = __getChannelSignalFromInputs(outputPins);
         if (channelSignal.channel == MultiplexerTranslationPolicy::CHANNEL_NOT_SPECIFIED)
             return false;
 
         sigPin->processSignal(channelSignal.signal);
-        auto signals = _translateChannelToInputSignals(channelSignal.channel, inputPins);
-        _processInputSignals(signals, inputPins);
+        auto signals = __translateChannelToInputSignals(channelSignal.channel, inputPins);
+        __processInputSignals(signals, inputPins);
         return true;
     }
 
 private:
-    ChannelSignal _getChannelSignalFromInputs(ILogicOutputPinSet* outputPins) {
+    ChannelSignal __getChannelSignalFromInputs(ILogicOutputPinSet* outputPins) {
         for (int i = 0; i < outputPins->size(); i++) {
             auto pin = outputPins->at(i);
             if (pin->hasSignal())
@@ -34,7 +34,7 @@ private:
         return { MultiplexerTranslationPolicy::CHANNEL_NOT_SPECIFIED, nullptr };
     }
 
-    std::vector<DigitalWrite> _translateChannelToInputSignals(const int& channel, ILogicInputPinSet* inputPins) {
+    std::vector<DigitalWrite> __translateChannelToInputSignals(const int& channel, ILogicInputPinSet* inputPins) {
         std::vector<DigitalWrite> signals;
         for (int i = 0; i < inputPins->size(); i++) {
             signals.emplace_back(__getBit(channel, i));
@@ -43,7 +43,7 @@ private:
         return signals;
     }
 
-    void _processInputSignals(std::vector<DigitalWrite>& signals, ILogicInputPinSet* inputPins) {
+    void __processInputSignals(std::vector<DigitalWrite>& signals, ILogicInputPinSet* inputPins) {
         for (int i = 0; i < inputPins->size(); i++) {
             inputPins->at(i)->processSignal(&signals[i]);
         }

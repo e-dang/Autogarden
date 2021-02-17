@@ -25,6 +25,10 @@ public:
         return true;
     }
 
+    const IOutputPin* getOutputPin() const override {
+        return __pOutputPin;
+    }
+
 private:
     IOutputPin* __pOutputPin;
 };
