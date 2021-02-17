@@ -9,8 +9,11 @@ public:
 
     ~LogicInputPin() = default;
 
-    void processSignal(ISignal* signal) override {
-        __pOutputPin->processSignal(signal);
+    bool processSignal(ISignal* signal) override {
+        if (__pOutputPin == nullptr)
+            return false;
+
+        return __pOutputPin->processSignal(signal);
     }
 
     bool connect(IOutputPin* outputPin) override {

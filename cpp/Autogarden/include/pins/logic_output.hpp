@@ -9,8 +9,9 @@ public:
 
     ~LogicOutputPin() = default;
 
-    void processSignal(ISignal* signal) override {
+    bool processSignal(ISignal* signal) override {
         __pSignal = signal;
+        return true;
     }
 
     ISignal* popSignal() override {

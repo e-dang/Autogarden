@@ -29,7 +29,7 @@ protected:
 TEST_P(ParametrizedLogicOutputPinTest, processSignal_saves_signal_to_instance_and_is_returned_by_popSignal) {
     MockSignal signal;
 
-    pin->processSignal(&signal);
+    EXPECT_TRUE(pin->processSignal(&signal));
 
     EXPECT_TRUE(pin->hasSignal());
     EXPECT_EQ(pin->popSignal(), &signal);
