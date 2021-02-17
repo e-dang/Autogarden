@@ -9,4 +9,6 @@ public:
     virtual ISignal* popSignal() = 0;
 
     virtual bool hasSignal() const = 0;
+
+    virtual int getSignalValue() const = 0;
 };

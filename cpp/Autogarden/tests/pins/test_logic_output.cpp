@@ -67,6 +67,15 @@ TEST_F(LogicOutputPinTest, getPinNum_returns_pinNum) {
     EXPECT_EQ(pin->getPinNum(), pinNum);
 }
 
+TEST_F(LogicOutputPinTest, getSignalValue_returns_the_value_in_the_contained_signal) {
+    const int value = HIGH;
+    MockSignal signal;
+    EXPECT_CALL(signal, getValue()).WillRepeatedly(Return(value));
+
+    pin->processSignal(&signal);
+    EXPECT_EQ(pin->getSignalValue(), value);
+}
+
 INSTANTIATE_TEST_SUITE_P(LogicOutputPinTest, ParametrizedLogicOutputPinTest,
                          Values(PinMode::DigitalOutput, PinMode::AnalogOutput, PinMode::DigitalInput,
                                 PinMode::AnalogInput));

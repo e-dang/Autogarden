@@ -14,4 +14,5 @@ public:
     MOCK_METHOD(bool, isConnected, (), (const, override));
     MOCK_METHOD(void, connect, (), (override));
     MOCK_METHOD(void, disconnect, (), (override));
+    MOCK_METHOD(int, getSignalValue, (), (const, override));
 };

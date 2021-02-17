@@ -2,6 +2,7 @@
 
 #include <pins/interfaces/logic_output.hpp>
 #include <pins/output.hpp>
+#include <signals/signals.hpp>
 
 class LogicOutputPin : public OutputPin, public ILogicOutputPin {
 public:
@@ -22,6 +23,10 @@ public:
 
     bool hasSignal() const override {
         return __pSignal != nullptr;
+    }
+
+    int getSignalValue() const override {
+        return __pSignal->getValue();
     }
 
 private:
