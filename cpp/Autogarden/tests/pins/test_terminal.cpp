@@ -37,8 +37,8 @@ TEST_P(ParametrizedTerminalPinTest, initialize_calls_pinMode_on_arduino_interfac
     setMockArduino(nullptr);
 }
 
-TEST_F(TerminalPinTest, initialize_throws_runtime_error_when_pin_mode_undefined) {
-    TerminalPin pin(pinNum, PinMode::Undefined);
+TEST_F(TerminalPinTest, initialize_throws_runtime_error_when_pin_mode_count_is_used) {
+    TerminalPin pin(pinNum, PinMode::Count);
 
     try {
         pin.initialize();

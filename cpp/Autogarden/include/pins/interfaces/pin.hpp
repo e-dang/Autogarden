@@ -2,7 +2,7 @@
 
 class ISignal;
 
-enum PinMode { DigitalOutput, DigitalInput, AnalogOutput, AnalogInput, Undefined };
+enum PinMode { DigitalOutput, DigitalInput, AnalogOutput, AnalogInput, Count };
 
 class IPin {
 public:

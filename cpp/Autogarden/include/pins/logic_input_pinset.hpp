@@ -5,6 +5,8 @@
 
 class LogicInputPinSet : public ILogicInputPinSet {
 public:
+    typedef ILogicInputPin value_type;
+
     LogicInputPinSet(std::vector<std::unique_ptr<ILogicInputPin>>&& pins) : __mPins(std::move(pins)) {}
 
     virtual ~LogicInputPinSet() = default;
