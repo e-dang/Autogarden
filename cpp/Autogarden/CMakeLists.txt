@@ -24,6 +24,8 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/signals/test_analog_write.cpp
                                 tests/components/test_microcontroller.cpp
                                 tests/components/test_valve.cpp
+                                tests/components/test_multiplexer.cpp
+                                tests/components/test_translation_policy.cpp
                                 tests/test_usage.cpp
 )
 
