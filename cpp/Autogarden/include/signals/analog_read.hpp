@@ -14,7 +14,7 @@ public:
         __mValue = analogRead(pin->getPinNum());
     }
 
-    int getValue() const {
+    int getValue() const override {
         return __mValue;
     }
 

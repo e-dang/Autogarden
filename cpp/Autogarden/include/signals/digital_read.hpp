@@ -18,7 +18,7 @@ public:
         __mValue = digitalRead(pin->getPinNum());
     }
 
-    int getValue() const {
+    int getValue() const override {
         return __mValue;
     }
 

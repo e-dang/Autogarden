@@ -18,6 +18,10 @@ public:
         digitalWrite(pin->getPinNum(), __mValue);
     }
 
+    int getValue() const override {
+        return __mValue;
+    }
+
 private:
     int __mValue;
 };

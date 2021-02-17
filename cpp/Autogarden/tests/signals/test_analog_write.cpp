@@ -41,6 +41,10 @@ TEST_F(AnalogWriteTest, execute_calls_analogWrite_on_arduino_interface) {
     setMockArduino(nullptr);
 }
 
+TEST_F(AnalogWriteTest, getValue_returns_the_value_passed_into_the_constructor) {
+    EXPECT_EQ(signal.getValue(), value);
+}
+
 TEST_P(ParametrizedAnalogWriteTest, execute_throw_runtime_error_if_pin_mode_is_not_analog_output) {
     try {
         signal.execute(&mockTerminalPin);

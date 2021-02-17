@@ -41,6 +41,10 @@ TEST_F(DigitalWriteTest, execute_calls_digitalWrite_on_arduino_interface) {
     setMockArduino(nullptr);
 }
 
+TEST_F(DigitalWriteTest, getValue_returns_the_value_passed_into_the_constructor) {
+    EXPECT_EQ(signal.getValue(), value);
+}
+
 TEST_P(ParametrizedDigitalWriteTest, execute_throw_runtime_error_if_pin_mode_is_not_digital_output) {
     try {
         signal.execute(&mockTerminalPin);
