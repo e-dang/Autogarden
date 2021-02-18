@@ -18,8 +18,8 @@ public:
             return false;
 
         sigPin->processSignal(channelSignal.signal);
-        auto signals = __translateChannelToInputSignals(channelSignal.channel, inputPins);
-        __processInputSignals(signals, inputPins);
+        __translateChannelToInputSignals(channelSignal.channel, inputPins);
+        __processInputSignals(inputPins);
         return true;
     }
 
@@ -34,18 +34,16 @@ private:
         return { MultiplexerTranslationPolicy::CHANNEL_NOT_SPECIFIED, nullptr };
     }
 
-    std::vector<DigitalWrite> __translateChannelToInputSignals(const int& channel, ILogicInputPinSet* inputPins) {
-        std::vector<DigitalWrite> signals;
+    void __translateChannelToInputSignals(const int& channel, ILogicInputPinSet* inputPins) {
+        __mSignals.clear();
         for (int i = 0; i < inputPins->size(); i++) {
-            signals.emplace_back(__getBit(channel, i));
+            __mSignals.emplace_back(__getBit(channel, i));
         }
-
-        return signals;
     }
 
-    void __processInputSignals(std::vector<DigitalWrite>& signals, ILogicInputPinSet* inputPins) {
+    void __processInputSignals(ILogicInputPinSet* inputPins) {
         for (int i = 0; i < inputPins->size(); i++) {
-            inputPins->at(i)->processSignal(&signals[i]);
+            inputPins->at(i)->processSignal(&__mSignals[i]);
         }
     }
 
@@ -54,5 +52,7 @@ private:
     }
 
 private:
+    std::vector<DigitalWrite> __mSignals;
+
     static const int CHANNEL_NOT_SPECIFIED = -1;
 };
