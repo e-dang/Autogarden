@@ -52,7 +52,7 @@ TEST_F(TerminalPinTest, initialize_throws_runtime_error_when_pin_mode_count_is_u
 
 TEST_P(ParametrizedTerminalPinTest, processSignal_calls_execute_on_signal_and_returns_true) {
     MockSignal signal;
-    EXPECT_CALL(signal, execute(pin.get()));
+    EXPECT_CALL(signal, execute(pin.get())).WillRepeatedly(Return(true));
 
     EXPECT_TRUE(pin->processSignal(&signal));
 }

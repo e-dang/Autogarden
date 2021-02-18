@@ -12,10 +12,11 @@ public:
 
     ~AnalogWrite() = default;
 
-    void execute(const ITerminalPin* pin) override {
+    bool execute(const ITerminalPin* pin) override {
         if (pin->getMode() != PinMode::AnalogOutput)
-            throw std::runtime_error("Pinmode must be AnalogOutput to write to this pin");
+            return false;
         analogWrite(pin->getPinNum(), __mValue);
+        return true;
     }
 
     int getValue() const override {

@@ -36,7 +36,7 @@ TEST_F(DigitalWriteTest, execute_calls_digitalWrite_on_arduino_interface) {
     EXPECT_CALL(mockArduino, _digitalWrite(pinNum, value));
     EXPECT_CALL(mockTerminalPin, getPinNum()).WillRepeatedly(Return(pinNum));
 
-    signal.execute(&mockTerminalPin);
+    EXPECT_TRUE(signal.execute(&mockTerminalPin));
 
     setMockArduino(nullptr);
 }
@@ -45,15 +45,8 @@ TEST_F(DigitalWriteTest, getValue_returns_the_value_passed_into_the_constructor)
     EXPECT_EQ(signal.getValue(), value);
 }
 
-TEST_P(ParametrizedDigitalWriteTest, execute_throw_runtime_error_if_pin_mode_is_not_digital_output) {
-    try {
-        signal.execute(&mockTerminalPin);
-        FAIL() << "Expected std::runtime_error";
-    } catch (std::runtime_error& error) {
-        EXPECT_STREQ(error.what(), "Pinmode must be DigitalOutput to write to this pin");
-    } catch (...) {
-        FAIL() << "Expected std::runtime_error";
-    }
+TEST_P(ParametrizedDigitalWriteTest, execute_returns_false_if_pin_mode_is_not_digital_output) {
+    EXPECT_FALSE(signal.execute(&mockTerminalPin));
 }
 
 INSTANTIATE_TEST_SUITE_P(DigitalWriteTest, ParametrizedDigitalWriteTest,

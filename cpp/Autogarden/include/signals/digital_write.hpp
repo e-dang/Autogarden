@@ -12,10 +12,11 @@ public:
 
     ~DigitalWrite() = default;
 
-    void execute(const ITerminalPin* pin) override {
+    bool execute(const ITerminalPin* pin) override {
         if (pin->getMode() != PinMode::DigitalOutput)
-            throw std::runtime_error("Pinmode must be DigitalOutput to write to this pin");
+            return false;
         digitalWrite(pin->getPinNum(), __mValue);
+        return true;
     }
 
     int getValue() const override {

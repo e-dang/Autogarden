@@ -27,7 +27,6 @@ public:
     }
 
     bool processSignal(ISignal* signal) override {
-        signal->execute(this);
-        return true;
+        return signal->execute(this);
     }
 };

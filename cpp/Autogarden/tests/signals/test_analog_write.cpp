@@ -36,7 +36,7 @@ TEST_F(AnalogWriteTest, execute_calls_analogWrite_on_arduino_interface) {
     EXPECT_CALL(mockArduino, _analogWrite(pinNum, value));
     EXPECT_CALL(mockTerminalPin, getPinNum()).WillRepeatedly(Return(pinNum));
 
-    signal.execute(&mockTerminalPin);
+    EXPECT_TRUE(signal.execute(&mockTerminalPin));
 
     setMockArduino(nullptr);
 }
@@ -45,15 +45,8 @@ TEST_F(AnalogWriteTest, getValue_returns_the_value_passed_into_the_constructor) 
     EXPECT_EQ(signal.getValue(), value);
 }
 
-TEST_P(ParametrizedAnalogWriteTest, execute_throw_runtime_error_if_pin_mode_is_not_analog_output) {
-    try {
-        signal.execute(&mockTerminalPin);
-        FAIL() << "Expected std::runtime_error";
-    } catch (std::runtime_error& error) {
-        EXPECT_STREQ(error.what(), "Pinmode must be AnalogOutput to write to this pin");
-    } catch (...) {
-        FAIL() << "Expected std::runtime_error";
-    }
+TEST_P(ParametrizedAnalogWriteTest, execute_returns_false_if_pin_mode_is_not_analog_output) {
+    EXPECT_FALSE(signal.execute(&mockTerminalPin));
 }
 
 INSTANTIATE_TEST_SUITE_P(AnalogWriteTest, ParametrizedAnalogWriteTest,

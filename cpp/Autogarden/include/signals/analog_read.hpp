@@ -8,10 +8,12 @@
 
 class AnalogRead : public ISignal {
 public:
-    void execute(const ITerminalPin* pin) override {
+    bool execute(const ITerminalPin* pin) override {
         if (pin->getMode() != PinMode::AnalogInput)
-            throw std::runtime_error("Pinmode must be AnalogInput to write to this pin");
+            return false;
+
         __mValue = analogRead(pin->getPinNum());
+        return true;
     }
 
     int getValue() const override {
