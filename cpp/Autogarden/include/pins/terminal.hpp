@@ -13,17 +13,17 @@ public:
 
     ~TerminalPin() = default;
 
-    void initialize() override {
+    bool initialize() override {
         auto mode = getMode();
         if (mode == PinMode::DigitalOutput || mode == PinMode::AnalogOutput) {
-            pinMode(getPinNum(), mode);
-            return;
+            pinMode(getPinNum(), OUTPUT);
+            return true;
         } else if (mode == PinMode::DigitalInput || mode == PinMode::AnalogInput) {
-            pinMode(getPinNum(), mode);
-            return;
+            pinMode(getPinNum(), INPUT);
+            return true;
         }
 
-        throw std::runtime_error("Pin mode not recongized - " + std::to_string(mode));
+        return false;
     }
 
     bool processSignal(ISignal* signal) override {

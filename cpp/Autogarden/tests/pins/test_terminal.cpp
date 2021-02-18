@@ -19,10 +19,10 @@ protected:
     }
 };
 
-class ParametrizedTerminalPinTest : public TerminalPinTest, public WithParamInterface<PinMode> {
+class ParametrizedTerminalPinTest : public TerminalPinTest, public WithParamInterface<std::tuple<PinMode, int>> {
 protected:
     void SetUp() {
-        mode = GetParam();
+        mode = std::get<0>(GetParam());
         TerminalPinTest::SetUp();
     }
 };
@@ -30,24 +30,17 @@ protected:
 TEST_P(ParametrizedTerminalPinTest, initialize_calls_pinMode_on_arduino_interface) {
     MockArduino mockArduino;
     setMockArduino(&mockArduino);
-    EXPECT_CALL(mockArduino, _pinMode(pinNum, mode));
+    EXPECT_CALL(mockArduino, _pinMode(pinNum, std::get<1>(GetParam())));
 
     pin->initialize();
 
     setMockArduino(nullptr);
 }
 
-TEST_F(TerminalPinTest, initialize_throws_runtime_error_when_pin_mode_count_is_used) {
+TEST_F(TerminalPinTest, initialize_returns_false_when_unrecongized_pin_mode_is_used) {
     TerminalPin pin(pinNum, PinMode::Count);
 
-    try {
-        pin.initialize();
-        FAIL() << "Expected std::runtime_error";
-    } catch (std::runtime_error const& err) {
-        EXPECT_STREQ(err.what(), "Pin mode not recongized - 4");
-    } catch (...) {
-        FAIL() << "Expected std::runtime_error";
-    }
+    EXPECT_FALSE(pin.initialize());
 }
 
 TEST_P(ParametrizedTerminalPinTest, processSignal_calls_execute_on_signal_and_returns_true) {
@@ -77,5 +70,7 @@ TEST_F(TerminalPinTest, getPinNum_returns_pinNum) {
 }
 
 INSTANTIATE_TEST_SUITE_P(TerminalPinTest, ParametrizedTerminalPinTest,
-                         Values(PinMode::DigitalOutput, PinMode::AnalogOutput, PinMode::DigitalInput,
-                                PinMode::AnalogInput));
+                         Values(std::tuple<PinMode, int>{ PinMode::DigitalOutput, OUTPUT },
+                                std::tuple<PinMode, int>{ PinMode::AnalogOutput, OUTPUT },
+                                std::tuple<PinMode, int>{ PinMode::DigitalInput, INPUT },
+                                std::tuple<PinMode, int>{ PinMode::AnalogInput, INPUT }));

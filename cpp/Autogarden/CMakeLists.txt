@@ -9,7 +9,6 @@ find_package(GTest REQUIRED CONFIG)
 
 include_directories(include tests/mocks)
 
-add_executable(main src/Arduino.cpp src/main.cpp)
 add_executable(test_autogarden  src/Arduino.cpp
                                 tests/pins/test_terminal.cpp
                                 tests/pins/test_logic_output.cpp
@@ -29,7 +28,6 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/test_usage.cpp
 )
 
-target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1)
-target_compile_definitions(main PUBLIC LOW=0 HIGH=1)
+target_compile_definitions(test_autogarden PUBLIC LOW=0 HIGH=1 INPUT=0 OUTPUT=1 LSBFIRST=0 MSBFIRST=1)
 
 target_link_libraries(test_autogarden PUBLIC GTest::gtest GTest::gmock GTest::gmock_main)
