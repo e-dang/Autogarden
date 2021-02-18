@@ -81,3 +81,7 @@ TEST_F(MultiplexerTest, disable_returns_false_when_enablePin_is_nullptr) {
     EXPECT_EQ(mux.isEnabled(), !prevState);
     EXPECT_EQ(mux.isDisabled(), prevState);
 }
+
+TEST_F(MultiplexerTest, mux_is_not_root_component) {
+    EXPECT_FALSE(mux->isRoot());
+}

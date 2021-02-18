@@ -4,15 +4,17 @@
 
 class MicroController : public Component {
 public:
-    MicroController(const std::string& id, ITerminalPinSet* pins) : Component(id), __mPins(pins) {}
-
-protected:
-    bool _setInputPins(IOutputPinSet* outputPins) override {
-        return false;
+    MicroController(const std::string& id, ITerminalPinSet* pins) : Component(id), __mPins(pins) {
+        _pRoot = this;
     }
 
-    IOutputPinSet* _getOutputPins() override {
+    IOutputPinSet* getOutputPins() override {
         return __mPins.get();
+    }
+
+protected:
+    bool _setInputPins(Component* parent) override {
+        return false;
     }
 
     bool _propagateSignal() override {

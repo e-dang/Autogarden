@@ -19,18 +19,26 @@ public:
 
     virtual std::string getId() const = 0;
 
+    virtual IOutputPinSet* getOutputPins() = 0;
+
+    virtual Component* getRoot() = 0;
+
     virtual bool hasParent() const = 0;
+
+    virtual bool isRoot() const = 0;
 };
+
 class Component : public IComponent {
 public:
-    Component(const std::string& id) : __mId(id), _pParent(nullptr), __mChildren(0) {}
+    Component(const std::string& id) : __mId(id), _pRoot(nullptr), _pParent(nullptr), __mChildren(0) {}
 
     virtual ~Component() = default;
 
     bool appendChild(Component* component) override {
-        if (component != nullptr && component->_setInputPins(_getOutputPins())) {
+        if (component != nullptr && component->_setInputPins(this)) {
             __mChildren.push_back(component);
             component->_pParent = this;
+            component->_pRoot   = _pRoot;
             return true;
         }
 
@@ -58,6 +66,10 @@ public:
         return _pParent;
     };
 
+    Component* getRoot() override {
+        return _pRoot;
+    }
+
     std::string getId() const override {
         return __mId;
     }
@@ -66,10 +78,12 @@ public:
         return getParent() != nullptr;
     }
 
-protected:
-    virtual IOutputPinSet* _getOutputPins() = 0;
+    bool isRoot() const override {
+        return _pRoot == this;
+    }
 
-    virtual bool _setInputPins(IOutputPinSet* parentOutputPins) = 0;
+protected:
+    virtual bool _setInputPins(Component* parent) = 0;
 
     virtual bool _propagateSignal() {
         if (_pParent != nullptr)
@@ -79,6 +93,7 @@ protected:
     }
 
 protected:
+    Component* _pRoot;
     Component* _pParent;
     std::vector<Component*> __mChildren;
 

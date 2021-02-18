@@ -32,16 +32,25 @@ public:
         return __mIsEnabled == false;
     }
 
-protected:
-    bool _setInputPins(IOutputPinSet* outputPins) override {
-        outputPins->connect(__pSigPin.get());
-        outputPins->connect(__pEnablePin.get());
-        outputPins->connect(__pInputPins.get());
-        return true;
+    IOutputPinSet* getOutputPins() override {
+        return __pOutputPins.get();
     }
 
-    IOutputPinSet* _getOutputPins() override {
-        return __pOutputPins.get();
+protected:
+    bool _setInputPins(Component* parent) override {
+        auto outputPins = parent->getOutputPins();
+        if (!parent->isRoot()) {
+            auto root           = parent->getRoot();
+            auto rootOutputPins = root->getOutputPins();
+            rootOutputPins->connect(__pSigPin.get());
+            rootOutputPins->connect(__pEnablePin.get());
+        } else {
+            outputPins->connect(__pSigPin.get());
+            outputPins->connect(__pEnablePin.get());
+        }
+
+        outputPins->connect(__pInputPins.get());
+        return true;
     }
 
     bool _propagateSignal() override {

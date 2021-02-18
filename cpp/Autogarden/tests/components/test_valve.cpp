@@ -35,6 +35,10 @@ TEST_F(ValveTest, open_calls_processSignal_on_pin) {
     valve->open();
 }
 
+TEST_F(ValveTest, valve_is_not_root_component) {
+    EXPECT_FALSE(valve->isRoot());
+}
+
 TEST_F(ValveTest, close_calls_processSignal_on_pin) {
     EXPECT_CALL(*mockInputPin, processSignal(_));
 

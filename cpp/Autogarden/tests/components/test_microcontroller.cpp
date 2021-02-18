@@ -41,3 +41,7 @@ TEST_F(MicroControllerTest, controller_cannot_be_child_of_another_component) {
     EXPECT_FALSE(controller.appendChild(&otherController));
     AssertHasNoParent(&otherController);
 }
+
+TEST_F(MicroControllerTest, controller_is_root_component) {
+    EXPECT_TRUE(controller.isRoot());
+}
