@@ -8,28 +8,28 @@ class Multiplexer : public IMultiplexer {
 public:
     Multiplexer(const std::string& id, ILogicInputPinSet* inputPins, ILogicOutputPinSet* outputPins,
                 ILogicInputPin* sigPin, ILogicInputPin* enablePin, IMultiplexerTranslationPolicy* policy) :
-        Component(id),
+        IMultiplexer(id),
         __pInputPins(inputPins),
         __pOutputPins(outputPins),
         __pSigPin(sigPin),
         __pEnablePin(enablePin),
         __pPolicy(policy),
-        __mIsEnabled(false) {}
+        __mIsDisabled(true) {}
 
     bool enable() override {
-        return _setEnablePin(HIGH);
-    }
-
-    bool disable() override {
         return _setEnablePin(LOW);
     }
 
+    bool disable() override {
+        return _setEnablePin(HIGH);
+    }
+
     bool isEnabled() override {
-        return __mIsEnabled == true;
+        return __mIsDisabled == false;
     }
 
     bool isDisabled() override {
-        return __mIsEnabled == false;
+        return __mIsDisabled == true;
     }
 
     IOutputPinSet* getOutputPins() override {
@@ -68,7 +68,7 @@ protected:
 
         DigitalWrite signal(value);
         if (__pEnablePin->processSignal(&signal)) {
-            __mIsEnabled = static_cast<bool>(value);
+            __mIsDisabled = static_cast<bool>(value);
             return true;
         }
 
@@ -76,7 +76,7 @@ protected:
     }
 
 private:
-    bool __mIsEnabled;
+    bool __mIsDisabled;
     std::unique_ptr<ILogicInputPin> __pSigPin;
     std::unique_ptr<ILogicInputPin> __pEnablePin;
     std::unique_ptr<ILogicInputPinSet> __pInputPins;

@@ -2,8 +2,10 @@
 
 #include <components/component.hpp>
 
-class IMultiplexer : virtual public Component {
+class IMultiplexer : public Component {
 public:
+    IMultiplexer(const std::string& id) : Component(id) {}
+
     virtual ~IMultiplexer() = default;
 
     virtual bool enable() = 0;
