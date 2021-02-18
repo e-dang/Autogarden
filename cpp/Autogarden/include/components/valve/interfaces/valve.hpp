@@ -2,8 +2,10 @@
 
 #include <components/component.hpp>
 
-class IValve : virtual public Component {
+class IValve : public Component {
 public:
+    IValve(const std::string& id) : Component(id) {}
+
     virtual ~IValve() = default;
 
     virtual bool open() = 0;

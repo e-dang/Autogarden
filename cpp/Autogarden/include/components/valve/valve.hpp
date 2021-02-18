@@ -7,7 +7,7 @@
 class Valve : public IValve {
 public:
     Valve(const std::string& id, ILogicInputPin* inputPin, const int& onValue = HIGH, const int& offValue = LOW) :
-        Component(id), __pPin(inputPin), __mOnValue(onValue), __mOffValue(offValue) {}
+        IValve(id), __pPin(inputPin), __mOnValue(onValue), __mOffValue(offValue) {}
 
     bool open() override {
         return _performAction(__mOnValue);

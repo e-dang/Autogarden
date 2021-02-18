@@ -2,8 +2,10 @@
 
 #include <components/component.hpp>
 
-class IShiftRegister : virtual public Component {
+class IShiftRegister : public Component {
 public:
+    IShiftRegister(const std::string& id) : Component(id) {}
+
     virtual ~IShiftRegister() = default;
 
     virtual bool enable() = 0;

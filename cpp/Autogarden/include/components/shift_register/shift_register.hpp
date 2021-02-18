@@ -6,7 +6,7 @@
 class ShiftRegister : public IShiftRegister {
 public:
     ShiftRegister(const std::string& id, IShiftRegisterInputPinSet* inputPins, ILogicOutputPinSet* outputPins) :
-        Component(id), __pInputPins(inputPins), __pOutputPins(outputPins) {}
+        IShiftRegister(id), __pInputPins(inputPins), __pOutputPins(outputPins) {}
 
     bool enable() override {
         return true;
