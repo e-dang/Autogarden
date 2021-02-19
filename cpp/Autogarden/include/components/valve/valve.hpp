@@ -35,8 +35,7 @@ protected:
         if (__pPin == nullptr)
             return false;
 
-        DigitalWrite signal(value);
-        __pPin->processSignal(&signal);
+        __pPin->processSignal(std::make_shared<DigitalWrite>(value));
         return _propagateSignal();
     }
 

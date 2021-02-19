@@ -44,10 +44,10 @@ TEST_F(TerminalPinTest, initialize_returns_false_when_unrecongized_pin_mode_is_u
 }
 
 TEST_P(ParametrizedTerminalPinTest, processSignal_calls_execute_on_signal_and_returns_true) {
-    MockSignal signal;
-    EXPECT_CALL(signal, execute(pin.get())).WillRepeatedly(Return(true));
+    auto signal = std::make_shared<MockSignal>();
+    EXPECT_CALL(*signal, execute(pin.get())).WillRepeatedly(Return(true));
 
-    EXPECT_TRUE(pin->processSignal(&signal));
+    EXPECT_TRUE(pin->processSignal(signal));
 }
 
 TEST_P(ParametrizedTerminalPinTest, getMode_returns_mode) {

@@ -27,12 +27,12 @@ protected:
 };
 
 TEST_P(ParametrizedLogicOutputPinTest, processSignal_saves_signal_to_instance_and_is_returned_by_popSignal) {
-    MockSignal signal;
+    auto signal = std::make_shared<MockSignal>();
 
-    EXPECT_TRUE(pin->processSignal(&signal));
+    EXPECT_TRUE(pin->processSignal(signal));
 
     EXPECT_TRUE(pin->hasSignal());
-    EXPECT_EQ(pin->popSignal(), &signal);
+    EXPECT_EQ(pin->popSignal(), signal);
 }
 
 TEST_P(ParametrizedLogicOutputPinTest, hasSignal_is_initially_false) {
@@ -40,9 +40,9 @@ TEST_P(ParametrizedLogicOutputPinTest, hasSignal_is_initially_false) {
 }
 
 TEST_P(ParametrizedLogicOutputPinTest, popSignal_removes_signal_from_instance) {
-    MockSignal signal;
+    auto signal = std::make_shared<MockSignal>();
 
-    pin->processSignal(&signal);
+    pin->processSignal(signal);
     pin->popSignal();
 
     EXPECT_FALSE(pin->hasSignal());
@@ -69,10 +69,10 @@ TEST_F(LogicOutputPinTest, getPinNum_returns_pinNum) {
 
 TEST_F(LogicOutputPinTest, getSignalValue_returns_the_value_in_the_contained_signal) {
     const int value = HIGH;
-    MockSignal signal;
-    EXPECT_CALL(signal, getValue()).WillRepeatedly(Return(value));
+    auto signal     = std::make_shared<MockSignal>();
+    EXPECT_CALL(*signal, getValue()).WillRepeatedly(Return(value));
 
-    pin->processSignal(&signal);
+    pin->processSignal(signal);
     EXPECT_EQ(pin->getSignalValue(), value);
 }
 

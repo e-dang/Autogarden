@@ -21,7 +21,7 @@ protected:
     std::unique_ptr<NiceMock<MockLogicOutputPin>> outputPin;
     std::unique_ptr<NiceMock<MockLogicInputPin>> inputPin;
     std::unique_ptr<NiceMock<MockLogicInputPin>> sigPin;
-    std::unique_ptr<NiceMock<MockSignal>> signal;
+    std::shared_ptr<ISignal> signal;
     std::unique_ptr<MultiplexerTranslationPolicy> policy;
 
     MultiplexerTranslationPolicyTest() :
@@ -38,11 +38,11 @@ TEST_F(MultiplexerTranslationPolicyTest, translate_returns_true) {
     ON_CALL(*outputPins, size()).WillByDefault(Return(numOutputPins));
     ON_CALL(*outputPins, at(_)).WillByDefault(Return(outputPin.get()));
     ON_CALL(*outputPin, hasSignal()).WillByDefault(Return(true));
-    ON_CALL(*outputPin, popSignal()).WillByDefault(Return(signal.get()));
+    ON_CALL(*outputPin, popSignal()).WillByDefault(Return(signal));
     ON_CALL(*inputPins, size()).WillByDefault(Return(numInputPins));
     ON_CALL(*inputPins, at(_)).WillByDefault(Return(inputPin.get()));
 
-    EXPECT_CALL(*sigPin, processSignal(signal.get()));
+    EXPECT_CALL(*sigPin, processSignal(signal));
     EXPECT_CALL(*inputPin, processSignal(_));
 
     EXPECT_TRUE(policy->translate(inputPins.get(), outputPins.get(), sigPin.get()));

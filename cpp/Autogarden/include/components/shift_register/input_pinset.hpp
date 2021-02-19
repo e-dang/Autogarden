@@ -15,13 +15,11 @@ public:
     }
 
     bool openLatch() override {
-        DigitalWrite signal(LOW);
-        return __pLatchPin->processSignal(&signal);
+        return __pLatchPin->processSignal(std::make_shared<DigitalWrite>(LOW));
     }
 
     bool closeLatch() override {
-        DigitalWrite signal(HIGH);
-        return __pLatchPin->processSignal(&signal);
+        return __pLatchPin->processSignal(std::make_shared<DigitalWrite>(HIGH));
     }
 
     bool shiftOut(const int& binary) override {

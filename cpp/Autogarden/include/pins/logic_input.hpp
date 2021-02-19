@@ -9,7 +9,7 @@ public:
 
     ~LogicInputPin() = default;
 
-    bool processSignal(ISignal* signal) override {
+    bool processSignal(std::shared_ptr<ISignal> signal) override {
         if (__pOutputPin == nullptr)
             return false;
 

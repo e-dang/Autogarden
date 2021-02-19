@@ -10,19 +10,19 @@ public:
 
     ~LogicOutputPin() = default;
 
-    bool processSignal(ISignal* signal) override {
+    bool processSignal(std::shared_ptr<ISignal> signal) override {
         __pSignal = signal;
         return true;
     }
 
-    ISignal* popSignal() override {
+    std::shared_ptr<ISignal> popSignal() override {
         auto signal = __pSignal;
         __pSignal   = nullptr;
         return signal;
     }
 
     bool hasSignal() const override {
-        return __pSignal != nullptr;
+        return __pSignal.get() != nullptr;
     }
 
     int getSignalValue() const override {
@@ -30,5 +30,5 @@ public:
     }
 
 private:
-    ISignal* __pSignal;
+    std::shared_ptr<ISignal> __pSignal;
 };

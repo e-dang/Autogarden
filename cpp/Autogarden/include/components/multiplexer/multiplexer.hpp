@@ -66,8 +66,7 @@ protected:
         if (__pEnablePin == nullptr)
             return false;
 
-        DigitalWrite signal(value);
-        if (__pEnablePin->processSignal(&signal)) {
+        if (__pEnablePin->processSignal(std::make_shared<DigitalWrite>(value))) {
             __mIsDisabled = static_cast<bool>(value);
             return true;
         }

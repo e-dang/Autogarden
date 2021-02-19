@@ -8,7 +8,7 @@ class IPin {
 public:
     virtual ~IPin() = default;
 
-    virtual bool processSignal(ISignal* signal) = 0;
+    virtual bool processSignal(std::shared_ptr<ISignal> signal) = 0;
 
     virtual int getPinNum() const = 0;
 

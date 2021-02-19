@@ -5,7 +5,7 @@
 
 struct ChannelSignal {
     int channel;
-    ISignal* signal;
+    std::shared_ptr<ISignal> signal;
 };
 
 class MultiplexerTranslationPolicy : public IMultiplexerTranslationPolicy {
@@ -37,13 +37,13 @@ private:
     void __translateChannelToInputSignals(const int& channel, ILogicInputPinSet* inputPins) {
         __mSignals.clear();
         for (int i = 0; i < inputPins->size(); i++) {
-            __mSignals.emplace_back(__getBit(channel, i));
+            __mSignals.emplace_back(std::make_shared<DigitalWrite>(__getBit(channel, i)));
         }
     }
 
     void __processInputSignals(ILogicInputPinSet* inputPins) {
         for (int i = 0; i < inputPins->size(); i++) {
-            inputPins->at(i)->processSignal(&__mSignals[i]);
+            inputPins->at(i)->processSignal(__mSignals[i]);
         }
     }
 
@@ -52,7 +52,7 @@ private:
     }
 
 private:
-    std::vector<DigitalWrite> __mSignals;
+    std::vector<std::shared_ptr<DigitalWrite>> __mSignals;
 
     static const int CHANNEL_NOT_SPECIFIED = -1;
 };

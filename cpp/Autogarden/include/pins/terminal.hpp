@@ -26,7 +26,7 @@ public:
         return false;
     }
 
-    bool processSignal(ISignal* signal) override {
+    bool processSignal(std::shared_ptr<ISignal> signal) override {
         return signal->execute(this);
     }
 };

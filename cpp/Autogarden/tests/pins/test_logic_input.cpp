@@ -29,21 +29,21 @@ protected:
 
 TEST_P(ParametrizedLogicInputPinTest,
        connect_saves_output_pin_to_instance_which_processSignal_then_calls_processSignal_on_with_signal) {
-    MockSignal mockSignal;
+    std::shared_ptr<ISignal> mockSignal = std::make_shared<MockSignal>();
     NiceMock<MockOutputPin> mockOutputPin;
     EXPECT_CALL(mockOutputPin, isConnected()).WillRepeatedly(Return(false));
     EXPECT_CALL(mockOutputPin, getMode()).WillRepeatedly(Return(mode));
-    EXPECT_CALL(mockOutputPin, processSignal(&mockSignal)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockOutputPin, processSignal(mockSignal)).WillRepeatedly(Return(true));
 
     EXPECT_TRUE(pin->connect(&mockOutputPin));
     ASSERT_EQ(pin->getOutputPin(), &mockOutputPin);
-    EXPECT_TRUE(pin->processSignal(&mockSignal));
+    EXPECT_TRUE(pin->processSignal(mockSignal));
 }
 
 TEST_P(ParametrizedLogicInputPinTest, processSignal_returns_false_if_pin_has_not_been_connected) {
-    MockSignal mockSignal;
+    std::shared_ptr<ISignal> mockSignal = std::make_shared<MockSignal>();
     ASSERT_EQ(pin->getOutputPin(), nullptr);
-    EXPECT_FALSE(pin->processSignal(&mockSignal));
+    EXPECT_FALSE(pin->processSignal(mockSignal));
 }
 
 TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_already_connected) {
