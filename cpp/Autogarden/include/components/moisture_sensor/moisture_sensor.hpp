@@ -11,14 +11,18 @@ public:
 
     int readRaw() override {
         auto signal = std::make_shared<AnalogRead>();
-        if (__pPin == nullptr || !__pPin->processSignal(signal) || !Component::_propagateSignal())
+        if (__pPin == nullptr || !__pPin->processSignal(signal) || !_propagateSignal())
             return MoistureSensor::NULL_READ_VALUE;
 
         return signal->getValue();
     }
 
     float readScaled() override {
-        return __mScaler * static_cast<float>(readRaw());
+        auto rawVal = readRaw();
+        if (rawVal == MoistureSensor::NULL_READ_VALUE)
+            return static_cast<float>(rawVal);
+
+        return __mScaler * static_cast<float>(rawVal);
     }
 
 protected:
@@ -34,9 +38,10 @@ protected:
         return nullptr;
     }
 
+public:
+    static const int NULL_READ_VALUE = INT32_MIN;
+
 private:
     float __mScaler;
     std::unique_ptr<ILogicInputPin> __pPin;
-
-    static const int NULL_READ_VALUE = INT32_MIN;
 };
