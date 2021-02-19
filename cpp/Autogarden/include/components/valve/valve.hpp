@@ -23,8 +23,7 @@ protected:
         if (parentOutputPins == nullptr)
             return false;
 
-        parentOutputPins->connect(__pPin.get());
-        return true;
+        return parentOutputPins->connect(__pPin.get());
     }
 
     IOutputPinSet* _getOutputPins() override {

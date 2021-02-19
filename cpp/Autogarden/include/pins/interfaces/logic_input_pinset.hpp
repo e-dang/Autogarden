@@ -8,6 +8,8 @@ public:
 
     virtual ~ILogicInputPinSet() = default;
 
+    virtual void disconnect() = 0;
+
     virtual iterator begin() = 0;
 
     virtual iterator end() = 0;

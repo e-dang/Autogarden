@@ -10,4 +10,5 @@ public:
     MOCK_METHOD(iterator, end, (), (override));
     MOCK_METHOD(ILogicInputPin*, at, (const int& idx), (override));
     MOCK_METHOD(int, size, (), (const, override));
+    MOCK_METHOD(void, disconnect, (), (override));
 };

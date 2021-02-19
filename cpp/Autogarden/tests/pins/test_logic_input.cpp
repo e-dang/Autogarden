@@ -38,6 +38,7 @@ TEST_P(ParametrizedLogicInputPinTest,
     EXPECT_TRUE(pin->connect(&mockOutputPin));
     ASSERT_EQ(pin->getOutputPin(), &mockOutputPin);
     EXPECT_TRUE(pin->processSignal(mockSignal));
+    EXPECT_TRUE(pin->isConnected());
 }
 
 TEST_P(ParametrizedLogicInputPinTest, processSignal_returns_false_if_pin_has_not_been_connected) {
@@ -52,6 +53,7 @@ TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_already_conne
     EXPECT_CALL(mockOutputPin, getMode()).WillRepeatedly(Return(mode));
 
     EXPECT_FALSE(pin->connect(&mockOutputPin));
+    EXPECT_FALSE(pin->isConnected());
 }
 
 TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_of_different_mode) {
@@ -60,6 +62,7 @@ TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_of_different_
     EXPECT_CALL(mockOutputPin, getMode()).WillRepeatedly(Return(static_cast<PinMode>((mode + 1) % 4)));
 
     EXPECT_FALSE(pin->connect(&mockOutputPin));
+    EXPECT_FALSE(pin->isConnected());
 }
 
 TEST_P(ParametrizedLogicInputPinTest, getMode_returns_mode) {

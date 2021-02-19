@@ -13,4 +13,8 @@ public:
     virtual int getPinNum() const = 0;
 
     virtual PinMode getMode() const = 0;
+
+    virtual bool isConnected() const = 0;
+
+    virtual void disconnect() = 0;
 };

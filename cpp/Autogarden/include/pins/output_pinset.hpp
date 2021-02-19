@@ -9,16 +9,23 @@ public:
 
     virtual ~OutputPinSet() = default;
 
-    void connect(ILogicInputPinSet* inputPins) override {
-        auto iter = __mPins.begin();
+    bool connect(ILogicInputPinSet* inputPins) override {
+        auto numSuccesses = 0;
+        auto iter         = __mPins.begin();
         for (auto& pin : *inputPins) {
-            _connect(pin.get(), iter);
+            numSuccesses += static_cast<int>(_connect(pin.get(), iter));
         }
+
+        auto wasSuccessful = numSuccesses == inputPins->size();
+        if (!wasSuccessful)
+            inputPins->disconnect();
+
+        return wasSuccessful;
     }
 
-    void connect(ILogicInputPin* pin) override {
+    bool connect(ILogicInputPin* pin) override {
         auto iter = __mPins.begin();
-        _connect(pin, iter);
+        return _connect(pin, iter);
     }
 
     int size() const override {
@@ -26,8 +33,13 @@ public:
     }
 
 protected:
-    void _connect(ILogicInputPin* pin, typename std::vector<T>::iterator& iter) {
+    bool _connect(ILogicInputPin* pin, typename std::vector<T>::iterator& iter) {
+        auto prev = pin->getOutputPin();
         while (iter != __mPins.end() && !pin->connect((*iter++).get())) continue;
+
+        if (prev == pin->getOutputPin())
+            return false;
+        return true;
     }
 
 protected:

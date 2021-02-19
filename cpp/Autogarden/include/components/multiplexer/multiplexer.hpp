@@ -39,9 +39,13 @@ protected:
         if (rootOutputPins == nullptr || parentOutputPins == nullptr)
             return false;
 
-        rootOutputPins->connect(__pSigPin.get());
-        rootOutputPins->connect(__pEnablePin.get());
-        parentOutputPins->connect(__pInputPins.get());
+        if (!(rootOutputPins->connect(__pSigPin.get()) && rootOutputPins->connect(__pEnablePin.get()) &&
+              parentOutputPins->connect(__pInputPins.get()))) {
+            __pSigPin->disconnect();
+            __pEnablePin->disconnect();
+            __pInputPins->disconnect();
+            return false;
+        }
 
         return true;
     }

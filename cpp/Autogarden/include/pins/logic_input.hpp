@@ -29,6 +29,17 @@ public:
         return __pOutputPin;
     }
 
+    bool isConnected() const override {
+        return __pOutputPin != nullptr;
+    }
+
+    void disconnect() override {
+        if (isConnected()) {
+            __pOutputPin->disconnect();
+            __pOutputPin = nullptr;
+        }
+    }
+
 private:
     IOutputPin* __pOutputPin;
 };

@@ -11,4 +11,6 @@ public:
     MOCK_METHOD(PinMode, getMode, (), (const, override));
     MOCK_METHOD(bool, connect, (IOutputPin * outputPin), (override));
     MOCK_METHOD(const IOutputPin*, getOutputPin, (), (const, override));
+    MOCK_METHOD(bool, isConnected, (), (const, override));
+    MOCK_METHOD(void, disconnect, (), (override));
 };

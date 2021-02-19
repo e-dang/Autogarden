@@ -32,6 +32,12 @@ public:
         return true;
     }
 
+    void disconnect() override {
+        for (auto& pin : __mPins) {
+            pin->disconnect();
+        }
+    }
+
     iterator begin() override {
         return __mPins.begin();
     }

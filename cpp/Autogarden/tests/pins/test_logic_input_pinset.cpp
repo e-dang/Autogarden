@@ -11,7 +11,7 @@ using namespace ::testing;
 class LogicInputPinSetTest : public Test {
 protected:
     int size = 5;
-    std::vector<ILogicInputPin*> mockPins;
+    std::vector<MockLogicInputPin*> mockPins;
     std::vector<std::unique_ptr<ILogicInputPin>> tmpMockPins;
     std::unique_ptr<LogicInputPinSet> pinSet;
 
@@ -37,4 +37,12 @@ TEST_F(LogicInputPinSetTest, at_returns_pin_at_idx) {
 
 TEST_F(LogicInputPinSetTest, size_returns_num_of_pins) {
     EXPECT_EQ(pinSet->size(), size);
+}
+
+TEST_F(LogicInputPinSetTest, disconnect_calls_disconnect_on_each_pin) {
+    for (auto& pin : mockPins) {
+        EXPECT_CALL(*pin, disconnect());
+    }
+
+    pinSet->disconnect();
 }

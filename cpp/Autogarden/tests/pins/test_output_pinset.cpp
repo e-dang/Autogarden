@@ -8,6 +8,7 @@
 #include <pins/output_pinset.hpp>
 
 using namespace ::testing;
+using ::testing::_;
 
 class OutputPinSetTest : public Test {
 protected:
@@ -41,15 +42,38 @@ TEST_F(OutputPinSetTest, size_returns_num_pins) {
 TEST_F(OutputPinSetTest, connect_calls_connect_on_each_input_pin_in_pin_set) {
     for (int i = 0; i < size; i++) {
         EXPECT_CALL(*mockInputPins[i], connect(mockPins[i])).WillRepeatedly(Return(true));
+        EXPECT_CALL(*mockInputPins[i], getOutputPin()).WillOnce(Return(nullptr)).WillOnce(Return(mockPins[i]));
     }
 
-    pinSet->connect(inputPinSet.get());
+    EXPECT_TRUE(pinSet->connect(inputPinSet.get()));
 }
 
 TEST_F(OutputPinSetTest, connect_calls_connect_on_input_pin) {
     const int idx  = 0;
     auto& inputPin = *mockInputPins[idx];
     EXPECT_CALL(inputPin, connect(mockPins[idx])).WillRepeatedly(Return(true));
+    EXPECT_CALL(inputPin, getOutputPin()).WillOnce(Return(nullptr)).WillOnce(Return(mockPins[idx]));
 
-    pinSet->connect(&inputPin);
+    EXPECT_TRUE(pinSet->connect(&inputPin));
+}
+
+TEST_F(OutputPinSetTest, connect_calls_disconnect_on_each_input_pin_if_one_fails_to_connect) {
+    for (int i = 0; i < size; i++) {
+        EXPECT_CALL(*mockInputPins[i], connect(_)).WillRepeatedly(Return(i > 0));
+        EXPECT_CALL(*mockInputPins[i], getOutputPin())
+          .WillOnce(Return(nullptr))
+          .WillOnce(Return(i > 0 ? mockPins[i] : nullptr));
+        EXPECT_CALL(*mockInputPins[i], disconnect());
+    }
+
+    EXPECT_FALSE(pinSet->connect(inputPinSet.get()));
+}
+
+TEST_F(OutputPinSetTest, connect_returns_false_if_pin_fails_to_connect) {
+    const int idx  = 0;
+    auto& inputPin = *mockInputPins[idx];
+    EXPECT_CALL(inputPin, connect(_)).WillRepeatedly(Return(false));
+    EXPECT_CALL(inputPin, getOutputPin()).WillRepeatedly(Return(nullptr));
+
+    EXPECT_FALSE(pinSet->connect(&inputPin));
 }

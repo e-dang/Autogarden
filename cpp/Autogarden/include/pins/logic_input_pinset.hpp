@@ -11,6 +11,12 @@ public:
 
     virtual ~LogicInputPinSet() = default;
 
+    void disconnect() override {
+        for (auto& pin : __mPins) {
+            pin->disconnect();
+        }
+    }
+
     iterator begin() override {
         return __mPins.begin();
     }
