@@ -8,22 +8,6 @@ public:
     ShiftRegister(const std::string& id, IShiftRegisterInputPinSet* inputPins, ILogicOutputPinSet* outputPins) :
         IShiftRegister(id), __pInputPins(inputPins), __pOutputPins(outputPins) {}
 
-    bool enable() override {
-        return true;
-    }
-
-    bool disable() override {
-        return true;
-    }
-
-    bool isEnabled() override {
-        return true;
-    }
-
-    bool isDisabled() override {
-        return true;
-    }
-
 protected:
     bool _setInputPins(Component* parent) override {
         auto parentOutputPins = _getComponentOutputPins(parent);
@@ -38,14 +22,11 @@ protected:
     }
 
     bool _propagateSignal() override {
-        disable();
-
         auto binary = __translateOutputsToBinary();
         __pInputPins->openLatch();
         __pInputPins->shiftOut(binary);
         __pInputPins->closeLatch();
 
-        enable();
         return Component::_propagateSignal();
     }
 
