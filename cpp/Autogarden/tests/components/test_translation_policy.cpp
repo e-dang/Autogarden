@@ -34,7 +34,7 @@ protected:
         policy(new MultiplexerTranslationPolicy()) {}
 };
 
-TEST_F(MultiplexerTranslationPolicyTest, translate_returns_true) {
+TEST_F(MultiplexerTranslationPolicyTest, translate_returns_true_and_sets_sig_pin_signal_to_instance_var) {
     ON_CALL(*outputPins, size()).WillByDefault(Return(numOutputPins));
     ON_CALL(*outputPins, at(_)).WillByDefault(Return(outputPin.get()));
     ON_CALL(*outputPin, hasSignal()).WillByDefault(Return(true));
@@ -42,10 +42,10 @@ TEST_F(MultiplexerTranslationPolicyTest, translate_returns_true) {
     ON_CALL(*inputPins, size()).WillByDefault(Return(numInputPins));
     ON_CALL(*inputPins, at(_)).WillByDefault(Return(inputPin.get()));
 
-    EXPECT_CALL(*sigPin, processSignal(signal));
     EXPECT_CALL(*inputPin, processSignal(_));
 
-    EXPECT_TRUE(policy->translate(inputPins.get(), outputPins.get(), sigPin.get()));
+    EXPECT_TRUE(policy->translate(inputPins.get(), outputPins.get()));
+    EXPECT_EQ(policy->getSigPinSignal(), signal);
 }
 
 TEST_F(MultiplexerTranslationPolicyTest, translate_returns_false) {
@@ -53,5 +53,5 @@ TEST_F(MultiplexerTranslationPolicyTest, translate_returns_false) {
     ON_CALL(*outputPins, at(_)).WillByDefault(Return(outputPin.get()));
     ON_CALL(*outputPin, hasSignal()).WillByDefault(Return(false));
 
-    EXPECT_FALSE(policy->translate(inputPins.get(), outputPins.get(), sigPin.get()));
+    EXPECT_FALSE(policy->translate(inputPins.get(), outputPins.get()));
 }

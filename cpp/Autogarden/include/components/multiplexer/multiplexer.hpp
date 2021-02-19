@@ -56,12 +56,11 @@ protected:
 
     bool _propagateSignal() override {
         disable();
-        if (!__pPolicy->translate(__pInputPins.get(), __pOutputPins.get(), __pSigPin.get()))
+        if (!__pPolicy->translate(__pInputPins.get(), __pOutputPins.get()) || !Component::_propagateSignal())
             return false;
 
-        auto result = Component::_propagateSignal();
         enable();
-        return result;
+        return __pSigPin->processSignal(__pPolicy->getSigPinSignal());  // sigPin must process signal as last operation
     }
 
     bool _setEnablePin(const int& value) {
