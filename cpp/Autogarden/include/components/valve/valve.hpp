@@ -17,18 +17,18 @@ public:
         return _performAction(__mOffValue);
     }
 
-    IOutputPinSet* getOutputPins() override {
-        return nullptr;
-    }
-
 protected:
     bool _setInputPins(Component* parent) override {
-        auto parentOutputPins = parent->getOutputPins();
+        auto parentOutputPins = _getComponentOutputPins(parent);
         if (parentOutputPins == nullptr)
             return false;
 
         parentOutputPins->connect(__pPin.get());
         return true;
+    }
+
+    IOutputPinSet* _getOutputPins() override {
+        return nullptr;
     }
 
     bool _performAction(const int& value) {

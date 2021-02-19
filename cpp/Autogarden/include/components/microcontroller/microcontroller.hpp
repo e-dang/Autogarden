@@ -8,13 +8,13 @@ public:
         _pRoot = this;
     }
 
-    IOutputPinSet* getOutputPins() override {
-        return __mPins.get();
-    }
-
 protected:
     bool _setInputPins(Component* parent) override {
         return false;
+    }
+
+    IOutputPinSet* _getOutputPins() override {
+        return __mPins.get();
     }
 
     bool _propagateSignal() override {

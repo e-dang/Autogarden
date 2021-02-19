@@ -19,8 +19,6 @@ public:
 
     virtual std::string getId() const = 0;
 
-    virtual IOutputPinSet* getOutputPins() = 0;
-
     virtual Component* getRoot() = 0;
 
     virtual bool hasParent() const = 0;
@@ -84,6 +82,15 @@ public:
 
 protected:
     virtual bool _setInputPins(Component* parent) = 0;
+
+    virtual IOutputPinSet* _getOutputPins() = 0;
+
+    IOutputPinSet* _getComponentOutputPins(Component* component) {
+        if (component == nullptr)
+            return nullptr;
+
+        return component->_getOutputPins();
+    }
 
     virtual bool _propagateSignal() {
         if (_pParent != nullptr)

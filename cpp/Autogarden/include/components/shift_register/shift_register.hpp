@@ -24,17 +24,19 @@ public:
         return true;
     }
 
-    IOutputPinSet* getOutputPins() override {
-        return __pOutputPins.get();
-    }
-
 protected:
     bool _setInputPins(Component* parent) override {
-        if (!parent->isRoot())
+        auto parentOutputPins = _getComponentOutputPins(parent);
+        if (parentOutputPins == nullptr)
             return false;
 
-        parent->getOutputPins()->connect(__pInputPins.get());
+        parentOutputPins->connect(__pInputPins.get());
+
         return true;
+    }
+
+    IOutputPinSet* _getOutputPins() override {
+        return __pOutputPins.get();
     }
 
     bool _propagateSignal() override {
