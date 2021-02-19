@@ -32,10 +32,9 @@ protected:
     }
 
     bool _performAction(const int& value) {
-        if (__pPin == nullptr)
+        if (__pPin == nullptr || !__pPin->processSignal(std::make_shared<DigitalWrite>(value)))
             return false;
 
-        __pPin->processSignal(std::make_shared<DigitalWrite>(value));
         return _propagateSignal();
     }
 

@@ -58,20 +58,17 @@ protected:
         if (!__pPolicy->translate(__pInputPins.get(), __pOutputPins.get(), __pSigPin.get()))
             return false;
 
+        auto result = Component::_propagateSignal();
         enable();
-        return Component::_propagateSignal();
+        return result;
     }
 
     bool _setEnablePin(const int& value) {
-        if (__pEnablePin == nullptr)
+        if (__pEnablePin == nullptr || !__pEnablePin->processSignal(std::make_shared<DigitalWrite>(value)))
             return false;
 
-        if (__pEnablePin->processSignal(std::make_shared<DigitalWrite>(value))) {
-            __mIsDisabled = static_cast<bool>(value);
-            return true;
-        }
-
-        return false;
+        __mIsDisabled = static_cast<bool>(value);
+        return true;
     }
 
 private:
