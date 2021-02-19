@@ -22,7 +22,7 @@ protected:
     int pin9                       = 9;
     const std::string controllerId = "controller";
     MicroControllerFactory mcFactory;
-    std::unique_ptr<MicroController> controller;
+    std::unique_ptr<IMicroController> controller;
 
     const std::string valveId = "valve";
     const int valveOnSig      = HIGH;
@@ -59,7 +59,6 @@ protected:
     ObjectWiringTest() {
         controller =
           mcFactory.create(controllerId, { pin0, pin1, pin2, pin3, pin4, pin5, pin6 }, {}, { pin7, pin8 }, { pin9 });
-        // valve = valveFactory.create(valveId, valveOnSig, valveOffSig);
         dMux = muxFactory.create(dMuxId, numDMuxInputs, numDMuxOutputs, dMuxMode);
         aMux = muxFactory.create(aMuxId, numAMuxInputs, numAMuxOutputs, aMuxMode);
         reg  = regFactory.create(regId, regNumOutputs, regDirection);

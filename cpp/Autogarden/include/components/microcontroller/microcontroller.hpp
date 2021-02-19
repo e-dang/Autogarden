@@ -1,11 +1,20 @@
 #pragma once
 
-#include <components/component.hpp>
+#include <components/microcontroller/interfaces/microcontroller.hpp>
 
-class MicroController : public Component {
+class MicroController : public IMicroController {
 public:
-    MicroController(const std::string& id, ITerminalPinSet* pins) : Component(id), __mPins(pins) {
+    MicroController(const std::string& id, ITerminalPinSet* pins) : IMicroController(id), __mPins(pins) {
         _pRoot = this;
+    }
+
+    bool initialize() override {
+        auto numSuccesses = 0;
+        for (int i = 0; i < __mPins->size(); i++) {
+            numSuccesses += static_cast<int>(__mPins->at(i)->initialize());
+        }
+
+        return numSuccesses == __mPins->size();
     }
 
 protected:

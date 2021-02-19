@@ -1,14 +1,15 @@
 #pragma once
 
 #include <components/microcontroller/interfaces/factory.hpp>
+#include <components/microcontroller/microcontroller.hpp>
 
 class MicroControllerFactory : public IMicroControllerFactory {
 public:
-    std::unique_ptr<MicroController> create(const std::string& id,
-                                            const std::initializer_list<int>& digitalOutputPinsNums,
-                                            const std::initializer_list<int>& digitalInputPinNums,
-                                            const std::initializer_list<int>& analogOutputPinNums,
-                                            const std::initializer_list<int>& analogInputPinNums) override {
+    std::unique_ptr<IMicroController> create(const std::string& id,
+                                             const std::initializer_list<int>& digitalOutputPinsNums,
+                                             const std::initializer_list<int>& digitalInputPinNums,
+                                             const std::initializer_list<int>& analogOutputPinNums,
+                                             const std::initializer_list<int>& analogInputPinNums) override {
         std::vector<std::vector<std::unique_ptr<typename TerminalPinSet::value_type>>> vec;
         vec.reserve(static_cast<int>(PinMode::Count));
         vec.emplace_back(__mTerminalPinSetFactory.createPinVector(digitalOutputPinsNums, PinMode::DigitalOutput));
