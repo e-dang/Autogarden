@@ -23,12 +23,11 @@ public:
     }
 
     bool shiftOut(const int& binary) override {
-        auto dataPin  = __pDataPin->getOutputPin();
-        auto clockPin = __pClockPin->getOutputPin();
-        if (dataPin == nullptr || clockPin == nullptr)
+        if (!__pDataPin->isConnected() || !__pClockPin->isConnected())
             return false;
 
-        ::shiftOut(dataPin->getPinNum(), clockPin->getPinNum(), __mDirection, binary);
+        ::shiftOut(__pDataPin->getOutputPin()->getPinNum(), __pClockPin->getOutputPin()->getPinNum(), __mDirection,
+                   binary);
         return true;
     }
 

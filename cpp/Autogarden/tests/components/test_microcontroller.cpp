@@ -11,11 +11,11 @@ class MicroControllerTest : public Test {
 protected:
     std::string id    = "controller";
     const int numPins = 8;
-    std::vector<MockTerminalPin> mockPins;
-    MockTerminalPinSet* mockPinSet;
+    std::vector<NiceMock<MockTerminalPin>> mockPins;
+    NiceMock<MockTerminalPinSet>* mockPinSet;
     std::unique_ptr<MicroController> controller;
 
-    MicroControllerTest() : mockPins(numPins), mockPinSet(new MockTerminalPinSet()) {
+    MicroControllerTest() : mockPins(numPins), mockPinSet(new NiceMock<MockTerminalPinSet>()) {
         for (int i = 0; i < numPins; i++) {
             auto pin = &mockPins[i];
             ON_CALL(*mockPinSet, at(i)).WillByDefault(Return(pin));
