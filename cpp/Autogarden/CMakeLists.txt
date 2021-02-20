@@ -27,6 +27,7 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/components/test_translation_policy.cpp
                                 tests/components/test_shift_register_input_pinset.cpp
                                 tests/components/test_moisture_sensor.cpp
+                                tests/components/test_pump.cpp
                                 tests/test_usage.cpp
 )
 
