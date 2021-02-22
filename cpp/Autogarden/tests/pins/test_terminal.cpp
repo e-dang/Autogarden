@@ -4,6 +4,7 @@
 #include <memory>
 #include <mock_arduino.hpp>
 #include <mock_signal.hpp>
+#include <pin_test_suite.hpp>
 #include <pins/terminal.hpp>
 
 using namespace ::testing;
@@ -26,6 +27,8 @@ protected:
         TerminalPinTest::SetUp();
     }
 };
+
+INSTANTIATE_TYPED_TEST_SUITE_P(TerminalPin, PinTestSuite, TerminalPin);
 
 TEST_P(ParametrizedTerminalPinTest, initialize_calls_pinMode_on_arduino_interface) {
     MockArduino mockArduino;
@@ -50,23 +53,11 @@ TEST_P(ParametrizedTerminalPinTest, processSignal_calls_execute_on_signal_and_re
     EXPECT_TRUE(pin->processSignal(signal));
 }
 
-TEST_P(ParametrizedTerminalPinTest, getMode_returns_mode) {
-    EXPECT_EQ(pin->getMode(), mode);
-}
-
-TEST_F(TerminalPinTest, isConnected_is_initially_false) {
-    EXPECT_FALSE(pin->isConnected());
-}
-
 TEST_F(TerminalPinTest, connect_and_disconnect_toggle_isConnected) {
     pin->connect();
     EXPECT_TRUE(pin->isConnected());
     pin->disconnect();
     EXPECT_FALSE(pin->isConnected());
-}
-
-TEST_F(TerminalPinTest, getPinNum_returns_pinNum) {
-    EXPECT_EQ(pin->getPinNum(), pinNum);
 }
 
 INSTANTIATE_TEST_SUITE_P(TerminalPinTest, ParametrizedTerminalPinTest,

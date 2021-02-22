@@ -4,6 +4,7 @@
 #include <memory>
 #include <mock_output.hpp>
 #include <mock_signal.hpp>
+#include <pin_test_suite.hpp>
 #include <pins/logic_input.hpp>
 
 using namespace ::testing;
@@ -26,6 +27,8 @@ protected:
         LogicInputPinTest::SetUp();
     }
 };
+
+INSTANTIATE_TYPED_TEST_SUITE_P(LogicInput, PinTestSuite, LogicInputPin);
 
 TEST_P(ParametrizedLogicInputPinTest,
        connect_saves_output_pin_to_instance_which_processSignal_then_calls_processSignal_on_with_signal) {
@@ -63,14 +66,6 @@ TEST_F(LogicInputPinTest, connect_returns_false_when_output_pin_is_of_different_
 
     EXPECT_FALSE(pin->connect(&mockOutputPin));
     EXPECT_FALSE(pin->isConnected());
-}
-
-TEST_P(ParametrizedLogicInputPinTest, getMode_returns_mode) {
-    EXPECT_EQ(pin->getMode(), mode);
-}
-
-TEST_F(LogicInputPinTest, getPinNum_returns_pinNum) {
-    EXPECT_EQ(pin->getPinNum(), pinNum);
 }
 
 TEST_F(LogicInputPinTest, output_pin_is_initially_a_nullptr) {

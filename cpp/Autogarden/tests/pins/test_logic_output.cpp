@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <mock_signal.hpp>
+#include <pin_test_suite.hpp>
 #include <pins/logic_output.hpp>
 
 using namespace ::testing;
@@ -26,6 +27,8 @@ protected:
     }
 };
 
+INSTANTIATE_TYPED_TEST_SUITE_P(LogicOutputPin, PinTestSuite, LogicOutputPin);
+
 TEST_P(ParametrizedLogicOutputPinTest, processSignal_saves_signal_to_instance_and_is_returned_by_popSignal) {
     auto signal = std::make_shared<MockSignal>();
 
@@ -48,23 +51,11 @@ TEST_P(ParametrizedLogicOutputPinTest, popSignal_removes_signal_from_instance) {
     EXPECT_FALSE(pin->hasSignal());
 }
 
-TEST_P(ParametrizedLogicOutputPinTest, getMode_returns_mode) {
-    EXPECT_EQ(pin->getMode(), mode);
-}
-
-TEST_F(LogicOutputPinTest, isConnected_is_initially_false) {
-    EXPECT_FALSE(pin->isConnected());
-}
-
 TEST_F(LogicOutputPinTest, connect_and_disconnect_toggle_isConnected) {
     pin->connect();
     EXPECT_TRUE(pin->isConnected());
     pin->disconnect();
     EXPECT_FALSE(pin->isConnected());
-}
-
-TEST_F(LogicOutputPinTest, getPinNum_returns_pinNum) {
-    EXPECT_EQ(pin->getPinNum(), pinNum);
 }
 
 TEST_F(LogicOutputPinTest, getSignalValue_returns_the_value_in_the_contained_signal) {
