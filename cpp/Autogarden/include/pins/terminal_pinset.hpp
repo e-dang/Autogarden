@@ -5,8 +5,6 @@
 
 class TerminalPinSet : public ITerminalPinSet, public OutputPinSet<std::unique_ptr<ITerminalPin>> {
 public:
-    typedef ITerminalPin value_type;
-
     TerminalPinSet(std::vector<std::unique_ptr<ITerminalPin>>&& pins) :
         OutputPinSet<std::unique_ptr<ITerminalPin>>(std::move(pins)) {}
 

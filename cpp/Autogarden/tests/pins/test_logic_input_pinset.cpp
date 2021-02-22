@@ -1,8 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <factories/pin_factory.hpp>
 #include <memory>
-#include <mock_logic_input.hpp>
 #include <mock_signal.hpp>
 #include <pins/logic_input_pinset.hpp>
 
@@ -11,16 +11,15 @@ using namespace ::testing;
 class LogicInputPinSetTest : public Test {
 protected:
     int size = 5;
+    PinMockFactory factory;
     std::vector<MockLogicInputPin*> mockPins;
     std::vector<std::unique_ptr<ILogicInputPin>> tmpMockPins;
     std::unique_ptr<LogicInputPinSet> pinSet;
 
     void SetUp() {
-        for (int i = 0; i < size; i++) {
-            mockPins.push_back(new MockLogicInputPin());
-            tmpMockPins.emplace_back(mockPins[i]);
-        }
-        pinSet = std::make_unique<LogicInputPinSet>(std::move(tmpMockPins));
+        tmpMockPins = factory.createGenericPinVec<ILogicInputPin, MockLogicInputPin>(size);
+        mockPins    = factory.getMockPtrs<MockLogicInputPin>(tmpMockPins);
+        pinSet      = std::make_unique<LogicInputPinSet>(std::move(tmpMockPins));
     }
 };
 

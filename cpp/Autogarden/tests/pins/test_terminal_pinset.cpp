@@ -1,30 +1,22 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <factories/pin_factory.hpp>
 #include <iterable_test_suite.hpp>
-#include <mock_terminal.hpp>
 #include <pins/terminal_pinset.hpp>
-
-using namespace ::testing;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(TerminalPinSet, PinSetTestSuite, TerminalPinSet);
 
 TEST(TerminalPinSetTest, merge) {
     const auto size = 5;
-    std::vector<MockTerminalPin*> mockPins1(size);
-    std::vector<std::unique_ptr<ITerminalPin>> pinPtrs1;
-    std::vector<MockTerminalPin*> mockPins2(size);
-    std::vector<std::unique_ptr<ITerminalPin>> pinPtrs2;
+    PinMockFactory factory;
+    auto tmpPins1  = factory.createGenericPinVec<ITerminalPin, MockTerminalPin>(size);
+    auto mockPins1 = factory.getMockPtrs<MockTerminalPin>(tmpPins1);
+    auto tmpPins2  = factory.createGenericPinVec<ITerminalPin, MockTerminalPin>(size);
+    auto mockPins2 = factory.getMockPtrs<MockTerminalPin>(tmpPins2);
 
-    for (int i = 0; i < size; i++) {
-        mockPins1.push_back(new MockTerminalPin());
-        pinPtrs1.emplace_back(mockPins1[i]);
-
-        mockPins2.push_back(new MockTerminalPin());
-        pinPtrs2.emplace_back(mockPins2[i]);
-    }
-    std::unique_ptr<TerminalPinSet> pinSet1 = std::make_unique<TerminalPinSet>(std::move(pinPtrs1));
-    std::unique_ptr<TerminalPinSet> pinSet2 = std::make_unique<TerminalPinSet>(std::move(pinPtrs2));
+    std::unique_ptr<TerminalPinSet> pinSet1 = std::make_unique<TerminalPinSet>(std::move(tmpPins1));
+    std::unique_ptr<TerminalPinSet> pinSet2 = std::make_unique<TerminalPinSet>(std::move(tmpPins2));
 
     pinSet1->merge(std::move(pinSet2));
 
