@@ -41,3 +41,9 @@ void pinMode(const uint8_t& pin, const int& direction) {
         ::arduino->_pinMode(pin, direction);
     }
 }
+
+void delay(const uint32_t& time) {
+    if (::arduino != nullptr) {
+        ::arduino->_delay(time);
+    }
+}

@@ -12,4 +12,5 @@ public:
                 (const uint8_t& dataPin, const uint8_t& clockPin, const int& direction, const int& data),
                 (const, override));
     MOCK_METHOD(void, _pinMode, (const uint8_t& pin, const int& direction), (const, override));
+    MOCK_METHOD(void, _delay, (const uint32_t& time), (const, override));
 };
