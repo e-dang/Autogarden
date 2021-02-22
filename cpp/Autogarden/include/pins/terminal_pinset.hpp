@@ -13,4 +13,17 @@ public:
     ITerminalPin* at(const int& idx) override {
         return __mPins[idx].get();
     };
+
+    iterator begin() override {
+        return __mPins.begin();
+    }
+
+    iterator end() override {
+        return __mPins.end();
+    }
+
+    void merge(std::unique_ptr<ITerminalPinSet>&& terminalPins) override {
+        __mPins.reserve(size() + terminalPins->size());
+        std::move(terminalPins->begin(), terminalPins->end(), std::back_inserter(__mPins));
+    }
 };
