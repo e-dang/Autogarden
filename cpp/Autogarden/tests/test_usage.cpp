@@ -21,20 +21,17 @@ protected:
     int pin8                       = 8;
     int pin9                       = 9;
     const std::string controllerId = "controller";
-    MicroControllerFactory mcFactory;
     std::unique_ptr<IMicroController> controller;
 
     const std::string valveId = "valve";
     const int valveOnSig      = HIGH;
     const int valveOffSig     = LOW;
-    ValveFactory valveFactory;
     std::vector<std::unique_ptr<IValve>> valves;
 
     const std::string dMuxId = "dMux";
     const int numDMuxInputs  = 4;
     const int numDMuxOutputs = 16;
     const PinMode dMuxMode   = PinMode::DigitalOutput;
-    MultiplexerFactory muxFactory;
     std::unique_ptr<IMultiplexer> dMux;
 
     const std::string aMuxId = "aMux";
@@ -46,29 +43,29 @@ protected:
     const std::string regId = "reg";
     const int regNumOutputs = 8;
     const int regDirection  = MSBFIRST;
-    ShiftRegisterFactory regFactory;
     std::unique_ptr<IShiftRegister> reg;
 
     const std::string sensorId = "sensor";
     const float sensorScaler   = 512. / 1023.;
-    MoistureSensorFactory sensorFactory;
     std::vector<std::unique_ptr<IMoistureSensor>> sensors;
+
+    ComponentFactory factory;
 
     NiceMock<MockArduino> mockArduino;
 
-    ObjectWiringTest() {
-        controller =
-          mcFactory.create(controllerId, { pin0, pin1, pin2, pin3, pin4, pin5, pin6 }, {}, { pin7, pin8 }, { pin9 });
-        dMux = muxFactory.create(dMuxId, numDMuxInputs, numDMuxOutputs, dMuxMode);
-        aMux = muxFactory.create(aMuxId, numAMuxInputs, numAMuxOutputs, aMuxMode);
-        reg  = regFactory.create(regId, regNumOutputs, regDirection);
+    ObjectWiringTest() : factory(std::make_unique<SignalFactory>(), std::make_unique<PinFactory>()) {
+        controller = factory.createMicroController(controllerId, { pin0, pin1, pin2, pin3, pin4, pin5, pin6 }, {},
+                                                   { pin7, pin8 }, { pin9 });
+        dMux       = factory.createMultiplexer(dMuxId, numDMuxInputs, numDMuxOutputs, dMuxMode);
+        aMux       = factory.createMultiplexer(aMuxId, numAMuxInputs, numAMuxOutputs, aMuxMode);
+        reg        = factory.createShiftRegister(regId, regNumOutputs, regDirection);
 
         for (int i = 0; i < numDMuxOutputs; i++) {
-            valves.emplace_back(valveFactory.create(valveId + std::to_string(i), valveOnSig, valveOffSig));
+            valves.emplace_back(factory.createValve(valveId + std::to_string(i), valveOnSig, valveOffSig));
         }
 
         for (int i = 0; i < numAMuxOutputs; i++) {
-            sensors.emplace_back(sensorFactory.create(sensorId + std::to_string(i), sensorScaler));
+            sensors.emplace_back(factory.createMoistureSensor(sensorId + std::to_string(i), sensorScaler));
         }
     }
 };
