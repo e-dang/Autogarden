@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <component_test_suite.hpp>
 #include <components/pump/pump.hpp>
 #include <mock_logic_input.hpp>
 
@@ -28,6 +29,17 @@ protected:
         PumpTest::SetUp();
     }
 };
+
+class PumpFactory {
+public:
+    std::unique_ptr<Pump> create() {
+        return std::make_unique<Pump>(id, new MockLogicInputPin());
+    }
+
+    const std::string id = "testID";
+};
+
+INSTANTIATE_TYPED_TEST_SUITE_P(Pump, ComponentTestSuite, PumpFactory);
 
 TEST_F(PumpTest, start_calls_processSignal_on_pin) {
     EXPECT_CALL(*mockInputPin, processSignal(_));

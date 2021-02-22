@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <component_test_suite.hpp>
 #include <components/microcontroller/microcontroller.hpp>
 #include <mock_terminal.hpp>
 #include <mock_terminal_pinset.hpp>
@@ -26,25 +27,20 @@ protected:
     }
 };
 
+class MicroControllerFactory {
+public:
+    std::unique_ptr<MicroController> create() {
+        return std::make_unique<MicroController>(id, new MockTerminalPinSet());
+    }
+
+    const std::string id = "testID";
+};
+
+INSTANTIATE_TYPED_TEST_SUITE_P(MicroController, ComponentTestSuite, MicroControllerFactory);
+
 void AssertHasNoParent(const Component* obj) {
     EXPECT_FALSE(obj->hasParent());
     EXPECT_EQ(obj->getParent(), nullptr);
-}
-
-TEST_F(MicroControllerTest, getId) {
-    EXPECT_EQ(controller->getId(), id);
-}
-
-TEST_F(MicroControllerTest, controller_initially_has_no_children) {
-    EXPECT_EQ(controller->getNumChildren(), 0);
-}
-
-TEST_F(MicroControllerTest, controller_has_no_parent) {
-    AssertHasNoParent(controller.get());
-}
-
-TEST_F(MicroControllerTest, getChild_returns_nullptr_when_no_child_is_found) {
-    EXPECT_EQ(controller->getChild("dne"), nullptr);
 }
 
 TEST_F(MicroControllerTest, controller_cannot_be_child_of_another_component) {

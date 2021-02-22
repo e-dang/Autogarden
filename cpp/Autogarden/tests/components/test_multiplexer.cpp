@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <component_test_suite.hpp>
 #include <components/components.hpp>
 #include <mock_logic_input.hpp>
 #include <mock_logic_input_pinset.hpp>
@@ -28,6 +29,19 @@ protected:
         policy(new MockMultiplexerTranslationPolicy()),
         mux(new Multiplexer(id, inputPins, outputPins, sigPin, enablePin, policy)) {}
 };
+
+class MultiplexerFactory {
+public:
+    std::unique_ptr<Multiplexer> create() {
+        return std::make_unique<Multiplexer>(id, new MockLogicInputPinSet(), new MockLogicOutputPinSet(),
+                                             new MockLogicInputPin(), new MockLogicInputPin(),
+                                             new MockMultiplexerTranslationPolicy());
+    }
+
+    const std::string id = "testID";
+};
+
+INSTANTIATE_TYPED_TEST_SUITE_P(Multiplexer, ComponentTestSuite, MultiplexerFactory);
 
 TEST_F(MultiplexerTest, enable_returns_true_when_processSignal_returns_true) {
     EXPECT_CALL(*enablePin, processSignal(_)).WillRepeatedly(Return(true));

@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <component_test_suite.hpp>
 #include <components/valve/valve.hpp>
 #include <mock_logic_input.hpp>
 
@@ -28,6 +29,17 @@ protected:
         ValveTest::SetUp();
     }
 };
+
+class ValveFactory {
+public:
+    std::unique_ptr<Valve> create() {
+        return std::make_unique<Valve>(id, new MockLogicInputPin());
+    }
+
+    const std::string id = "testID";
+};
+
+INSTANTIATE_TYPED_TEST_SUITE_P(Valve, ComponentTestSuite, ValveFactory);
 
 TEST_F(ValveTest, open_calls_processSignal_on_pin) {
     EXPECT_CALL(*mockInputPin, processSignal(_));

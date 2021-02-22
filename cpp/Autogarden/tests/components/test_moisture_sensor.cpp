@@ -1,6 +1,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <component_test_suite.hpp>
 #include <components/components.hpp>
 #include <mock_arduino.hpp>
 #include <mock_logic_input.hpp>
@@ -27,6 +28,17 @@ protected:
         sensor = std::make_unique<MoistureSensor>(id, nullptr, scaler);
     }
 };
+
+class MoistureSensorFactory {
+public:
+    std::unique_ptr<MoistureSensor> create() {
+        return std::make_unique<MoistureSensor>(id, new MockLogicInputPin());
+    }
+
+    const std::string id = "testID";
+};
+
+INSTANTIATE_TYPED_TEST_SUITE_P(MoistureSensor, ComponentTestSuite, MoistureSensorFactory);
 
 TEST_F(MoistureSensorTest, readRaw_returns_error_num_if_input_pin_is_null) {
     useNullInputPin();
