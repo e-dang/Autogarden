@@ -1,12 +1,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <component_test_suite.hpp>
 #include <components/components.hpp>
-#include <mock_arduino.hpp>
-#include <mock_logic_input.hpp>
-#include <mock_signal.hpp>
-#include <mock_terminal.hpp>
+#include <mocks/mock_arduino.hpp>
+#include <mocks/mock_logic_input.hpp>
+#include <mocks/mock_signal.hpp>
+#include <mocks/mock_terminal.hpp>
+#include <suites/component_test_suite.hpp>
 
 using namespace ::testing;
 using ::testing::_;

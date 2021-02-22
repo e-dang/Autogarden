@@ -1,10 +1,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <memory>
-#include <mock_signal.hpp>
-#include <pin_test_suite.hpp>
+#include <mocks/mock_signal.hpp>
 #include <pins/logic_output.hpp>
+#include <suites/pin_test_suite.hpp>
 
 using namespace ::testing;
 

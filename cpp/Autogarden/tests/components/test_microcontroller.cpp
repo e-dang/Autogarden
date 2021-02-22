@@ -1,10 +1,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <component_test_suite.hpp>
 #include <components/microcontroller/microcontroller.hpp>
-#include <mock_terminal.hpp>
-#include <mock_terminal_pinset.hpp>
+#include <mocks/mock_terminal.hpp>
+#include <mocks/mock_terminal_pinset.hpp>
+#include <suites/component_test_suite.hpp>
 
 using namespace ::testing;
 

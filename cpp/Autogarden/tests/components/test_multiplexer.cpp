@@ -1,12 +1,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <component_test_suite.hpp>
 #include <components/components.hpp>
-#include <mock_logic_input.hpp>
-#include <mock_logic_input_pinset.hpp>
-#include <mock_logic_output_pinset.hpp>
-#include <mock_translation_policy.hpp>
+#include <mocks/mock_logic_input.hpp>
+#include <mocks/mock_logic_input_pinset.hpp>
+#include <mocks/mock_logic_output_pinset.hpp>
+#include <mocks/mock_translation_policy.hpp>
+#include <suites/component_test_suite.hpp>
 
 using namespace ::testing;
 using ::testing::_;

@@ -2,9 +2,9 @@
 #include <gtest/gtest.h>
 
 #include <components/components.hpp>
-#include <mock_arduino.hpp>
-#include <mock_logic_input.hpp>
-#include <mock_output.hpp>
+#include <mocks/mock_arduino.hpp>
+#include <mocks/mock_logic_input.hpp>
+#include <mocks/mock_output.hpp>
 
 using namespace ::testing;
 using ::testing::_;

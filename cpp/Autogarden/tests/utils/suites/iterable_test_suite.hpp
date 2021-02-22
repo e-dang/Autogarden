@@ -3,7 +3,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <mock_terminal.hpp>
+#include <mocks/mock_terminal.hpp>
 #include <pins/terminal_pinset.hpp>
 
 using namespace ::testing;

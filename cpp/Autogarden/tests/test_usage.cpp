@@ -1,10 +1,8 @@
-#include <Arduino.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <components/components.hpp>
-
-#include "mock_arduino.hpp"
+#include <mocks/mock_arduino.hpp>
 
 using namespace ::testing;
 

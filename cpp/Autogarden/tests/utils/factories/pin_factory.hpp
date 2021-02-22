@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mock_logic_input.hpp>
-#include <mock_logic_input_pinset.hpp>
-#include <mock_logic_output.hpp>
-#include <mock_logic_output_pinset.hpp>
-#include <mock_output.hpp>
-#include <mock_terminal.hpp>
-#include <mock_terminal_pinset.hpp>
+#include <mocks/mock_logic_input.hpp>
+#include <mocks/mock_logic_input_pinset.hpp>
+#include <mocks/mock_logic_output.hpp>
+#include <mocks/mock_logic_output_pinset.hpp>
+#include <mocks/mock_output.hpp>
+#include <mocks/mock_terminal.hpp>
+#include <mocks/mock_terminal_pinset.hpp>
 
 class PinMockFactory {
 public:

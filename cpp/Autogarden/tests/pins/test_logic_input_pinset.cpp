@@ -2,8 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <factories/pin_factory.hpp>
-#include <memory>
-#include <mock_signal.hpp>
+#include <mocks/mock_signal.hpp>
 #include <pins/logic_input_pinset.hpp>
 
 using namespace ::testing;

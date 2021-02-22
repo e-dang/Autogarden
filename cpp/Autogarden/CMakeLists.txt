@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 find_package(GTest REQUIRED CONFIG)
 
-include_directories(include tests/mocks tests/suites tests/utils)
+include_directories(include tests/utils)
 
 add_executable(test_autogarden  src/Arduino.cpp
                                 tests/pins/test_terminal.cpp

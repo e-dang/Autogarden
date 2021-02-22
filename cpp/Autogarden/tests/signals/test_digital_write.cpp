@@ -1,8 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <mock_arduino.hpp>
-#include <mock_terminal.hpp>
+#include <mocks/mock_arduino.hpp>
+#include <mocks/mock_terminal.hpp>
 #include <signals/digital_write.hpp>
 
 using namespace ::testing;

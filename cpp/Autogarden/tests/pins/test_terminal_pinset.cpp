@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 
 #include <factories/pin_factory.hpp>
-#include <iterable_test_suite.hpp>
 #include <pins/terminal_pinset.hpp>
+#include <suites/iterable_test_suite.hpp>
 
 INSTANTIATE_TYPED_TEST_SUITE_P(TerminalPinSet, PinSetTestSuite, TerminalPinSet);
 
