@@ -48,10 +48,10 @@ TEST_F(MicroControllerTest, getChild_returns_nullptr_when_no_child_is_found) {
 }
 
 TEST_F(MicroControllerTest, controller_cannot_be_child_of_another_component) {
-    MicroController otherController("otherController", new MockTerminalPinSet());
+    auto otherController = std::make_shared<MicroController>("otherController", new MockTerminalPinSet());
 
-    EXPECT_FALSE(controller->appendChild(&otherController));
-    AssertHasNoParent(&otherController);
+    EXPECT_FALSE(controller->appendChild(otherController));
+    AssertHasNoParent(otherController.get());
 }
 
 TEST_F(MicroControllerTest, controller_is_root_component) {

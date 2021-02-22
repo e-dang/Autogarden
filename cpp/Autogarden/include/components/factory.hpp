@@ -19,17 +19,17 @@ public:
       const std::initializer_list<int>& digitalInputPinNums, const std::initializer_list<int>& analogOutputPinNums,
       const std::initializer_list<int>& analogInputPinNums) = 0;
 
-    virtual std::unique_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
+    virtual std::shared_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
                                                                 const int& direction) = 0;
 
-    virtual std::unique_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
+    virtual std::shared_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
                                                             const int& numOutputs, const PinMode& sigMode) = 0;
 
-    virtual std::unique_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) = 0;
+    virtual std::shared_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) = 0;
 
-    virtual std::unique_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) = 0;
+    virtual std::shared_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) = 0;
 
-    virtual std::unique_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) = 0;
+    virtual std::shared_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) = 0;
 };
 
 class ComponentFactory : public IComponentFactory {
@@ -52,7 +52,7 @@ public:
         return std::make_unique<MicroController>(id, pinSet1.release());
     }
 
-    std::unique_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
+    std::shared_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
                                                         const int& direction) override {
         auto logicPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
         auto dataPin  = __pPinFactory->createLogicInputPin(1, PinMode::DigitalOutput);
@@ -61,33 +61,33 @@ public:
           new ShiftRegisterInputPinSet(logicPin.release(), dataPin.release(), clockPin.release(), direction);
 
         auto outputPinSet = __pPinFactory->createLogicOutputPinSet(numOutputPins, PinMode::DigitalOutput);
-        return std::make_unique<ShiftRegister>(id, inputPinSet, outputPinSet.release());
+        return std::make_shared<ShiftRegister>(id, inputPinSet, outputPinSet.release());
     }
 
-    std::unique_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
+    std::shared_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
                                                     const int& numOutputs, const PinMode& sigMode) override {
         auto sigPin     = __pPinFactory->createLogicInputPin(1, sigMode);
         auto enablePin  = __pPinFactory->createLogicInputPin(1, PinMode::DigitalOutput);
         auto inputPins  = __pPinFactory->createLogicInputPinSet(numLogicInputs, PinMode::DigitalOutput);
         auto outputPins = __pPinFactory->createLogicOutputPinSet(numOutputs, sigMode);
         auto policy     = new MultiplexerTranslationPolicy();
-        return std::make_unique<Multiplexer>(id, inputPins.release(), outputPins.release(), sigPin.release(),
+        return std::make_shared<Multiplexer>(id, inputPins.release(), outputPins.release(), sigPin.release(),
                                              enablePin.release(), policy);
     }
 
-    std::unique_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) override {
+    std::shared_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
-        return std::make_unique<Valve>(id, inputPin.release(), onValue, offValue);
+        return std::make_shared<Valve>(id, inputPin.release(), onValue, offValue);
     }
 
-    std::unique_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) override {
+    std::shared_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::AnalogInput);
-        return std::make_unique<MoistureSensor>(id, inputPin.release(), scaler);
+        return std::make_shared<MoistureSensor>(id, inputPin.release(), scaler);
     }
 
-    std::unique_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) override {
+    std::shared_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
-        return std::make_unique<Pump>(id, inputPin.release(), onValue, offValue);
+        return std::make_shared<Pump>(id, inputPin.release(), onValue, offValue);
     }
 
 private:

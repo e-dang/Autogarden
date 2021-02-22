@@ -26,28 +26,28 @@ protected:
     const std::string valveId = "valve";
     const int valveOnSig      = HIGH;
     const int valveOffSig     = LOW;
-    std::vector<std::unique_ptr<IValve>> valves;
+    std::vector<std::shared_ptr<IValve>> valves;
 
     const std::string dMuxId = "dMux";
     const int numDMuxInputs  = 4;
     const int numDMuxOutputs = 16;
     const PinMode dMuxMode   = PinMode::DigitalOutput;
-    std::unique_ptr<IMultiplexer> dMux;
+    std::shared_ptr<IMultiplexer> dMux;
 
     const std::string aMuxId = "aMux";
     const int numAMuxInputs  = 4;
     const int numAMuxOutputs = 16;
     const PinMode aMuxMode   = PinMode::AnalogInput;
-    std::unique_ptr<IMultiplexer> aMux;
+    std::shared_ptr<IMultiplexer> aMux;
 
     const std::string regId = "reg";
     const int regNumOutputs = 8;
     const int regDirection  = MSBFIRST;
-    std::unique_ptr<IShiftRegister> reg;
+    std::shared_ptr<IShiftRegister> reg;
 
     const std::string sensorId = "sensor";
     const float sensorScaler   = 512. / 1023.;
-    std::vector<std::unique_ptr<IMoistureSensor>> sensors;
+    std::vector<std::shared_ptr<IMoistureSensor>> sensors;
 
     ComponentFactory factory;
 
@@ -81,11 +81,11 @@ TEST_F(ObjectWiringTest, valve_attached_to_microcontroller) {
     setMockArduino(&mockArduino);
     auto& valve = valves.back();
 
+    ASSERT_TRUE(controller->appendChild(valve));
+    assertWiringIsCorrect(controller.get(), valve.get());
+
     EXPECT_CALL(mockArduino, _digitalWrite(pin0, valveOnSig));
     EXPECT_CALL(mockArduino, _digitalWrite(pin0, valveOffSig));
-
-    ASSERT_TRUE(controller->appendChild(valve.get()));
-    assertWiringIsCorrect(controller.get(), valve.get());
 
     ASSERT_TRUE(valve->open());
     ASSERT_TRUE(valve->close());
@@ -97,10 +97,11 @@ TEST_F(ObjectWiringTest, moisture_sensor_to_microcontroller) {
     const int value = 456;
     auto& sensor    = sensors.back();
     setMockArduino(&mockArduino);
-    EXPECT_CALL(mockArduino, _analogRead(pin9)).Times(2).WillRepeatedly(Return(value));
 
-    ASSERT_TRUE(controller->appendChild(sensor.get()));
+    ASSERT_TRUE(controller->appendChild(sensor));
     assertWiringIsCorrect(controller.get(), sensor.get());
+
+    EXPECT_CALL(mockArduino, _analogRead(pin9)).Times(2).WillRepeatedly(Return(value));
 
     EXPECT_EQ(sensor->readRaw(), value);
     EXPECT_FLOAT_EQ(sensor->readScaled(), static_cast<float>(value) * sensorScaler);
@@ -112,10 +113,10 @@ TEST_F(ObjectWiringTest, microcontroller_to_multiplexer_to_valve) {
     setMockArduino(&mockArduino);
     auto& valve = valves.back();
 
-    ASSERT_TRUE(controller->appendChild(dMux.get()));
+    ASSERT_TRUE(controller->appendChild(dMux));
     assertWiringIsCorrect(controller.get(), dMux.get());
 
-    ASSERT_TRUE(dMux->appendChild(valve.get()));
+    ASSERT_TRUE(dMux->appendChild(valve));
     assertWiringIsCorrect(dMux.get(), valve.get());
 
     // mux transferring signal from valve
@@ -142,13 +143,13 @@ TEST_F(ObjectWiringTest, microcontroller_to_shift_register_to_multiplexer_to_val
     setMockArduino(&mockArduino);
     auto& valve = valves.back();
 
-    ASSERT_TRUE(controller->appendChild(reg.get()));
+    ASSERT_TRUE(controller->appendChild(reg));
     assertWiringIsCorrect(controller.get(), reg.get());
 
-    ASSERT_TRUE(reg->appendChild(dMux.get()));
+    ASSERT_TRUE(reg->appendChild(dMux));
     assertWiringIsCorrect(reg.get(), dMux.get());
 
-    ASSERT_TRUE(dMux->appendChild(valve.get()));
+    ASSERT_TRUE(dMux->appendChild(valve));
     assertWiringIsCorrect(dMux.get(), valve.get());
 
     // valve on / off through mux sig pin
@@ -179,22 +180,22 @@ TEST_F(ObjectWiringTest, microcontroller_to_shift_register_to_two_multiplexers_t
     const auto numValves  = valves.size();
     const auto numSensors = sensors.size();
 
-    ASSERT_TRUE(controller->appendChild(reg.get()));
+    ASSERT_TRUE(controller->appendChild(reg));
     assertWiringIsCorrect(controller.get(), reg.get());
 
-    ASSERT_TRUE(reg->appendChild(dMux.get()));
+    ASSERT_TRUE(reg->appendChild(dMux));
     assertWiringIsCorrect(reg.get(), dMux.get());
 
-    ASSERT_TRUE(reg->appendChild(aMux.get()));
+    ASSERT_TRUE(reg->appendChild(aMux));
     assertWiringIsCorrect(reg.get(), aMux.get());
 
     for (auto& valve : valves) {
-        ASSERT_TRUE(dMux->appendChild(valve.get()));
+        ASSERT_TRUE(dMux->appendChild(valve));
         assertWiringIsCorrect(dMux.get(), valve.get());
     }
 
     for (auto& sensor : sensors) {
-        ASSERT_TRUE(aMux->appendChild(sensor.get()));
+        ASSERT_TRUE(aMux->appendChild(sensor));
         assertWiringIsCorrect(aMux.get(), sensor.get());
     }
 

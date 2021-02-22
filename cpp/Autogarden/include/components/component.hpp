@@ -9,7 +9,7 @@ class IComponent {
 public:
     virtual ~IComponent() = default;
 
-    virtual bool appendChild(Component* component) = 0;
+    virtual bool appendChild(std::shared_ptr<Component> component) = 0;
 
     virtual Component* getChild(const std::string& id) = 0;
 
@@ -32,7 +32,7 @@ public:
 
     virtual ~Component() = default;
 
-    bool appendChild(Component* component) override {
+    bool appendChild(std::shared_ptr<Component> component) override {
         if (component != nullptr && component->_setInputPins(this)) {
             __mChildren.push_back(component);
             component->_pParent = this;
@@ -102,7 +102,7 @@ protected:
 protected:
     Component* _pRoot;
     Component* _pParent;
-    std::vector<Component*> __mChildren;
+    std::vector<std::shared_ptr<Component>> __mChildren;
 
 private:
     std::string __mId;
