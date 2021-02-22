@@ -4,7 +4,7 @@
 
 class IMicroController : public Component {
 public:
-    IMicroController(const std::string& id) : Component(id) {}
+    IMicroController(const String& id) : Component(id) {}
 
     virtual ~IMicroController() = default;
 

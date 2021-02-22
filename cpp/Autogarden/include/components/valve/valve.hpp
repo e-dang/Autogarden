@@ -4,7 +4,7 @@
 
 class Valve : public IValve {
 public:
-    Valve(const std::string& id, ILogicInputPin* inputPin, const int& onValue = HIGH, const int& offValue = LOW) :
+    Valve(const String& id, ILogicInputPin* inputPin, const int& onValue = HIGH, const int& offValue = LOW) :
         IValve(id, inputPin, onValue, offValue) {}
 
     bool open() override {

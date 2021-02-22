@@ -4,7 +4,7 @@
 
 class MoistureSensor : public IMoistureSensor {
 public:
-    MoistureSensor(const std::string& id, ILogicInputPin* inputPin, const float& scaler = 0.) :
+    MoistureSensor(const String& id, ILogicInputPin* inputPin, const float& scaler = 0.) :
         IMoistureSensor(id), __pPin(inputPin), __mScaler(scaler) {}
 
     ~MoistureSensor() = default;

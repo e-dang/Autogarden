@@ -4,7 +4,7 @@
 
 class IMoistureSensor : public Component {
 public:
-    IMoistureSensor(const std::string& id) : Component(id) {}
+    IMoistureSensor(const String& id) : Component(id) {}
 
     virtual ~IMoistureSensor() = default;
 

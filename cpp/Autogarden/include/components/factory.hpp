@@ -15,21 +15,21 @@ public:
     virtual ~IComponentFactory() = default;
 
     virtual std::unique_ptr<IMicroController> createMicroController(
-      const std::string& id, const std::initializer_list<int>& digitalOutputPinsNums,
+      const String& id, const std::initializer_list<int>& digitalOutputPinsNums,
       const std::initializer_list<int>& digitalInputPinNums, const std::initializer_list<int>& analogOutputPinNums,
       const std::initializer_list<int>& analogInputPinNums) = 0;
 
-    virtual std::shared_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
+    virtual std::shared_ptr<IShiftRegister> createShiftRegister(const String& id, const int& numOutputPins,
                                                                 const int& direction) = 0;
 
-    virtual std::shared_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
+    virtual std::shared_ptr<IMultiplexer> createMultiplexer(const String& id, const int& numLogicInputs,
                                                             const int& numOutputs, const PinMode& sigMode) = 0;
 
-    virtual std::shared_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) = 0;
+    virtual std::shared_ptr<IValve> createValve(const String& id, const int& onValue, const int& offValue) = 0;
 
-    virtual std::shared_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) = 0;
+    virtual std::shared_ptr<IMoistureSensor> createMoistureSensor(const String& id, const float& scaler) = 0;
 
-    virtual std::shared_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) = 0;
+    virtual std::shared_ptr<IPump> createPump(const String& id, const int& onValue, const int& offValue) = 0;
 };
 
 class ComponentFactory : public IComponentFactory {
@@ -38,7 +38,7 @@ public:
         __pSignalFactory(std::move(signalFactory)), __pPinFactory(std::move(pinFactory)) {}
 
     std::unique_ptr<IMicroController> createMicroController(
-      const std::string& id, const std::initializer_list<int>& digitalOutputPinsNums,
+      const String& id, const std::initializer_list<int>& digitalOutputPinsNums,
       const std::initializer_list<int>& digitalInputPinNums, const std::initializer_list<int>& analogOutputPinNums,
       const std::initializer_list<int>& analogInputPinNums) override {
         auto pinSet1 = __pPinFactory->createTerminalPinSet(digitalOutputPinsNums, PinMode::DigitalOutput);
@@ -52,7 +52,7 @@ public:
         return std::make_unique<MicroController>(id, pinSet1.release());
     }
 
-    std::shared_ptr<IShiftRegister> createShiftRegister(const std::string& id, const int& numOutputPins,
+    std::shared_ptr<IShiftRegister> createShiftRegister(const String& id, const int& numOutputPins,
                                                         const int& direction) override {
         auto logicPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
         auto dataPin  = __pPinFactory->createLogicInputPin(1, PinMode::DigitalOutput);
@@ -64,8 +64,8 @@ public:
         return std::make_shared<ShiftRegister>(id, inputPinSet, outputPinSet.release());
     }
 
-    std::shared_ptr<IMultiplexer> createMultiplexer(const std::string& id, const int& numLogicInputs,
-                                                    const int& numOutputs, const PinMode& sigMode) override {
+    std::shared_ptr<IMultiplexer> createMultiplexer(const String& id, const int& numLogicInputs, const int& numOutputs,
+                                                    const PinMode& sigMode) override {
         auto sigPin     = __pPinFactory->createLogicInputPin(1, sigMode);
         auto enablePin  = __pPinFactory->createLogicInputPin(1, PinMode::DigitalOutput);
         auto inputPins  = __pPinFactory->createLogicInputPinSet(numLogicInputs, PinMode::DigitalOutput);
@@ -75,17 +75,17 @@ public:
                                              enablePin.release(), policy);
     }
 
-    std::shared_ptr<IValve> createValve(const std::string& id, const int& onValue, const int& offValue) override {
+    std::shared_ptr<IValve> createValve(const String& id, const int& onValue, const int& offValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
         return std::make_shared<Valve>(id, inputPin.release(), onValue, offValue);
     }
 
-    std::shared_ptr<IMoistureSensor> createMoistureSensor(const std::string& id, const float& scaler) override {
+    std::shared_ptr<IMoistureSensor> createMoistureSensor(const String& id, const float& scaler) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::AnalogInput);
         return std::make_shared<MoistureSensor>(id, inputPin.release(), scaler);
     }
 
-    std::shared_ptr<IPump> createPump(const std::string& id, const int& onValue, const int& offValue) override {
+    std::shared_ptr<IPump> createPump(const String& id, const int& onValue, const int& offValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
         return std::make_shared<Pump>(id, inputPin.release(), onValue, offValue);
     }

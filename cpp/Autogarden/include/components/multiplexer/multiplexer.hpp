@@ -6,8 +6,8 @@
 
 class Multiplexer : public IMultiplexer {
 public:
-    Multiplexer(const std::string& id, ILogicInputPinSet* inputPins, ILogicOutputPinSet* outputPins,
-                ILogicInputPin* sigPin, ILogicInputPin* enablePin, IMultiplexerTranslationPolicy* policy) :
+    Multiplexer(const String& id, ILogicInputPinSet* inputPins, ILogicOutputPinSet* outputPins, ILogicInputPin* sigPin,
+                ILogicInputPin* enablePin, IMultiplexerTranslationPolicy* policy) :
         IMultiplexer(id),
         __pInputPins(inputPins),
         __pOutputPins(outputPins),

@@ -13,7 +13,7 @@ using ::testing::_;
 
 class MoistureSensorTest : public Test {
 protected:
-    const std::string id = "sensor";
+    const String id = "sensor";
     MockLogicInputPin* mockInputPin;
     const float scaler    = .782;
     const int errorSignal = INT32_MIN;
@@ -35,7 +35,7 @@ public:
         return std::make_unique<MoistureSensor>(id, new MockLogicInputPin());
     }
 
-    const std::string id = "testID";
+    const String id = "testID";
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(MoistureSensor, ComponentTestSuite, MoistureSensorFactory);

@@ -10,9 +10,9 @@ using ::testing::_;
 
 class ValveTest : public Test {
 protected:
-    std::string id = "valve";
-    int onSig      = HIGH;
-    int offSig     = LOW;
+    String id  = "valve";
+    int onSig  = HIGH;
+    int offSig = LOW;
     NiceMock<MockLogicInputPin>* mockInputPin;
     std::unique_ptr<Valve> valve;
 
@@ -36,7 +36,7 @@ public:
         return std::make_unique<Valve>(id, new MockLogicInputPin());
     }
 
-    const std::string id = "testID";
+    const String id = "testID";
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(Valve, ComponentTestSuite, ValveFactory);

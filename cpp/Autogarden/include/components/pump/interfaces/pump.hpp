@@ -4,7 +4,7 @@
 
 class IPump : public DiStateActuator {
 public:
-    IPump(const std::string& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
+    IPump(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         DiStateActuator(id, inputPin, onValue, offValue) {}
 
     virtual ~IPump() = default;

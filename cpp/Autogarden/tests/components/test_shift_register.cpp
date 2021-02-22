@@ -12,7 +12,7 @@ public:
         return std::make_unique<ShiftRegister>(id, new MockShiftRegisterInputPinSet(), new MockLogicOutputPinSet());
     }
 
-    const std::string id = "testID";
+    const String id = "testID";
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(ShiftRegister, ComponentTestSuite, ShiftRegisterFactory);

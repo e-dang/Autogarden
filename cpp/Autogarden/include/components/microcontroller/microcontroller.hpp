@@ -4,7 +4,7 @@
 
 class MicroController : public IMicroController {
 public:
-    MicroController(const std::string& id, ITerminalPinSet* pins) : IMicroController(id), __mPins(pins) {
+    MicroController(const String& id, ITerminalPinSet* pins) : IMicroController(id), __mPins(pins) {
         _pRoot = this;
     }
 

@@ -1,7 +1,8 @@
 #pragma once
 
+#include <Arduino.h>
+
 #include <pins/pins.hpp>
-#include <string>
 
 class Component;
 
@@ -11,13 +12,13 @@ public:
 
     virtual bool appendChild(std::shared_ptr<Component> component) = 0;
 
-    virtual Component* getChild(const std::string& id) = 0;
+    virtual Component* getChild(const String& id) = 0;
 
     virtual int getNumChildren() const = 0;
 
     virtual const Component* getParent() const = 0;
 
-    virtual std::string getId() const = 0;
+    virtual String getId() const = 0;
 
     virtual Component* getRoot() = 0;
 
@@ -28,7 +29,7 @@ public:
 
 class Component : public IComponent {
 public:
-    Component(const std::string& id) : __mId(id), _pRoot(nullptr), _pParent(nullptr), __mChildren(0) {}
+    Component(const String& id) : __mId(id), _pRoot(nullptr), _pParent(nullptr), __mChildren(0) {}
 
     virtual ~Component() = default;
 
@@ -43,7 +44,7 @@ public:
         return false;
     }
 
-    Component* getChild(const std::string& id) override {
+    Component* getChild(const String& id) override {
         if (getId() == id)
             return this;
 
@@ -68,7 +69,7 @@ public:
         return _pRoot;
     }
 
-    std::string getId() const override {
+    String getId() const override {
         return __mId;
     }
 
@@ -105,5 +106,5 @@ protected:
     std::vector<std::shared_ptr<Component>> __mChildren;
 
 private:
-    std::string __mId;
+    String __mId;
 };

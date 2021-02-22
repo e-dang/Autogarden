@@ -13,7 +13,7 @@ using ::testing::_;
 
 class MultiplexerTest : public Test {
 protected:
-    const std::string id = "mux";
+    const String id = "mux";
     MockLogicInputPinSet* inputPins;
     MockLogicOutputPinSet* outputPins;
     MockLogicInputPin* sigPin;
@@ -38,7 +38,7 @@ public:
                                              new MockMultiplexerTranslationPolicy());
     }
 
-    const std::string id = "testID";
+    const String id = "testID";
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(Multiplexer, ComponentTestSuite, MultiplexerFactory);

@@ -4,7 +4,7 @@
 
 class DiStateActuator : public Component {
 public:
-    DiStateActuator(const std::string& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
+    DiStateActuator(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         Component(id), __pPin(inputPin), _mOnValue(onValue), _mOffValue(offValue) {}
 
 protected:

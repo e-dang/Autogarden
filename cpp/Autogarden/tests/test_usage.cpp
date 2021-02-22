@@ -10,43 +10,43 @@ using namespace ::testing;
 
 class ObjectWiringTest : public Test {
 protected:
-    int pin0                       = 0;
-    int pin1                       = 1;
-    int pin2                       = 2;
-    int pin3                       = 3;
-    int pin4                       = 4;
-    int pin5                       = 5;
-    int pin6                       = 6;
-    int pin7                       = 7;
-    int pin8                       = 8;
-    int pin9                       = 9;
-    const std::string controllerId = "controller";
+    int pin0                  = 0;
+    int pin1                  = 1;
+    int pin2                  = 2;
+    int pin3                  = 3;
+    int pin4                  = 4;
+    int pin5                  = 5;
+    int pin6                  = 6;
+    int pin7                  = 7;
+    int pin8                  = 8;
+    int pin9                  = 9;
+    const String controllerId = "controller";
     std::unique_ptr<IMicroController> controller;
 
-    const std::string valveId = "valve";
-    const int valveOnSig      = HIGH;
-    const int valveOffSig     = LOW;
+    const String valveId  = "valve";
+    const int valveOnSig  = HIGH;
+    const int valveOffSig = LOW;
     std::vector<std::shared_ptr<IValve>> valves;
 
-    const std::string dMuxId = "dMux";
+    const String dMuxId      = "dMux";
     const int numDMuxInputs  = 4;
     const int numDMuxOutputs = 16;
     const PinMode dMuxMode   = PinMode::DigitalOutput;
     std::shared_ptr<IMultiplexer> dMux;
 
-    const std::string aMuxId = "aMux";
+    const String aMuxId      = "aMux";
     const int numAMuxInputs  = 4;
     const int numAMuxOutputs = 16;
     const PinMode aMuxMode   = PinMode::AnalogInput;
     std::shared_ptr<IMultiplexer> aMux;
 
-    const std::string regId = "reg";
+    const String regId      = "reg";
     const int regNumOutputs = 8;
     const int regDirection  = MSBFIRST;
     std::shared_ptr<IShiftRegister> reg;
 
-    const std::string sensorId = "sensor";
-    const float sensorScaler   = 512. / 1023.;
+    const String sensorId    = "sensor";
+    const float sensorScaler = 512. / 1023.;
     std::vector<std::shared_ptr<IMoistureSensor>> sensors;
 
     ComponentFactory factory;
@@ -61,11 +61,13 @@ protected:
         reg        = factory.createShiftRegister(regId, regNumOutputs, regDirection);
 
         for (int i = 0; i < numDMuxOutputs; i++) {
-            valves.emplace_back(factory.createValve(valveId + std::to_string(i), valveOnSig, valveOffSig));
+            auto id = valveId + String(i);
+            valves.emplace_back(factory.createValve(id, valveOnSig, valveOffSig));
         }
 
         for (int i = 0; i < numAMuxOutputs; i++) {
-            sensors.emplace_back(factory.createMoistureSensor(sensorId + std::to_string(i), sensorScaler));
+            auto id = sensorId + String(i);
+            sensors.emplace_back(factory.createMoistureSensor(id, sensorScaler));
         }
     }
 };

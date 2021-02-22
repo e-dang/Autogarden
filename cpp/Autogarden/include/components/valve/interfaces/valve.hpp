@@ -4,7 +4,7 @@
 
 class IValve : public DiStateActuator {
 public:
-    IValve(const std::string& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
+    IValve(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         DiStateActuator(id, inputPin, onValue, offValue) {}
 
     virtual ~IValve() = default;

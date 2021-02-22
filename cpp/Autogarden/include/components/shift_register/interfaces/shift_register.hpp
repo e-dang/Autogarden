@@ -4,7 +4,7 @@
 
 class IShiftRegister : public Component {
 public:
-    IShiftRegister(const std::string& id) : Component(id) {}
+    IShiftRegister(const String& id) : Component(id) {}
 
     virtual ~IShiftRegister() = default;
 };

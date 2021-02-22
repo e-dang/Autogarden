@@ -5,7 +5,7 @@
 
 class ShiftRegister : public IShiftRegister {
 public:
-    ShiftRegister(const std::string& id, IShiftRegisterInputPinSet* inputPins, ILogicOutputPinSet* outputPins) :
+    ShiftRegister(const String& id, IShiftRegisterInputPinSet* inputPins, ILogicOutputPinSet* outputPins) :
         IShiftRegister(id), __pInputPins(inputPins), __pOutputPins(outputPins) {}
 
 protected:

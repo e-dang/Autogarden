@@ -4,7 +4,7 @@
 
 class IMultiplexer : public Component {
 public:
-    IMultiplexer(const std::string& id) : Component(id) {}
+    IMultiplexer(const String& id) : Component(id) {}
 
     virtual ~IMultiplexer() = default;
 

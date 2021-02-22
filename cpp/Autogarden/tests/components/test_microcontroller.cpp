@@ -10,7 +10,7 @@ using namespace ::testing;
 
 class MicroControllerTest : public Test {
 protected:
-    std::string id    = "controller";
+    String id         = "controller";
     const int numPins = 8;
     std::vector<NiceMock<MockTerminalPin>> mockPins;
     NiceMock<MockTerminalPinSet>* mockPinSet;
@@ -33,7 +33,7 @@ public:
         return std::make_unique<MicroController>(id, new MockTerminalPinSet());
     }
 
-    const std::string id = "testID";
+    const String id = "testID";
 };
 
 INSTANTIATE_TYPED_TEST_SUITE_P(MicroController, ComponentTestSuite, MicroControllerFactory);

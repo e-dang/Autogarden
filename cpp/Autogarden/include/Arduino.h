@@ -2,6 +2,17 @@
 
 #include <stdint.h>
 
+#include <string>
+
+class String : public std::string {
+public:
+    String(int i) : std::string(std::to_string(i)) {}
+
+    String(const char* str) : std::string(str) {}
+
+    String(std::string& str) : std::string(str) {}
+};
+
 class ArduinoInterface {
 public:
     virtual ~ArduinoInterface() = default;
