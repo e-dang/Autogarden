@@ -27,4 +27,5 @@ test-cpp:
 test:
 	pytest -m unit && \
 	pytest -m integration && \
-	pytest -m functional
+	pytest -m functional && \
+	make test-cpp
