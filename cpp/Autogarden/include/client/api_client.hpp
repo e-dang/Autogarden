@@ -50,7 +50,7 @@ public:
     }
 
     String getInitializationUrl() const override {
-        return __mRootUrl + "api/micro-controller/";
+        return __mRootUrl + "api/garden/";
     }
 
 private:
