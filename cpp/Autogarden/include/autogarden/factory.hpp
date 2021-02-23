@@ -37,7 +37,7 @@ struct AutoGardenConfigs {
     int valveOffValue;
 
     ServerConfigs serverConfigs;
-    int millisecondDelay;
+    uint32_t millisecondDelay;
 
     String ssid;
     String password;
