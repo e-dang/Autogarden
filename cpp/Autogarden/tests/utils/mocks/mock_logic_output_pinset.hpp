@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gmock/gmock.h>
 
 #include <pins/interfaces/logic_output_pinset.hpp>
