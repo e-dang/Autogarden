@@ -6,6 +6,8 @@
 
 class String : public std::string {
 public:
+    String() : std::string() {}
+
     String(int i) : std::string(std::to_string(i)) {}
 
     String(const char* str) : std::string(str) {}

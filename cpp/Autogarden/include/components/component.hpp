@@ -29,6 +29,8 @@ public:
 
 class Component : public IComponent {
 public:
+    Component() = default;
+
     Component(const String& id) : __mId(id), _pRoot(nullptr), _pParent(nullptr), __mChildren(0) {}
 
     virtual ~Component() = default;

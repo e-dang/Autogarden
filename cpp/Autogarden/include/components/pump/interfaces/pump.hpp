@@ -4,6 +4,8 @@
 
 class IPump : public DiStateActuator {
 public:
+    IPump() = default;
+
     IPump(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         DiStateActuator(id, inputPin, onValue, offValue) {}
 

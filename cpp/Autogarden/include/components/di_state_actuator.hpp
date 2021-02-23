@@ -4,6 +4,8 @@
 
 class DiStateActuator : public Component {
 public:
+    DiStateActuator() = default;
+
     DiStateActuator(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         Component(id), __pPin(inputPin), _mOnValue(onValue), _mOffValue(offValue) {}
 

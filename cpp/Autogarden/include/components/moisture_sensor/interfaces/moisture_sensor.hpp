@@ -4,6 +4,8 @@
 
 class IMoistureSensor : public Component {
 public:
+    IMoistureSensor() = default;
+
     IMoistureSensor(const String& id) : Component(id) {}
 
     virtual ~IMoistureSensor() = default;

@@ -4,6 +4,8 @@
 
 class IValve : public DiStateActuator {
 public:
+    IValve() = default;
+
     IValve(const String& id, ILogicInputPin* inputPin, const int& onValue, const int& offValue) :
         DiStateActuator(id, inputPin, onValue, offValue) {}
 
