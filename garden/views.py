@@ -1,5 +1,7 @@
-from rest_framework.response import Response
+from django.shortcuts import render
+from django.views import View
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Garden
@@ -25,3 +27,9 @@ class WateringStationView(APIView):
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GardenListView(View):
+    def get(self, request):
+        gardens = Garden.objects.all()
+        return render(request, 'gardens.html', context={'gardens': gardens})
