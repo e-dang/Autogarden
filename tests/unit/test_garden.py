@@ -1,7 +1,7 @@
 import pytest
 from garden.models import (Garden, WateringStation,
                            _default_moisture_threshold,
-                           _default_watering_duration)
+                           _default_watering_duration, _default_garden_name)
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
 from rest_framework.serializers import ValidationError
@@ -28,6 +28,18 @@ class TestGardenSerializer:
         with pytest.raises(ValidationError) as err:
             serializer.validate_num_watering_stations(value)
             assert str(err) == NEGATIVE_NUM_WATERING_STATIONS_ERR
+
+
+@pytest.mark.unit
+class TestGardenModel:
+    @pytest.mark.parametrize('field, get_default', [
+        ('name', _default_garden_name),
+    ],
+        ids=['name'])
+    def test_field_is_given_a_default_value(self, field, get_default):
+        garden = Garden()
+
+        assert getattr(garden, field) == get_default()
 
 
 @pytest.mark.unit

@@ -11,8 +11,13 @@ def _default_watering_duration():
     return timedelta(minutes=1)
 
 
+def _default_garden_name():
+    return 'My Garden'
+
+
 class Garden(models.Model):
     uuid = models.UUIDField(unique=True)
+    name = models.CharField(max_length=255, default=_default_garden_name)
 
 
 class WateringStation(models.Model):
