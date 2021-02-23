@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div class="row justify-content-center my-5">
+    <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#createGardenModal">Add New
+        Garden</button>
+</div>
+
+<div id="gardenList" class="row">
+    {% for garden in gardens %}
+    <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="/static/images/default_garden.png" alt="Garden Image">
+        <div class="card-body">
+            <h5 class="card-title text-center"><a href="{% url 'garden' garden.pk %}"
+                    class="btn btn-primary">{{garden.name}}</a></h5>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="createGardenModal" tabindex="-1" role="dialog" aria-labelledby="createGardenModal"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Garden</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div id="form-modal-body" class="modal-body">
+                <form method="post" action="{% url 'garden-list' %}">
+                    {% csrf_token %}
+                    {{form.as_p}}
+                    <button id="submitBtn" class="btn btn-primary" type="submit">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
