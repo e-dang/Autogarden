@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include <autogarden/interfaces/duration_parser.hpp>
+#include <vector>
 
 class DurationParser : public IDurationParser {
 public:
