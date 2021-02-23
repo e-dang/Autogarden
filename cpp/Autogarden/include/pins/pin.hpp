@@ -1,55 +1,22 @@
 #pragma once
 
-#include <stdint.h>
-
-enum PinMode { Digital, AnalogInput, AnalogOutput };
-
-class IPin {
-public:
-    virtual ~IPin() = default;
-
-    virtual uint8_t getPin() const = 0;
-
-    virtual bool isConnected() const = 0;
-
-    virtual void setIsConnected(const bool& value) = 0;
-
-    virtual int getValue() const = 0;
-
-    virtual void setValue(const int& value) = 0;
-
-    virtual PinMode getMode() const = 0;
-
-protected:
-    virtual int _scaleValue(const int& value) = 0;
-};
+#include <pins/interfaces/pin.hpp>
 
 class Pin : virtual public IPin {
 public:
-    Pin(const uint8_t& pin, const int& value = LOW) : __mValue(value), __mPin(pin), __mIsConnected(false) {}
+    Pin(const int& pinNum, const PinMode& pinMode) : __mPinNum(pinNum), __mPinMode(pinMode) {}
 
-    uint8_t getPin() const {
-        return __mPin;
+    virtual ~Pin() = default;
+
+    int getPinNum() const override {
+        return __mPinNum;
     }
 
-    bool isConnected() const {
-        return __mIsConnected;
-    }
-
-    void setIsConnected(const bool& value) {
-        __mIsConnected = value;
-    }
-
-    int getValue() const {
-        return __mValue;
-    }
-
-    virtual void setValue(const int& value) {
-        __mValue = _scaleValue(value);
+    PinMode getMode() const override {
+        return __mPinMode;
     }
 
 private:
-    int __mValue;
-    uint8_t __mPin;
-    bool __mIsConnected;
+    int __mPinNum;
+    PinMode __mPinMode;
 };

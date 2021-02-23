@@ -1,71 +1,112 @@
 #pragma once
 
-#include <pins/pins.hpp>
-#include <string>
+#include <Arduino.h>
 
-class Component {
+#include <pins/pins.hpp>
+
+class Component;
+
+class IComponent {
 public:
-    Component(const std::string& id) : __mId(id), _pParent(nullptr), _mChildren(0) {}
+    virtual ~IComponent() = default;
+
+    virtual bool appendChild(std::shared_ptr<Component> component) = 0;
+
+    virtual Component* getChild(const String& id) = 0;
+
+    virtual int getNumChildren() const = 0;
+
+    virtual const Component* getParent() const = 0;
+
+    virtual String getId() const = 0;
+
+    virtual Component* getRoot() = 0;
+
+    virtual bool hasParent() const = 0;
+
+    virtual bool isRoot() const = 0;
+};
+
+class Component : public IComponent {
+public:
+    Component() = default;
+
+    Component(const String& id) : __mId(id), _pRoot(nullptr), _pParent(nullptr), __mChildren(0) {}
 
     virtual ~Component() = default;
 
-    bool appendChild(Component* component) {
-        if (component != nullptr && component->_setInputPins(_getOutputPins())) {
-            _mChildren.push_back(component);
-            component->_setParent(this);
+    bool appendChild(std::shared_ptr<Component> component) override {
+        if (component != nullptr && component->_setInputPins(this)) {
+            __mChildren.push_back(component);
+            component->_pParent = this;
+            component->_pRoot   = _pRoot;
             return true;
         }
+
         return false;
     }
 
-    Component* getChild(const std::string& id) {
-        if (__mId == id)
+    Component* getChild(const String& id) override {
+        if (getId() == id)
             return this;
 
-        for (int i = 0; i < getNumChildren(); i++) {
-            auto component = _mChildren[i]->getChild(id);
-            if (component != nullptr)
-                return component;
+        for (auto& child : __mChildren) {
+            auto target = child->getChild(id);
+            if (target != nullptr)
+                return target;
         }
 
         return nullptr;
     }
 
-    std::string getId() const {
+    int getNumChildren() const override {
+        return static_cast<int>(__mChildren.size());
+    }
+
+    const Component* getParent() const override {
+        return _pParent;
+    };
+
+    Component* getRoot() override {
+        return _pRoot;
+    }
+
+    String getId() const override {
         return __mId;
     }
 
-    Component* getParent() {
-        return _pParent;
-    }
-
-    int getNumChildren() const {
-        return static_cast<int>(_mChildren.size());
-    }
-
-    bool hasParent() {
+    bool hasParent() const override {
         return getParent() != nullptr;
     }
 
-    virtual void run() = 0;
+    bool isRoot() const override {
+        return _pRoot == this;
+    }
 
 protected:
-    virtual bool _setInputPins(IOutputPinSet* parentOutputPins) = 0;
+    virtual bool _setInputPins(Component* parent) = 0;
 
     virtual IOutputPinSet* _getOutputPins() = 0;
 
-    bool _setParent(Component* component) {
-        if (component != nullptr) {
-            _pParent = component;
-            return true;
-        }
+    IOutputPinSet* _getComponentOutputPins(Component* component) {
+        if (component == nullptr)
+            return nullptr;
+
+        return component->_getOutputPins();
+    }
+
+    virtual bool _propagateSignal() {
+        if (_pParent != nullptr)
+            return _pParent->_propagateSignal();
+
         return false;
     }
 
 protected:
+    Component* _pRoot;
     Component* _pParent;
-    std::vector<Component*> _mChildren;
+    std::vector<std::shared_ptr<Component> > __mChildren;
 
 private:
-    std::string __mId;
+    String __mId;
 };

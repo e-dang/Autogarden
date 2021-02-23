@@ -2,6 +2,19 @@
 
 #include <stdint.h>
 
+#include <string>
+
+class String : public std::string {
+public:
+    String() : std::string() {}
+
+    String(int i) : std::string(std::to_string(i)) {}
+
+    String(const char* str) : std::string(str) {}
+
+    String(std::string& str) : std::string(str) {}
+};
+
 class ArduinoInterface {
 public:
     virtual ~ArduinoInterface() = default;
@@ -18,6 +31,8 @@ public:
                            const int& data) const = 0;
 
     virtual void _pinMode(const uint8_t& pin, const int& direction) const = 0;
+
+    virtual void _delay(const uint32_t& time) const = 0;
 };
 
 class Arduino : public ArduinoInterface {
@@ -40,6 +55,8 @@ public:
                    const int& data) const override {}
 
     void _pinMode(const uint8_t& pin, const int& direction) const override {}
+
+    void _delay(const uint32_t& time) const override {}
 };
 
 namespace
@@ -60,3 +77,5 @@ int analogRead(const uint8_t& pin);
 void shiftOut(const uint8_t& dataPin, const uint8_t& clockPin, const int& direction, const int& data);
 
 void pinMode(const uint8_t& pin, const int& direction);
+
+void delay(const uint32_t& time);

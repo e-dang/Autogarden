@@ -1,7 +1,5 @@
 #include <Arduino.h>
 
-#include <iostream>
-
 void setMockArduino(ArduinoInterface* mockArduino) {
     ::arduino = mockArduino;
 }
@@ -41,5 +39,11 @@ void shiftOut(const uint8_t& dataPin, const uint8_t& clockPin, const int& direct
 void pinMode(const uint8_t& pin, const int& direction) {
     if (::arduino != nullptr) {
         ::arduino->_pinMode(pin, direction);
+    }
+}
+
+void delay(const uint32_t& time) {
+    if (::arduino != nullptr) {
+        ::arduino->_delay(time);
     }
 }

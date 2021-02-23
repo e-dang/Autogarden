@@ -1,118 +1,81 @@
 #pragma once
 
-#include <components/connector.hpp>
-#include <components/multiplexer/oi_policy.hpp>
-#include <components/multiplexer/output_pin_set.hpp>
-#include <pins/pins.hpp>
+#include <components/multiplexer/interfaces/multiplexer.hpp>
+#include <components/multiplexer/interfaces/translation_policy.hpp>
+#include <vector>
 
-class Multiplexer : public ConnectorComponent {
+class Multiplexer : public IMultiplexer {
 public:
-    Multiplexer(const std::string& id, IInputPinSet* logicInputPins, IOutputPinSet* outputPins,
-                IOutputToInputPolicy* policy, const PinMode& sigPinMode) :
-        ConnectorComponent(id, logicInputPins, outputPins),
+    Multiplexer(const String& id, ILogicInputPinSet* inputPins, ILogicOutputPinSet* outputPins, ILogicInputPin* sigPin,
+                ILogicInputPin* enablePin, IMultiplexerTranslationPolicy* policy) :
+        IMultiplexer(id),
+        __pInputPins(inputPins),
+        __pOutputPins(outputPins),
+        __pSigPin(sigPin),
+        __pEnablePin(enablePin),
         __pPolicy(policy),
-        __mSigPinMode(sigPinMode),
-        __mSigPin(nullptr),
-        __mEnablePin(nullptr) {}
+        __mIsDisabled(true) {}
 
-    virtual ~Multiplexer() = default;
-
-    void run() override {
-        if (_pParent == nullptr)
-            throw std::runtime_error("Component " + getId() + " doesn't have a parent");
-
-        if (__pPolicy->execute(_pInputPinSet, _pOutputPinSet))
-            enable();
-        else
-            disable();
-
-        _pParent->run();
+    bool enable() override {
+        return _setEnablePin(LOW);
     }
 
-    bool enable() {
-        return _setPinView(__mEnablePin, LOW);
+    bool disable() override {
+        return _setEnablePin(HIGH);
     }
 
-    bool disable() {
-        return _setPinView(__mEnablePin, HIGH);
+    bool isEnabled() override {
+        return __mIsDisabled == false;
     }
 
-    bool setSigPin(const int& value) {
-        return _setPinView(__mSigPin, value);
-    }
-
-    PinMode getSigPinMode() const {
-        return __mSigPinMode;
+    bool isDisabled() override {
+        return __mIsDisabled == true;
     }
 
 protected:
-    bool _setInputPins(IOutputPinSet* parentOutputPins) override {
-        if (parentOutputPins == nullptr)
+    bool _setInputPins(Component* parent) override {
+        auto rootOutputPins   = _getComponentOutputPins(parent->getRoot());
+        auto parentOutputPins = _getComponentOutputPins(parent);
+        if (rootOutputPins == nullptr || parentOutputPins == nullptr)
             return false;
 
-        if (_pInputPinSet->getMode() == getSigPinMode()) {
-            const auto requiredNumOutputs = _pInputPinSet->size() + 1;
-            if (parentOutputPins->hasNumAvailable(requiredNumOutputs, _pInputPinSet->getMode())) {
-                _pInputPinSet->connectToOutput(
-                  parentOutputPins->getNextAvailable(requiredNumOutputs - 1, _pInputPinSet->getMode()));
-                __mSigPin    = parentOutputPins->getNextAvailable(1, getSigPinMode()).front();
-                __mEnablePin = parentOutputPins->getNextAvailable(1, PinMode::Digital).front();
-                disable();
-                return true;
-            }
-        } else {
-            if (parentOutputPins->hasNumAvailable(_pInputPinSet->size(), _pInputPinSet->getMode()) &&
-                parentOutputPins->hasNumAvailable(1, getSigPinMode())) {
-                _pInputPinSet->connectToOutput(
-                  parentOutputPins->getNextAvailable(_pInputPinSet->size(), _pInputPinSet->getMode()));
-                __mSigPin    = parentOutputPins->getNextAvailable(1, getSigPinMode()).front();
-                __mEnablePin = parentOutputPins->getNextAvailable(1, PinMode::Digital).front();
-                disable();
-                return true;
-            }
+        if (!(rootOutputPins->connect(__pSigPin.get()) && rootOutputPins->connect(__pEnablePin.get()) &&
+              parentOutputPins->connect(__pInputPins.get()))) {
+            __pSigPin->disconnect();
+            __pEnablePin->disconnect();
+            __pInputPins->disconnect();
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     IOutputPinSet* _getOutputPins() override {
-        return _pOutputPinSet;
+        return __pOutputPins.get();
     }
 
-    bool _setPinView(PinView& pinView, const int& value) {
-        if (!pinView.isNull) {
-            pinView.set(value);
-            return true;
-        }
-        return false;
+    bool _propagateSignal() override {
+        disable();
+        if (!__pPolicy->translate(__pInputPins.get(), __pOutputPins.get()) || !Component::_propagateSignal())
+            return false;
+
+        enable();
+        return __pSigPin->processSignal(__pPolicy->getSigPinSignal());  // sigPin must process signal as last operation
     }
 
-private:
-    PinMode __mSigPinMode;
-    PinView __mSigPin;
-    PinView __mEnablePin;
-    IOutputToInputPolicy* __pPolicy;
-};
+    bool _setEnablePin(const int& value) {
+        if (__pEnablePin == nullptr || !__pEnablePin->processSignal(std::make_shared<DigitalWrite>(value)))
+            return false;
 
-class MultiplexerFactory {
-public:
-    std::vector<IPin*> createPin(const int& numPins) {
-        std::vector<IPin*> pins;
-        pins.reserve(numPins);
-        for (int i = 0; i < numPins; i++) {
-            pins.push_back(new LogicPin(i, PinMode::Digital));
-        }
-        return pins;
-    }
-
-    Multiplexer* createMultiplexer(const std::string& id, const int& numLogicInputPins, const int& numOutputPins,
-                                   const PinMode& sigPinMode) {
-        auto logicInputPins = __mInputFactory.createInputPinSet(numLogicInputPins, PinMode::Digital);
-        auto outputPins     = new MultiplexerOutputPinSet(createPin(numOutputPins));
-        auto policy         = new MultiplexerOIPolicy();
-        return new Multiplexer(id, logicInputPins, outputPins, policy, sigPinMode);
+        __mIsDisabled = static_cast<bool>(value);
+        return true;
     }
 
 private:
-    InputPinSetFactory __mInputFactory;
+    bool __mIsDisabled;
+    std::unique_ptr<ILogicInputPin> __pSigPin;
+    std::unique_ptr<ILogicInputPin> __pEnablePin;
+    std::unique_ptr<ILogicInputPinSet> __pInputPins;
+    std::unique_ptr<ILogicOutputPinSet> __pOutputPins;
+    std::unique_ptr<IMultiplexerTranslationPolicy> __pPolicy;
 };
