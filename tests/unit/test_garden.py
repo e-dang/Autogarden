@@ -1,10 +1,12 @@
 import pytest
+from unittest.mock import create_autospec, patch
 from garden.models import (Garden, WateringStation,
                            _default_moisture_threshold,
                            _default_watering_duration, _default_garden_name)
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
 from rest_framework.serializers import ValidationError
+import garden.utils as utils
 
 
 @pytest.mark.unit
@@ -69,3 +71,46 @@ class TestWateringStationSerializer:
         serializer = WateringStationSerializer(watering_station)
 
         assert field in serializer.data
+
+
+@pytest.mark.unit
+class TestUtils:
+    @patch('garden.utils.Garden', autospec=True)
+    @patch('garden.utils.uuid4')
+    def test_create_unique_uuid_calls_uuid_until_a_unique_one_is_found(self, mock_uuid, mock_garden):
+        calls = []
+        call_count = 2
+        for _ in range(call_count):
+            calls.append(True)
+        calls.append(False)
+        mock_garden.objects.filter.return_value.exists.side_effect = calls
+
+        utils.create_unique_garden_uuid()
+
+        assert mock_uuid.call_count == call_count + 1
+
+    @patch('garden.utils.Garden', autospec=True)
+    @patch('garden.utils.uuid4')
+    def test_create_unique_uuid_returns_the_last_return_value_of_uuid4(self, mock_uuid, mock_garden):
+        ret_val = 'test-uuid'
+        mock_uuid.return_value = ret_val
+        mock_garden.objects.filter.return_value.exists.return_value = False
+
+        uuid = utils.create_unique_garden_uuid()
+
+        assert uuid == ret_val
+
+    @pytest.mark.parametrize('curr_num, target_num', [
+        (0, 4),
+        (4, 3),
+        (4, 4)
+    ],
+        ids=['<', '>', '='])
+    def test_set_num_watering_stations_calls_create_on_garden_related_manager_until_garden_has_the_specified_num_of_watering_stations(self, curr_num, target_num):
+        mock_garden = create_autospec(Garden)
+        mock_garden.watering_stations.count.return_value = curr_num
+        num_watering_stations = target_num
+
+        utils.set_num_watering_stations(mock_garden, num_watering_stations)
+
+        assert mock_garden.watering_stations.create.call_count == max(0, target_num - curr_num)

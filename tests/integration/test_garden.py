@@ -2,9 +2,10 @@ import uuid
 
 import pytest
 from django.db.utils import IntegrityError
+from django.forms import ValidationError
+from garden.forms import NewGardenForm
 from garden.models import Garden
-from garden.serializers import (GardenSerializer,
-                                WateringStationSerializer)
+from garden.serializers import GardenSerializer, WateringStationSerializer
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -30,8 +31,12 @@ def data_GET_api_watering_stations(garden_factory):
     return num_watering_stations, garden, url
 
 
+def is_template_rendered(template_name, response):
+    return template_name in (template.name for template in response.templates)
+
+
 @pytest.mark.integration
-class TestViews:
+class TestAPIViews:
     @pytest.mark.parametrize('view, kwargs, expected', [
         ('api-garden', {}, '/api/garden/'),
         ('api-watering-stations', {'pk': 0}, '/api/garden/0/watering-stations/'),
@@ -98,6 +103,41 @@ class TestViews:
 
 
 @pytest.mark.integration
+class TestGardenListView:
+    @pytest.mark.django_db
+    def test_GET_renders_garden_html_template(self, client):
+        url = reverse('garden-list')
+
+        resp = client.get(url)
+
+        assert resp.status_code == 200
+        assert is_template_rendered('gardens.html', resp)
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client):
+        data = {'name': 'My Garden',
+                'num_watering_stations': 3}
+        url = reverse('garden-list')
+        prev_num_gardens = Garden.objects.all().count()
+
+        client.post(url, data=data)
+
+        assert prev_num_gardens + 1 == Garden.objects.all().count()
+        assert Garden.objects.first().watering_stations.count() == data['num_watering_stations']
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_redirects_to_garden_list_page(self, client):
+        data = {'name': 'My Garden',
+                'num_watering_stations': 3}
+        url = reverse('garden-list')
+
+        resp = client.post(url, data=data, follow=False)
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == '/'
+
+
+@pytest.mark.integration
 class TestGardenModel:
     @pytest.mark.django_db
     def test_uuid_field_must_be_unique(self):
@@ -126,3 +166,33 @@ class TestGardenSerializer:
         garden = serializer.create({'uuid': uuid.uuid4(), 'num_watering_stations': num_watering_stations})
 
         assert garden.watering_stations.count() == num_watering_stations
+
+
+@pytest.mark.integration
+class TestNewGardenForm:
+    @pytest.mark.django_db
+    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self):
+        data = {
+            'name': 'My Garden',
+            'num_watering_stations': 4
+        }
+        prev_num_gardens = Garden.objects.all().count()
+        form = NewGardenForm(data=data)
+
+        assert form.is_valid()
+        garden = form.save()
+
+        assert prev_num_gardens + 1 == Garden.objects.all().count()
+        assert garden.watering_stations.count() == data['num_watering_stations']
+
+    @pytest.mark.django_db
+    def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):
+        data = {
+            'name': 'My Garden',
+            'num_watering_stations': -1
+        }
+        form = NewGardenForm(data=data)
+        form.cleaned_data = data
+
+        with pytest.raises(ValidationError):
+            form.clean_num_watering_stations()

@@ -1,5 +1,5 @@
 from garden.forms import NewGardenForm
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
@@ -35,3 +35,9 @@ class GardenListView(View):
         form = NewGardenForm()
         gardens = Garden.objects.all()
         return render(request, 'gardens.html', context={'gardens': gardens, 'form': form})
+
+    def post(self, request):
+        form = NewGardenForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('garden-list')

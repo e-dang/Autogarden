@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from .models import Garden, WateringStation
+from .utils import set_num_watering_stations
 
 NEGATIVE_NUM_WATERING_STATIONS_ERR = 'Cannot have a negative number of watering stations'
 
@@ -18,8 +20,7 @@ class GardenSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         garden = Garden.objects.create(uuid=validated_data['uuid'])
-        for _ in range(validated_data['num_watering_stations']):
-            garden.watering_stations.create()
+        set_num_watering_stations(garden, validated_data['num_watering_stations'])
         return garden
 
 
