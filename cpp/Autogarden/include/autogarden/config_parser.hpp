@@ -14,7 +14,7 @@ class WateringStationConfigParser : public IWateringStationConfigParser<Watering
 public:
     WateringStationConfigParser(std::unique_ptr<IDurationParser>&& parser) : __pParser(std::move(parser)) {}
 
-    WateringStationConfigs parse(const DynamicJsonDocument& configs) override {
+    WateringStationConfigs parse(const JsonObject& configs) override {
         __pParser->parse(configs["watering_duration"]);
         auto duration  = __pParser->getMilliSeconds();
         auto threshold = configs["moisture_threshold"];

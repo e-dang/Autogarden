@@ -11,11 +11,11 @@ TEST(WateringStationConfigParserTest, parse) {
     DynamicJsonDocument doc(1024);
     doc["watering_duration"]  = duration;
     doc["moisture_threshold"] = threshold;
-    auto mockDurationParser   = std::make_unique<MockDurationParser>();
+    auto mockDurationParser   = std::make_unique<NiceMock<MockDurationParser>>();
     EXPECT_CALL(*mockDurationParser, getMilliSeconds()).WillOnce(Return(duration));
     WateringStationConfigParser parser(std::move(mockDurationParser));
 
-    auto configs = parser.parse(doc);
+    auto configs = parser.parse(doc.as<JsonObject>());
 
     EXPECT_EQ(configs.duration, duration);
     EXPECT_FLOAT_EQ(configs.threshold, threshold);

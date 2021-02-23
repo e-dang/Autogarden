@@ -6,5 +6,5 @@
 
 class MockWateringStationConfigParser : public IWateringStationConfigParser<WateringStationConfigs> {
 public:
-    MOCK_METHOD(WateringStationConfigs, parse, (const DynamicJsonDocument& configs), (override));
+    MOCK_METHOD(WateringStationConfigs, parse, (const JsonObject& configs), (override));
 };

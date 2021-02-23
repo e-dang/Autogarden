@@ -77,7 +77,7 @@ TEST_F(WateringStationTest, setThreshold_return_true) {
 TEST_F(WateringStationTest, update_returns_true) {
     const uint32_t newDuration = duration + 10;
     const float newThreshold   = threshold + 1.;
-    DynamicJsonDocument configs(0);
+    JsonObject configs;
     WateringStationConfigs parsedConfigs = { newDuration, newThreshold };
 
     EXPECT_CALL(*mockParser, parse(configs)).WillOnce(Return(parsedConfigs));
@@ -90,7 +90,7 @@ TEST_F(WateringStationTest, update_returns_true) {
 TEST_F(WateringStationTest, update_returns_false) {
     const uint32_t newDuration = duration + 10;
     const float newThreshold   = 101.;
-    DynamicJsonDocument configs(0);
+    JsonObject configs;
     WateringStationConfigs parsedConfigs = { newDuration, newThreshold };
 
     EXPECT_CALL(*mockParser, parse(configs)).WillOnce(Return(parsedConfigs));

@@ -7,5 +7,5 @@ class IWateringStationConfigParser {
 public:
     virtual ~IWateringStationConfigParser() = default;
 
-    virtual T parse(const DynamicJsonDocument& configs) = 0;
+    virtual T parse(const JsonObject& configs) = 0;
 };

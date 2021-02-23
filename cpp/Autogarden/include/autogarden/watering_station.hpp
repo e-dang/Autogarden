@@ -27,7 +27,7 @@ public:
         }
     }
 
-    bool update(const DynamicJsonDocument& configs) override {
+    bool update(const JsonObject& configs) override {
         auto parsedConfigs = __pParser->parse(configs);
         if (setThreshold(parsedConfigs.threshold)) {
             setDuration(parsedConfigs.duration);

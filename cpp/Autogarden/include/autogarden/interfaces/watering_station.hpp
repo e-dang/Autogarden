@@ -8,7 +8,7 @@ public:
 
     virtual void activate() = 0;
 
-    virtual bool update(const DynamicJsonDocument& configs) = 0;
+    virtual bool update(const JsonObject& configs) = 0;
 
     virtual int getIdx() const = 0;
 };
