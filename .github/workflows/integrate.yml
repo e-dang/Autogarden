@@ -12,7 +12,28 @@ on:
       - '*'
 
 jobs:
-  build:
+  cpp:
+    runs-on: macos-10.15
+    steps:
+        - uses: actions/checkout@v2
+        - uses: lukka/get-cmake@latest
+
+        - name: Install vcpkg
+          uses: lukka/run-vcpkg@v6
+          with:
+            setupOnly: true
+            vcpkgGitCommitId: 28c588e6a
+
+        - name: Configure project
+          run: |
+            cd cpp/Autogarden && \
+            cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+
+        - name: Build and test
+          run: |
+            make test-cpp
+
+  python:
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
