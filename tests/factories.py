@@ -1,11 +1,11 @@
 import factory
 
 
-class MicroControllerFactory(factory.django.DjangoModelFactory):
+class GardenFactory(factory.django.DjangoModelFactory):
     uuid = factory.Faker('uuid4')
 
     class Meta:
-        model = 'microcontroller.MicroController'
+        model = 'garden.Garden'
 
     @factory.post_generation
     def watering_stations(self, create, count, **kwargs):
@@ -14,11 +14,11 @@ class MicroControllerFactory(factory.django.DjangoModelFactory):
 
         if count:
             for _ in range(count):
-                WateringStationFactory(micro_controller=self)
+                WateringStationFactory(garden=self)
 
 
 class WateringStationFactory(factory.django.DjangoModelFactory):
-    micro_controller = factory.SubFactory(MicroControllerFactory)
+    garden = factory.SubFactory(GardenFactory)
 
     class Meta:
-        model = 'microcontroller.WateringStation'
+        model = 'garden.WateringStation'

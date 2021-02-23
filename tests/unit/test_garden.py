@@ -1,29 +1,29 @@
 import pytest
-from microcontroller.models import (MicroController, WateringStation,
-                                    _default_moisture_threshold,
-                                    _default_watering_duration)
-from microcontroller.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
-                                         MicroControllerSerializer, WateringStationSerializer)
+from garden.models import (Garden, WateringStation,
+                           _default_moisture_threshold,
+                           _default_watering_duration)
+from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
+                                GardenSerializer, WateringStationSerializer)
 from rest_framework.serializers import ValidationError
 
 
 @pytest.mark.unit
-class TestMicroControllerSerializer:
-    @pytest.mark.parametrize('micro_controller_factory, field', [
+class TestGardenSerializer:
+    @pytest.mark.parametrize('garden_factory, field', [
         (None, 'uuid'),
     ],
-        indirect=['micro_controller_factory'],
+        indirect=['garden_factory'],
         ids=['uuid'])
-    def test_field_is_serialized(self, micro_controller_factory, field):
-        micro_controller = micro_controller_factory.build()
+    def test_field_is_serialized(self, garden_factory, field):
+        garden = garden_factory.build()
 
-        serializer = MicroControllerSerializer(micro_controller)
+        serializer = GardenSerializer(garden)
 
         assert field in serializer.data
 
     def test_validate_num_watering_stations_raises_validation_error_when_value_is_negative(self):
         value = -1
-        serializer = MicroControllerSerializer()
+        serializer = GardenSerializer()
 
         with pytest.raises(ValidationError) as err:
             serializer.validate_num_watering_stations(value)
@@ -38,7 +38,7 @@ class TestWateringStationModel:
     ],
         ids=['moisture_threshold', 'watering_duration'])
     def test_field_is_given_a_default_value(self, field, get_default):
-        watering_station = WateringStation(micro_controller=MicroController())
+        watering_station = WateringStation(garden=Garden())
 
         assert getattr(watering_station, field) == get_default()
 

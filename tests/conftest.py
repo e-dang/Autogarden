@@ -15,5 +15,5 @@ def api_client():
     return APIClient()
 
 
-register(factories.MicroControllerFactory)
+register(factories.GardenFactory)
 register(factories.WateringStationFactory)

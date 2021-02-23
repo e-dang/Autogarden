@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import MicroController, WateringStation
+from .models import Garden, WateringStation
 
 NEGATIVE_NUM_WATERING_STATIONS_ERR = 'Cannot have a negative number of watering stations'
 
 
-class MicroControllerSerializer(serializers.ModelSerializer):
+class GardenSerializer(serializers.ModelSerializer):
     num_watering_stations = serializers.IntegerField(write_only=True, required=True)
 
     class Meta:
-        model = MicroController
+        model = Garden
         fields = ['uuid', 'num_watering_stations']
 
     def validate_num_watering_stations(self, value):
@@ -17,10 +17,10 @@ class MicroControllerSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        micro_controller = MicroController.objects.create(uuid=validated_data['uuid'])
+        garden = Garden.objects.create(uuid=validated_data['uuid'])
         for _ in range(validated_data['num_watering_stations']):
-            micro_controller.watering_stations.create()
-        return micro_controller
+            garden.watering_stations.create()
+        return garden
 
 
 class WateringStationSerializer(serializers.ModelSerializer):

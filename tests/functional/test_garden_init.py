@@ -3,23 +3,23 @@ from datetime import timedelta
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-from microcontroller.models import MicroController
+from garden.models import Garden
 
 
 @pytest.mark.functional
-class TestMicroControllerInitialization:
+class TestGardenInitialization:
     @pytest.mark.django_db
-    def test_micro_controller_can_setup_hard_configs_and_get_soft_configs(self, api_client):
+    def test_garden_can_setup_hard_configs_and_get_soft_configs(self, api_client):
         num_watering_stations = 16
 
-        # the micro controller sends a POST request to initialize its configs on the server
-        mc_configs = {
+        # the microcontroller sends a POST request to initialize its configs on the server
+        garden_configs = {
             'uuid': uuid.uuid4(),
             'num_watering_stations': num_watering_stations
         }
 
-        init_url = reverse('api-micro-controller')
-        resp = api_client.post(init_url, data=mc_configs)
+        init_url = reverse('api-garden')
+        resp = api_client.post(init_url, data=garden_configs)
         assert resp.status_code == status.HTTP_201_CREATED
         pk = int(resp.data['pk'])  # should not raise
 
@@ -37,8 +37,8 @@ class TestMicroControllerInitialization:
         # the MC recieves the new updated watering station configs
         mt_diff = 1
         wd_diff = timedelta(minutes=1)
-        micro_controller = MicroController.objects.get(pk=pk)
-        for watering_station in micro_controller.watering_stations.all():
+        garden = Garden.objects.get(pk=pk)
+        for watering_station in garden.watering_stations.all():
             watering_station.moisture_threshold += mt_diff
             watering_station.watering_duration += wd_diff
             watering_station.save()
@@ -54,7 +54,7 @@ class TestMicroControllerInitialization:
 
         # the MC unexpectedly crashes which causes it to repeat the same operations as before. This time it does not
         # recieve a HTTP_201_CREATED status code, but recieves the same pk.
-        resp = api_client.post(init_url, data=mc_configs)
+        resp = api_client.post(init_url, data=garden_configs)
         assert resp.status_code == status.HTTP_409_CONFLICT
         assert pk == int(resp.data['pk'])
 
