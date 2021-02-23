@@ -32,6 +32,7 @@ add_executable(test_autogarden  src/Arduino.cpp
                                 tests/autogarden/test_duration_parser.cpp
                                 tests/autogarden/test_config_parser.cpp
                                 tests/autogarden/test_watering_station.cpp
+                                tests/autogarden/test_autogarden.cpp
                                 tests/test_usage.cpp
 )
 
