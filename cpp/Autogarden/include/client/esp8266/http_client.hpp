@@ -7,7 +7,7 @@
 
 class ESP8266HttpClient : public IHttpClient {
 public:
-    ESP8266HttpClient(IWifiConnection* connection) : __mClient(), __pConnection(std::move(connection)) {}
+    ESP8266HttpClient(std::unique_ptr<IWifiConnection>&& connection) : __pConnection(std::move(connection)) {}
 
     HttpResponse get(const HttpRequest& request) override {
         HttpResponse response;
@@ -67,7 +67,7 @@ class ESP8266HttpClientFactory : public IHttpClientFactory {
 public:
     std::unique_ptr<IHttpClient> create(const String& ssid, const String& password,
                                         const int& waitTime = 1000) override {
-        auto connection = new WifiConnection(ssid, password, waitTime);
-        return std::make_unique<ESP8266HttpClient>(connection);
+        std::unique_ptr<IWifiConnection> connection = std::make_unique<WifiConnection>(ssid, password, waitTime);
+        return std::make_unique<ESP8266HttpClient>(std::move(connection));
     }
 };

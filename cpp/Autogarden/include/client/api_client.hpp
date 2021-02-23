@@ -9,7 +9,7 @@
 
 class APIClient : public IAPIClient {
 public:
-    APIClient(const String& rootUrl, std::unique_ptr<IHttpClient>& client,
+    APIClient(const String& rootUrl, std::unique_ptr<IHttpClient>&& client,
               const String& contentType = "application/json") :
         __mPK(""), __mRootUrl(rootUrl), __mContentType(contentType), __pClient(std::move(client)) {}
 
@@ -23,7 +23,7 @@ public:
         while (String(__mPK.toInt()) != __mPK) {
             auto response = __pClient->post(request);
             if (response.statusCode > 0)
-                _setPk(response.getJsonData());
+                __setPk(response.getJsonData());
         }
     }
 
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    void _setPk(const DynamicJsonDocument& data) {
+    void __setPk(const DynamicJsonDocument& data) {
         __mPK = data["pk"].as<String>();
     }
 
@@ -65,17 +65,17 @@ private:
     std::unique_ptr<IHttpClient> __pClient;
 };
 
-template <typename T>
 class APIClientFactory : public IAPIClientFactory {
 public:
+    APIClientFactory(std::unique_ptr<IHttpClientFactory>&& httpClientFactory) :
+        __pHttpClientFactory(std::move(httpClientFactory)) {}
+
     std::unique_ptr<IAPIClient> create(const String& ssid, const String& password, const String& rootUrl,
                                        const int& waitTime = 1000) override {
-        auto httpClient = __mHttpClientFactory.create(ssid, password, waitTime);
-        return std::make_unique<APIClient>(rootUrl, httpClient);
+        auto httpClient = __pHttpClientFactory->create(ssid, password, waitTime);
+        return std::make_unique<APIClient>(rootUrl, std::move(httpClient));
     }
 
 private:
-    T __mHttpClientFactory;
+    std::unique_ptr<IHttpClientFactory> __pHttpClientFactory;
 };
-
-typedef APIClientFactory<ESP8266HttpClientFactory> ESP8266APIClientFactory;

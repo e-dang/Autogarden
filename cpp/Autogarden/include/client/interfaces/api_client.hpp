@@ -21,5 +21,5 @@ public:
     virtual ~IAPIClientFactory() = default;
 
     virtual std::unique_ptr<IAPIClient> create(const String& ssid, const String& password, const String& rootUrl,
-                                               const int& waitTime) = 0;
+                                               const int& waitTime = 1000) = 0;
 };
