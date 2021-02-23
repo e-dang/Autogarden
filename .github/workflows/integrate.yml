@@ -13,6 +13,8 @@ on:
 
 jobs:
   cpp:
+    env:
+      buildDir: '${{ github.workspace }}/cpp/Autogarden/build'
     runs-on: macos-10.15
     steps:
         - uses: actions/checkout@v2
@@ -23,6 +25,8 @@ jobs:
           with:
             setupOnly: true
             vcpkgGitCommitId: 28c588e6a
+            appendedCacheKey: ${{ hashFiles( '${{ github.workspace }}/cpp/Autogarden/vcpkg.json' ) }}
+            additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
 
         - name: Configure project
           run: |
