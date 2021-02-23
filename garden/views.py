@@ -1,3 +1,4 @@
+from garden.forms import NewGardenForm
 from django.shortcuts import render
 from django.views import View
 from rest_framework import status
@@ -31,5 +32,6 @@ class WateringStationView(APIView):
 
 class GardenListView(View):
     def get(self, request):
+        form = NewGardenForm()
         gardens = Garden.objects.all()
-        return render(request, 'gardens.html', context={'gardens': gardens})
+        return render(request, 'gardens.html', context={'gardens': gardens, 'form': form})
