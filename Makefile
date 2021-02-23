@@ -1,5 +1,6 @@
 PROJECT_DIR := `dirname $(abspath $(MAKEFILE_LIST))`
 HEADLESS := $(if $(CI), --headless, )
+THREADS := $(if $(CI), -j2, -j4)
 CPP_DIR := $(PROJECT_DIR)/cpp/Autogarden
 
 install:
@@ -19,7 +20,7 @@ test-cpp:
 	cd $(CPP_DIR) && \
 	if [ -d "build" ]; then \
 		cd build && \
-		make && \
+		make $(THREADS) && \
 		./test_autogarden; \
 	fi
 
