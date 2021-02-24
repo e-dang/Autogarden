@@ -23,7 +23,7 @@ class GardenListPage:
         self.driver = driver
 
     def has_correct_url(self):
-        pattern = r'(://[^/]+[/]$)'  # match only when / is at the end of url and there are no preceding / after '://'
+        pattern = r'/gardens/$'
         return re.search(pattern, self.driver.current_url) is not None
 
     def click_add_new_garden(self):
