@@ -49,5 +49,3 @@ class TestGardenSetup(Base):
         page.watering_station = selected_watering_station
         assert page.moisture_threshold == moisture_threshold
         assert page.watering_duration == watering_duration
-
-        assert False, 'Finish the test'

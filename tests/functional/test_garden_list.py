@@ -51,3 +51,8 @@ class TestGardenSetup(Base):
 
         # they see the watering stations that are part of the garden
         assert detail_page.get_number_watering_stations() == num_watering_stations
+
+        # the user then clicks the AutoGarden tag in the nav bar to navigate home and is taken back to the garden
+        # list page
+        list_page.click_home()
+        self.wait_for_page_to_be_loaded(list_page)
