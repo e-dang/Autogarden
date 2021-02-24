@@ -1,5 +1,7 @@
 import re
 
+from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID
+
 from .elements import ButtonGroup, TextInput
 
 
@@ -29,3 +31,6 @@ class GardenDetailPage:
 
     def get_number_watering_stations(self):
         return len(self.driver.find_elements_by_css_selector('button[id*=wateringStationBtn]'))
+
+    def submit_watering_station_update(self):
+        self.driver.find_element_by_id(UPDATE_WATERING_STATION_SUBMIT_ID).click()
