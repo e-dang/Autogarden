@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import NewGardenForm
+from garden.forms import NewGardenForm, UpdateWateringStationForm
 
 from .models import Garden
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -58,3 +58,12 @@ class GardenDetailView(View):
     def get(self, request, pk):
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
+
+
+class WateringStationDetailView(View):
+    def get(self, request, pk, idx):
+        garden = Garden.objects.get(pk=pk)
+        watering_station = list(garden.watering_stations.all())[idx - 1]
+        form = UpdateWateringStationForm(instance=watering_station)
+        form_html = render_crispy_form(form, context=csrf(request))
+        return JsonResponse({'html': form_html})

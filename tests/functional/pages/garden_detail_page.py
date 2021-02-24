@@ -12,7 +12,7 @@ class MoistureThresholdInput(TextInput):
 
 
 class WateringDurationInput(TextInput):
-    LOCATOR = 'id_watering_duration_input'
+    LOCATOR = 'id_watering_duration'
 
 
 class GardenDetailPage:

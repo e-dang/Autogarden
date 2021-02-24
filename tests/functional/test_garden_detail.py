@@ -1,3 +1,4 @@
+from garden.forms import duration_string
 import pytest
 from django.urls import reverse
 
@@ -28,7 +29,7 @@ class TestGardenSetup(Base):
         # they click a watering station button and see a form appear under the button row taht allows them
         # to edit the configurations of the watering station
         page.watering_station = 1
-        assert page.moisture_threshold == _default_moisture_threshold()
-        assert page.watering_duration == _default_watering_duration()
+        assert page.moisture_threshold == str(_default_moisture_threshold())
+        assert page.watering_duration == duration_string(_default_watering_duration())
 
         assert False, 'Finish the test'

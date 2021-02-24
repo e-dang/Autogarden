@@ -8,9 +8,10 @@
 
 <div class="row">
     <div class="col">
-
         {% for watering_station in garden.watering_stations.all %}
-        <button id="wateringStationBtn{{ forloop.counter }}" class="btn btn-secondary">{{ forloop.counter }}</button>
+        {% url 'watering-station-detail' garden.pk forloop.counter as the_url %}
+        <button id="wateringStationBtn{{ forloop.counter }}" class="btn btn-secondary"
+            onclick="getWateringStationForm('{{the_url}}')">{{ forloop.counter }}</button>
         {% endfor %}
     </div>
 </div>
@@ -19,4 +20,20 @@
 
 <div id="wsFormContainer" class="row">
 </div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function updateHTML(url, data) {
+        $('#wsFormContainer').html(data.html);
+        $('#updateWateringStationForm').on('submit', (event) => {
+            event.preventDefault();
+            $.post(url, $('#wsForm').serialize(), (data) => updateHTML(url, data));
+        });
+    };
+
+    function getWateringStationForm(url) {
+        $.get(url, (data) => updateHTML(url, data));
+    };
+</script>
 {% endblock %}

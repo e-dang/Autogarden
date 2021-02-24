@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import create_autospec, patch
 
 import garden.utils as utils
@@ -117,6 +118,19 @@ class TestUtils:
         utils.set_num_watering_stations(mock_garden, num_watering_stations)
 
         assert mock_garden.watering_stations.create.call_count == max(0, target_num - curr_num)
+
+    @pytest.mark.parametrize('minutes, seconds', [
+        (0, 0),
+        (4, 1),
+        (10, 20)
+    ],
+        ids=['zeros', 'single_digits', 'double_digits'])
+    def test_duration_string_returns_minutes_seconds_repr_of_timedelta(self, minutes, seconds):
+        duration = timedelta(minutes=minutes, seconds=seconds)
+
+        ret_val = utils.duration_string(duration)
+
+        assert ret_val == f'{minutes:02}:{seconds:02}'
 
 
 @pytest.mark.unit

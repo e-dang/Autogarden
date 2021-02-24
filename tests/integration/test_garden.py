@@ -178,6 +178,32 @@ class TestGardenDetailView:
 
 
 @pytest.mark.integration
+class TestWateringStationDetailView:
+    @pytest.fixture
+    def garden(self, garden_factory):
+        return garden_factory(watering_stations=5)
+
+    def create_url(self, pk, idx):
+        return reverse('watering-station-detail', kwargs={'pk': pk, 'idx': idx})
+
+    def test_view_has_correct_url(self):
+        pk = 1
+        idx = 1
+        assert self.create_url(pk, idx) == f'/gardens/{pk}/watering-stations/{idx}/'
+
+    @pytest.mark.django_db
+    def test_GET_returns_json_response_with_update_watering_station_form_html(self, client, garden):
+        idx = 1
+        url = self.create_url(garden.pk, idx)
+
+        resp = client.get(url)
+
+        data = resp.json()
+        assert "Moisture Threshold" in data['html']
+        assert "Watering Duration" in data['html']
+
+
+@pytest.mark.integration
 class TestGardenModel:
     @pytest.mark.django_db
     def test_uuid_field_must_be_unique(self):

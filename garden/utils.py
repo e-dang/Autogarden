@@ -14,3 +14,8 @@ def create_unique_garden_uuid():
     while Garden.objects.filter(uuid=uuid).exists():
         uuid = uuid4()
     return uuid
+
+
+def duration_string(duration):
+    minutes, seconds = divmod(duration.total_seconds(), 60)
+    return f'{int(minutes):02d}:{int(seconds):02d}'
