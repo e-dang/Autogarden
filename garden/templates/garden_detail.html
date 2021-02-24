@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+
+<div class="row">
+    <h2>{{garden.name}}</h2>
+</div>
+
+<div class="row">
+    <div class="col">
+
+        {% for watering_station in garden.watering_stations.all %}
+        <button id="wateringStationBtn{{ forloop.counter }}" class="btn btn-secondary">{{ forloop.counter }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<hr>
+
+<div id="wsFormContainer" class="row">
+</div>
+{% endblock %}

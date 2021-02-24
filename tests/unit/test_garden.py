@@ -1,12 +1,15 @@
-import pytest
 from unittest.mock import create_autospec, patch
-from garden.models import (Garden, WateringStation,
+
+import garden.utils as utils
+import pytest
+from django.http.request import HttpRequest
+from garden.models import (Garden, WateringStation, _default_garden_name,
                            _default_moisture_threshold,
-                           _default_watering_duration, _default_garden_name)
+                           _default_watering_duration)
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
+from garden.views import GardenDetailView
 from rest_framework.serializers import ValidationError
-import garden.utils as utils
 
 
 @pytest.mark.unit
@@ -114,3 +117,17 @@ class TestUtils:
         utils.set_num_watering_stations(mock_garden, num_watering_stations)
 
         assert mock_garden.watering_stations.create.call_count == max(0, target_num - curr_num)
+
+
+@pytest.mark.unit
+class TestGardenDetailView:
+    @patch('garden.views.render')
+    @patch('garden.views.Garden', autospec=True)
+    def test_GET_passes_garden_as_context_to_render(self, mock_garden_clas, mock_render):
+        mock_garden = mock_garden_clas.objects.get.return_value
+        request = HttpRequest()
+        pk = 0
+
+        GardenDetailView().get(request, pk)
+
+        assert mock_render.call_args.kwargs['context']['garden'] == mock_garden

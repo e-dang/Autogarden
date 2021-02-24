@@ -122,9 +122,7 @@ class TestGardenListView:
                 'num_watering_stations': -1}
 
     @pytest.mark.django_db
-    def test_GET_renders_garden_html_template(self, client):
-        url = reverse('garden-list')
-
+    def test_GET_renders_garden_html_template(self, client, url):
         resp = client.get(url)
 
         assert resp.status_code == 200
@@ -158,10 +156,25 @@ class TestGardenListView:
 
 @pytest.mark.integration
 class TestGardenDetailView:
+    @pytest.fixture
+    def garden(self, garden_factory):
+        return garden_factory(watering_stations=5)
+
+    def create_url(self, pk):
+        return reverse('garden-detail', kwargs={'pk': pk})
 
     def test_view_has_correct_url(self):
         pk = 1
-        assert reverse('garden-detail', kwargs={'pk': 1}) == f'/gardens/{pk}/'
+        assert self.create_url(pk) == f'/gardens/{pk}/'
+
+    @pytest.mark.django_db
+    def test_GET_renders_garden_detail_html_template(self, client, garden):
+        url = self.create_url(garden.pk)
+
+        resp = client.get(url)
+
+        assert resp.status_code == 200
+        assert is_template_rendered('garden_detail.html', resp)
 
 
 @pytest.mark.integration

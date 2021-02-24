@@ -3,6 +3,7 @@ import factory
 
 class GardenFactory(factory.django.DjangoModelFactory):
     uuid = factory.Faker('uuid4')
+    name = factory.Sequence(lambda x: f'Garden{x}')
 
     class Meta:
         model = 'garden.Garden'

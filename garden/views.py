@@ -1,13 +1,14 @@
+from crispy_forms.utils import render_crispy_form
 from django.http.response import JsonResponse
-from garden.forms import NewGardenForm
-from django.shortcuts import redirect, render
+from django.shortcuts import render
+from django.template.context_processors import csrf
 from django.urls import reverse
 from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.template.context_processors import csrf
-from crispy_forms.utils import render_crispy_form
+
+from garden.forms import NewGardenForm
 
 from .models import Garden
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -55,4 +56,5 @@ class GardenListView(View):
 
 class GardenDetailView(View):
     def get(self, request, pk):
-        pass
+        garden = Garden.objects.get(pk=pk)
+        return render(request, 'garden_detail.html', context={'garden': garden})
