@@ -5,6 +5,9 @@ from selenium import webdriver
 
 from . import factories
 
+register(factories.GardenFactory)
+register(factories.WateringStationFactory)
+
 
 def pytest_addoption(parser):
     parser.addoption('--headless', action='store_true', default=False)
@@ -32,7 +35,3 @@ def faker_seed():
 @pytest.fixture
 def api_client():
     return APIClient()
-
-
-register(factories.GardenFactory)
-register(factories.WateringStationFactory)
