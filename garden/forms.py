@@ -5,7 +5,7 @@ from crispy_forms.layout import Submit
 from django import forms
 
 from .models import Garden, WateringStation
-from .utils import create_unique_garden_uuid, set_num_watering_stations, duration_string
+from .utils import create_unique_garden_uuid, set_num_watering_stations, derive_duration_string
 
 NEW_GARDEN_FORM_ID = 'newGardenForm'
 NEW_GARDEN_SUBMIT_ID = 'submitBtn'
@@ -46,7 +46,7 @@ class NewGardenForm(forms.ModelForm):
 class CustomDurationField(forms.DurationField):
     def prepare_value(self, value):
         if isinstance(value, datetime.timedelta):
-            return duration_string(value)
+            return derive_duration_string(value)
         return value
 
 

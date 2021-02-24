@@ -1,5 +1,4 @@
-from datetime import timedelta
-from garden.forms import duration_string
+from garden.utils import build_duration_string, derive_duration_string
 import pytest
 from django.urls import reverse
 
@@ -19,7 +18,7 @@ class TestGardenSetup(Base):
 
     def assert_watering_station_has_default_values(self, page):
         assert page.moisture_threshold == str(_default_moisture_threshold())
-        assert page.watering_duration == duration_string(_default_watering_duration())
+        assert page.watering_duration == derive_duration_string(_default_watering_duration())
 
     @pytest.mark.django_db
     def test_user_can_create_a_garden(self):
@@ -38,8 +37,8 @@ class TestGardenSetup(Base):
         self.assert_watering_station_has_default_values(page)
 
         # the user then changes these values and submits the form
-        moisture_threshold = 80
-        watering_duration = duration_string(timedelta(minutes=10, seconds=2))
+        moisture_threshold = '80'
+        watering_duration = build_duration_string(minutes=10, seconds=2)
         page.moisture_threshold = moisture_threshold
         page.watering_duration = watering_duration
         page.submit_watering_station_update()

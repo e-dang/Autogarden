@@ -67,3 +67,12 @@ class WateringStationDetailView(View):
         form = UpdateWateringStationForm(instance=watering_station)
         form_html = render_crispy_form(form, context=csrf(request))
         return JsonResponse({'html': form_html})
+
+    def post(self, request, pk, idx):
+        garden = Garden.objects.get(pk=pk)
+        watering_station = list(garden.watering_stations.all())[idx - 1]
+        form = UpdateWateringStationForm(instance=watering_station, data=request.POST)
+        if form.is_valid():
+            form.save()
+        form_html = render_crispy_form(form, context=csrf(request))
+        return JsonResponse({'html': form_html})

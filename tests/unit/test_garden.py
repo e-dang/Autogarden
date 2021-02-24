@@ -125,12 +125,24 @@ class TestUtils:
         (10, 20)
     ],
         ids=['zeros', 'single_digits', 'double_digits'])
-    def test_duration_string_returns_minutes_seconds_repr_of_timedelta(self, minutes, seconds):
+    def test_derive_duration_string_returns_minutes_seconds_repr_of_timedelta(self, minutes, seconds):
         duration = timedelta(minutes=minutes, seconds=seconds)
 
-        ret_val = utils.duration_string(duration)
+        ret_val = utils.derive_duration_string(duration)
 
         assert ret_val == f'{minutes:02}:{seconds:02}'
+
+    @patch('garden.utils.timedelta')
+    @patch('garden.utils.derive_duration_string')
+    def test_build_duration_string_calls_derive_duration_string_with_timedelta_built_from_args(self, mock_derive, mock_timedelta):
+        minutes = 1
+        seconds = 2
+
+        ret_val = utils.build_duration_string(minutes, seconds)
+
+        assert ret_val == mock_derive.return_value
+        mock_derive.assert_called_once_with(mock_timedelta.return_value)
+        mock_timedelta.assert_called_once_with(minutes=minutes, seconds=seconds)
 
 
 @pytest.mark.unit

@@ -1,3 +1,5 @@
+from datetime import timedelta
+from garden.utils import build_duration_string, derive_duration_string
 import uuid
 
 import pytest
@@ -173,7 +175,7 @@ class TestGardenDetailView:
 
         resp = client.get(url)
 
-        assert resp.status_code == 200
+        assert resp.status_code == status.HTTP_200_OK
         assert is_template_rendered('garden_detail.html', resp)
 
 
@@ -182,6 +184,12 @@ class TestWateringStationDetailView:
     @pytest.fixture
     def garden(self, garden_factory):
         return garden_factory(watering_stations=5)
+
+    @pytest.fixture
+    def valid_watering_station_data(self):
+        return {'moisture_threshold': 89,
+                'watering_duration': build_duration_string(5, 65)
+                }
 
     def create_url(self, pk, idx):
         return reverse('watering-station-detail', kwargs={'pk': pk, 'idx': idx})
@@ -198,9 +206,35 @@ class TestWateringStationDetailView:
 
         resp = client.get(url)
 
-        data = resp.json()
-        assert "Moisture Threshold" in data['html']
-        assert "Watering Duration" in data['html']
+        json = resp.json()
+        assert resp.status_code == status.HTTP_200_OK
+        assert "Moisture Threshold" in json['html']
+        assert "Watering Duration" in json['html']
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, garden, valid_watering_station_data):
+        idx = 1
+        url = self.create_url(garden.pk, idx)
+
+        resp = client.post(url, data=valid_watering_station_data)
+
+        json = resp.json()
+        assert resp.status_code == status.HTTP_200_OK
+        assert str(valid_watering_station_data['moisture_threshold']) in json['html']
+        assert valid_watering_station_data['watering_duration'] in json['html']
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, garden, valid_watering_station_data):
+        idx = 1
+        url = self.create_url(garden.pk, idx)
+
+        resp = client.post(url, data=valid_watering_station_data)
+
+        watering_station = list(garden.watering_stations.all())[idx - 1]
+        assert resp.status_code == status.HTTP_200_OK
+        assert watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
+        assert derive_duration_string(
+            watering_station.watering_duration) == valid_watering_station_data['watering_duration']
 
 
 @pytest.mark.integration

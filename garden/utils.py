@@ -1,3 +1,4 @@
+from datetime import timedelta
 from uuid import uuid4
 
 from .models import Garden
@@ -16,6 +17,10 @@ def create_unique_garden_uuid():
     return uuid
 
 
-def duration_string(duration):
+def derive_duration_string(duration):
     minutes, seconds = divmod(duration.total_seconds(), 60)
     return f'{int(minutes):02d}:{int(seconds):02d}'
+
+
+def build_duration_string(minutes, seconds):
+    return derive_duration_string(timedelta(minutes=minutes, seconds=seconds))

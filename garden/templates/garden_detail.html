@@ -28,7 +28,7 @@
         $('#wsFormContainer').html(data.html);
         $('#updateWateringStationForm').on('submit', (event) => {
             event.preventDefault();
-            $.post(url, $('#wsForm').serialize(), (data) => updateHTML(url, data));
+            $.post(url, $('#updateWateringStationForm').serialize(), (data) => updateHTML(url, data));
         });
     };
 
