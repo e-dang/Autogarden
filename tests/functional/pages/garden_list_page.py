@@ -1,5 +1,6 @@
 import re
 
+from garden.forms import NEW_GARDEN_SUBMIT_ID
 from selenium.common.exceptions import WebDriverException
 
 from ..base import wait
@@ -33,7 +34,7 @@ class GardenListPage:
         return len(gardens.find_elements_by_css_selector('.card'))
 
     def submit_new_garden(self):
-        self.driver.find_element_by_id('submitBtn').click()
+        self.driver.find_element_by_id(NEW_GARDEN_SUBMIT_ID).click()
 
     @wait
     def wait_for_garden_in_list(self, name):

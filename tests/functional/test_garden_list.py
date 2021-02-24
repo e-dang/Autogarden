@@ -1,8 +1,9 @@
 import pytest
-
-from .base import Base
-from .pages.garden_list_page import GardenListPage
 from django.urls import reverse
+from garden.models import _default_garden_name
+
+from .base import Base, wait_for
+from .pages.garden_list_page import GardenListPage
 
 
 class TestGardenSetup(Base):
@@ -24,10 +25,17 @@ class TestGardenSetup(Base):
         # them for the garden name. The default garden name is displayed in that text box. They are also prompted for
         # the number of watering stations that are going to be in this garden
         garden_page.click_add_new_garden()
-        assert garden_page.new_garden_name.lower().replace(' ', '') == 'mygarden'
+        assert garden_page.new_garden_name == _default_garden_name()
         assert garden_page.num_watering_stations == ''
 
-        # they enter a garden name and see it appear in the list of gardens
+        # they enter a negative number for the number of watering stations and hit enter, and they see a error message
+        # appear
+        garden_page.num_watering_stations = -1
+        garden_page.submit_new_garden()
+        wait_for(lambda: self.driver.find_element_by_id('error_1_id_num_watering_stations'))
+
+        # now they enter a garden name and valid number of watering stations and see a new garden appear in the list of
+        # gardens
         garden_name = 'My New Garden'
         num_watering_stations = 16
         garden_page.new_garden_name = garden_name
