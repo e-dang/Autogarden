@@ -5,7 +5,7 @@ from .elements import ButtonGroup
 
 
 class WateringStationButtons(ButtonGroup):
-    LOCATOR = 'wateringStationBtn'
+    LOCATOR = 'wateringStation'
 
 
 class GardenDetailPage(BasePage):
@@ -16,4 +16,5 @@ class GardenDetailPage(BasePage):
         return re.search(pattern, self.driver.current_url) is not None
 
     def get_number_watering_stations(self):
-        return len(self.driver.find_elements_by_css_selector('button[id*=wateringStationBtn]'))
+        # bootstrap puts table header in tbody tag so use this selector to get only watering station rows
+        return len(self.driver.find_elements_by_css_selector('td:first-child'))

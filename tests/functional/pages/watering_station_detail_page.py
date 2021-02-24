@@ -19,7 +19,7 @@ class WateringStationDetailPage(BasePage):
     watering_duration = WateringDurationInput()
 
     def has_correct_url(self):
-        pattern = r'/gardens/[0-9]+/watering-station/[0-9]+/$'
+        pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'
         return re.search(pattern, self.driver.current_url) is not None
 
     def submit_watering_station_update(self):

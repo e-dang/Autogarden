@@ -46,6 +46,7 @@ class TestGardenSetup(Base):
         ws_page.watering_duration = watering_duration
         ws_page.submit_watering_station_update()
 
+        assert False, 'Finish the test'
         # # they then click to another watering station and then back again and see that the changes have persisted
         # page.watering_station = selected_watering_station + 1
         # self.assert_watering_station_has_default_values(page)
