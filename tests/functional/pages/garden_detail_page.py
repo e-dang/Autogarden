@@ -2,6 +2,7 @@ import re
 
 from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID
 
+from .base_page import BasePage
 from .elements import ButtonGroup, TextInput
 
 
@@ -17,13 +18,10 @@ class WateringDurationInput(TextInput):
     LOCATOR = 'id_watering_duration'
 
 
-class GardenDetailPage:
+class GardenDetailPage(BasePage):
     watering_station = WateringStationButtons()
     moisture_threshold = MoistureThresholdInput()
     watering_duration = WateringDurationInput()
-
-    def __init__(self, driver):
-        self.driver = driver
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/$'

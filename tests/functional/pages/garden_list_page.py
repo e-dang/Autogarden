@@ -5,6 +5,7 @@ from selenium.common.exceptions import WebDriverException
 
 from ..base import wait
 from .elements import TextInput
+from .base_page import BasePage
 
 
 class NewGardenNameInput(TextInput):
@@ -15,12 +16,9 @@ class NumWateringStationsInput(TextInput):
     LOCATOR = 'id_num_watering_stations'
 
 
-class GardenListPage:
+class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
-
-    def __init__(self, driver):
-        self.driver = driver
 
     def has_correct_url(self):
         pattern = r'/gardens/$'
