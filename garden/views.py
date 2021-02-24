@@ -51,3 +51,8 @@ class GardenListView(View):
 
         form_html = render_crispy_form(form, context=csrf(request))
         return JsonResponse({'success': False, 'html': form_html})
+
+
+class GardenDetailView(View):
+    def get(self, request, pk):
+        pass

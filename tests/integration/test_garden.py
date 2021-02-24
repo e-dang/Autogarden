@@ -104,6 +104,9 @@ class TestAPIViews:
 
 @pytest.mark.integration
 class TestGardenListView:
+    def test_view_has_correct_url(self):
+        assert reverse('garden-list') == f'/gardens/'
+
     @pytest.fixture
     def url(self):
         return reverse('garden-list')
@@ -151,6 +154,14 @@ class TestGardenListView:
         data = resp.json()
         assert data['success'] == False
         assert NUM_WATERING_STATIONS_ERROR_MSG in data['html']
+
+
+@pytest.mark.integration
+class TestGardenDetailView:
+
+    def test_view_has_correct_url(self):
+        pk = 1
+        assert reverse('garden-detail', kwargs={'pk': 1}) == f'/gardens/{pk}/'
 
 
 @pytest.mark.integration

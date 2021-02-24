@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from garden.views import GardenView, WateringStationView, GardenListView
+from garden.views import GardenView, WateringStationView, GardenListView, GardenDetailView
 
 API_PREFIX = 'api/'
 
@@ -24,5 +24,6 @@ urlpatterns = [
     path(API_PREFIX + 'garden/', GardenView.as_view(), name='api-garden'),
     path(API_PREFIX + 'garden/<int:pk>/watering-stations/',
          WateringStationView.as_view(), name='api-watering-stations'),
-    path('gardens/', GardenListView.as_view(), name='garden-list')
+    path('gardens/', GardenListView.as_view(), name='garden-list'),
+    path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
 ]
