@@ -3,7 +3,7 @@ import uuid
 import pytest
 from django.db.utils import IntegrityError
 from django.forms import ValidationError
-from garden.forms import NewGardenForm
+from garden.forms import NewGardenForm, NUM_WATERING_STATIONS_ERROR_MSG
 from garden.models import Garden
 from garden.serializers import GardenSerializer, WateringStationSerializer
 from rest_framework import status
@@ -104,6 +104,20 @@ class TestAPIViews:
 
 @pytest.mark.integration
 class TestGardenListView:
+    @pytest.fixture
+    def url(self):
+        return reverse('garden-list')
+
+    @pytest.fixture
+    def valid_new_garden_data(self):
+        return {'name': 'My Garden',
+                'num_watering_stations': 3}
+
+    @pytest.fixture
+    def invalid_new_garden_data(self):
+        return {'name': 'My Garden',
+                'num_watering_stations': -1}
+
     @pytest.mark.django_db
     def test_GET_renders_garden_html_template(self, client):
         url = reverse('garden-list')
@@ -114,27 +128,29 @@ class TestGardenListView:
         assert is_template_rendered('gardens.html', resp)
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client):
-        data = {'name': 'My Garden',
-                'num_watering_stations': 3}
-        url = reverse('garden-list')
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_new_garden_data):
         prev_num_gardens = Garden.objects.all().count()
 
-        client.post(url, data=data)
+        client.post(url, data=valid_new_garden_data)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert Garden.objects.first().watering_stations.count() == data['num_watering_stations']
+        assert Garden.objects.first().watering_stations.count() == valid_new_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_redirects_to_garden_list_page(self, client):
-        data = {'name': 'My Garden',
-                'num_watering_stations': 3}
-        url = reverse('garden-list')
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_new_garden_data):
+        resp = client.post(url, data=valid_new_garden_data, follow=False)
 
-        resp = client.post(url, data=data, follow=False)
+        data = resp.json()
+        assert data['success'] == True
+        assert data['url'] == resp.wsgi_request.build_absolute_uri(reverse('garden-list'))
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == '/'
+    @pytest.mark.django_db
+    def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, client, url, invalid_new_garden_data):
+        resp = client.post(url, data=invalid_new_garden_data)
+
+        data = resp.json()
+        assert data['success'] == False
+        assert NUM_WATERING_STATIONS_ERROR_MSG in data['html']
 
 
 @pytest.mark.integration

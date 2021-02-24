@@ -2,7 +2,7 @@
 
 {% block main_content %}
 <div class="row justify-content-center my-5">
-    <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#createGardenModal">Add New
+    <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#newGardenModal">Add New
         Garden</button>
 </div>
 
@@ -17,7 +17,7 @@
     {% endfor %}
 </div>
 
-<div class="modal fade" id="createGardenModal" tabindex="-1" role="dialog" aria-labelledby="createGardenModal"
+<div id="newGardenModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createGardenModal"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -25,15 +25,23 @@
                 <h5 class="modal-title">New Garden</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
-            <div id="form-modal-body" class="modal-body">
-                <form method="post" action="{% url 'garden-list' %}">
-                    {% csrf_token %}
-                    {{form.as_p}}
-                    <button id="submitBtn" class="btn btn-primary" type="submit">Create</button>
-                </form>
+            <div class="modal-body">
+                {% load crispy_forms_tags %}
+                {% crispy form %}
             </div>
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+{% load compress %}
+
+{% compress js %}
+<script src="/static/javascript/utils.js"></script>
+<script src="/static/javascript/gardens.js"></script>
+{% endcompress %}
 
 {% endblock %}
