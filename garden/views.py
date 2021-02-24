@@ -61,17 +61,16 @@ class GardenDetailView(View):
 
 
 class WateringStationDetailView(View):
-    def get(self, request, pk, idx):
-        garden = Garden.objects.get(pk=pk)
-        watering_station = list(garden.watering_stations.all())[idx - 1]
-        form = UpdateWateringStationForm(instance=watering_station)
-        form_html = render_crispy_form(form, context=csrf(request))
-        return JsonResponse({'html': form_html})
+    def get(self, request, garden_pk, ws_pk):
+        garden = Garden.objects.get(pk=garden_pk)
+        station = garden.watering_stations.get(pk=ws_pk)
+        form = UpdateWateringStationForm(instance=station)
+        return render(request, 'watering_station.html', context={'form': form})
 
-    def post(self, request, pk, idx):
-        garden = Garden.objects.get(pk=pk)
-        watering_station = list(garden.watering_stations.all())[idx - 1]
-        form = UpdateWateringStationForm(instance=watering_station, data=request.POST)
+    def post(self, request, garden_pk, ws_pk):
+        garden = Garden.objects.get(pk=garden_pk)
+        station = garden.watering_stations.get(pk=ws_pk)
+        form = UpdateWateringStationForm(instance=station, data=request.POST)
         if form.is_valid():
             form.save()
         form_html = render_crispy_form(form, context=csrf(request))

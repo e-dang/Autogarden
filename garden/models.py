@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
+from django.urls import reverse
 
 
 def _default_moisture_threshold():
@@ -27,3 +28,6 @@ class WateringStation(models.Model):
 
     class Meta:
         ordering = ['id']
+
+    def get_absolute_url(self):
+        return reverse('watering-station-detail', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})

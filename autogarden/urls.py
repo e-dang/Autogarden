@@ -26,6 +26,6 @@ urlpatterns = [
          WateringStationView.as_view(), name='api-watering-stations'),
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
-    path('gardens/<int:pk>/watering-stations/<int:idx>/',
+    path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),
 ]

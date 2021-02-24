@@ -9,8 +9,12 @@ from garden.models import (Garden, WateringStation, _default_garden_name,
                            _default_watering_duration)
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
-from garden.views import GardenDetailView
+from garden.views import GardenDetailView, WateringStationDetailView
 from rest_framework.serializers import ValidationError
+
+
+def assert_render_context_called_with(mock_render, kwarg):
+    assert mock_render.call_args.kwargs['context'] == kwarg
 
 
 @pytest.mark.unit
@@ -156,4 +160,20 @@ class TestGardenDetailView:
 
         GardenDetailView().get(request, pk)
 
-        assert mock_render.call_args.kwargs['context']['garden'] == mock_garden
+        assert_render_context_called_with(mock_render, {'garden': mock_garden})
+
+
+@pytest.mark.unit
+class TestWateringStationDetailView:
+    @patch('garden.views.Garden')
+    @patch('garden.views.render')
+    @patch('garden.views.UpdateWateringStationForm', autospec=True)
+    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_garden):
+        garden_pk = 1
+        ws_pk = 2
+        mock_form = mock_form_class.return_value
+        request = HttpRequest()
+
+        WateringStationDetailView().get(request, garden_pk, ws_pk)
+
+        assert_render_context_called_with(mock_render, {'form': mock_form})
