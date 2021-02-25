@@ -43,9 +43,10 @@ class TestGardenModel:
     @pytest.mark.parametrize('field, get_default', [
         ('name', models._default_garden_name),
         ('is_connected', models._default_is_connected),
-        ('update_interval', models._default_update_interval)
+        ('update_interval', models._default_update_interval),
+        ('num_missed_updates', models._default_num_missed_updates)
     ],
-        ids=['name', 'is_connected', 'update_interval'])
+        ids=['name', 'is_connected', 'update_interval', 'num_missed_updates'])
     def test_field_is_given_a_default_value(self, field, get_default):
         garden = models.Garden()
 
