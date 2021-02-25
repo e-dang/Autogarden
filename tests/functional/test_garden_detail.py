@@ -51,7 +51,7 @@ class TestGardenSetup(Base):
         self.wait_for_page_to_be_loaded(garden_page)
         garden_page.watering_station = selected_watering_station + 1
         self.wait_for_page_to_be_loaded(ws_page)
-        self.assert_watering_station_has_default_values(garden_page)
+        self.assert_watering_station_has_default_values(ws_page)
 
         # they then use the navbar to go directly to the watering station page that they had edited and see that their
         # configurations have persisted
