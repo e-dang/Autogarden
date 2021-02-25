@@ -67,7 +67,7 @@ class Garden(models.Model):
         while next_update.total_seconds() < 0:
             factor += 1
             next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
-        return next_update
+        return int(next_update.total_seconds())
 
 
 class WateringStation(models.Model):
