@@ -28,6 +28,7 @@ class WateringStation(models.Model):
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)
     moisture_threshold = models.IntegerField(default=_default_moisture_threshold)
     watering_duration = models.DurationField(default=_default_watering_duration)
+    plant_type = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ['id']
