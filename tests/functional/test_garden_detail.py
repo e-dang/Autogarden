@@ -29,15 +29,33 @@ class TestGardenSetup(Base):
         garden_page = GardenDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(garden_page)
 
-        # they see a list, where each row corresponds to a watering station in the garden
+        # they see a table, where each row corresponds to a watering station in the garden and the header of the table
+        # displays the field names of the watering_stations
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
+        assert garden_page.field_is_in_watering_station_table('Watering Station Number')
+        assert garden_page.field_is_in_watering_station_table('Plant Type')
+        assert garden_page.field_is_in_watering_station_table('Moisture Threshold')
+        assert garden_page.field_is_in_watering_station_table('Watering Duration')
+
+        # the user also notices that the row display some information about the watering station
+        selected_watering_station = 1
+        assert str(selected_watering_station) == garden_page.get_watering_station_field_value(
+            selected_watering_station, 'Watering Station Number')
+        plant_type = garden_page.get_watering_station_field_value(selected_watering_station, 'Plant Type')
+        moisture_threshold = garden_page.get_watering_station_field_value(
+            selected_watering_station, 'Moisture Threshold')
+        watering_duration = garden_page.get_watering_station_field_value(
+            selected_watering_station, 'Watering Duration')
 
         # they click a watering station link and are taken to a page with a form that allows them
-        # to edit the configurations of the watering station
-        selected_watering_station = 1
+        # to edit the configurations of the watering station. The user notices that the values in the form are the same
+        # as in the table on the previous page
         garden_page.watering_station = selected_watering_station
         ws_page = WateringStationDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(ws_page)
+        assert ws_page.plant_type == plant_type
+        assert ws_page.watering_duration == watering_duration
+        assert ws_page.moisture_threshold == moisture_threshold
         self.assert_watering_station_has_default_values(ws_page)
 
         # the user then changes these values and submits the form
