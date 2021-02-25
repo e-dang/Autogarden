@@ -62,7 +62,6 @@ class UpdateWateringStationForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
-        self.helper.form_action = 'watering-station-detail'
         self.helper.add_input(Submit('submit', 'Update', css_id=UPDATE_WATERING_STATION_SUBMIT_ID))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'

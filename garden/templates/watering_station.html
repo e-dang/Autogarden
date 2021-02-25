@@ -10,3 +10,21 @@
 </div>
 
 {% endblock %}
+
+
+{% block javascript %}
+<script>
+    const form = $('#updateWateringStationForm');
+    form.on('submit', (event) => {
+        event.preventDefault();
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: (data) => {
+                form.html(data.html);
+            },
+        });
+    })
+</script>
+{% endblock %}
