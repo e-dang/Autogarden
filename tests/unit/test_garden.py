@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import create_autospec, patch
+from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
 import pytest
@@ -64,6 +64,22 @@ class TestWateringStationModel:
 
         assert getattr(watering_station, field) == get_default()
 
+    @patch('garden.models.derive_duration_string')
+    def test_get_formatted_duration_calls_derive_duration_string_with_watering_duration_field(self, mock_derive_duration_string):
+        mock_ws = Mock()
+
+        WateringStation.get_formatted_duration(mock_ws)
+
+        mock_derive_duration_string.assert_called_once_with(mock_ws.watering_duration)
+
+    @patch('garden.models.derive_duration_string')
+    def test_get_formatted_duration_returns_return_value_of_derive_duration_string(self, mock_derive_duration_string):
+        mock_ws = Mock()
+
+        ret_val = WateringStation.get_formatted_duration(mock_ws)
+
+        assert ret_val == mock_derive_duration_string.return_value
+
 
 @pytest.mark.unit
 class TestWateringStationSerializer:
@@ -83,9 +99,10 @@ class TestWateringStationSerializer:
 
 @pytest.mark.unit
 class TestUtils:
-    @patch('garden.utils.Garden', autospec=True)
+    @patch('garden.utils.apps.get_model', autospec=True)
     @patch('garden.utils.uuid4')
-    def test_create_unique_uuid_calls_uuid_until_a_unique_one_is_found(self, mock_uuid, mock_garden):
+    def test_create_unique_uuid_calls_uuid_until_a_unique_one_is_found(self, mock_uuid, mock_get_model):
+        mock_garden = mock_get_model.return_value
         calls = []
         call_count = 2
         for _ in range(call_count):
@@ -97,9 +114,10 @@ class TestUtils:
 
         assert mock_uuid.call_count == call_count + 1
 
-    @patch('garden.utils.Garden', autospec=True)
+    @patch('garden.utils.apps.get_model', autospec=True)
     @patch('garden.utils.uuid4')
-    def test_create_unique_uuid_returns_the_last_return_value_of_uuid4(self, mock_uuid, mock_garden):
+    def test_create_unique_uuid_returns_the_last_return_value_of_uuid4(self, mock_uuid, mock_get_model):
+        mock_garden = mock_get_model.return_value
         ret_val = 'test-uuid'
         mock_uuid.return_value = ret_val
         mock_garden.objects.filter.return_value.exists.return_value = False
