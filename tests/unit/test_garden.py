@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
@@ -96,6 +96,27 @@ class TestGardenModel:
         ret_val = garden.calc_time_till_next_update()
 
         assert int(expected.total_seconds()) == ret_val
+
+    def test_get_formatted_last_connection_time_returns_correct_format(self, garden_factory):
+        day = 25
+        month = 2
+        year = 2021
+        hour = 12
+        minute = 13
+        period = 'PM'
+        dtime = datetime(day=day, month=month, year=year, hour=hour, minute=minute, tzinfo=pytz.UTC)
+        garden = garden_factory.build(last_connection_time=dtime)
+
+        ret_val = garden.get_formatted_last_connection_time()
+
+        assert ret_val == f'{month}/{day}/{year} {hour}:{minute} {period}'
+
+    def test_get_formatted_last_connection_time_returns_None_if_last_connection_time_is_none(self, garden_factory):
+        garden = garden_factory.build(last_connection_time=None)
+
+        ret_val = garden.get_formatted_last_connection_time()
+
+        assert ret_val == str(None)
 
 
 @pytest.mark.unit

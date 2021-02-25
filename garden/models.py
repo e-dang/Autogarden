@@ -69,6 +69,11 @@ class Garden(models.Model):
             next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
         return int(next_update.total_seconds())
 
+    def get_formatted_last_connection_time(self):
+        if self.last_connection_time is None:
+            return str(None)
+        return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
+
 
 class WateringStation(models.Model):
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)
