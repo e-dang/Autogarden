@@ -17,11 +17,6 @@ class TestGardenSetup(Base):
     def url(self, live_server):
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
 
-    def assert_watering_station_has_default_values(self, page):
-        assert page.moisture_threshold == str(_default_moisture_threshold())
-        assert page.watering_duration == derive_duration_string(_default_watering_duration())
-        assert page.plant_type == ''
-
     @pytest.mark.django_db
     def test_user_can_modify_a_garden(self):
         # a user goes to a garden detail page
@@ -30,20 +25,11 @@ class TestGardenSetup(Base):
         self.wait_for_page_to_be_loaded(garden_page)
 
         # the user sees information about the garden
-        assert garden_page.get_status() == self.garden.status
-        assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
-        assert garden_page.get_last_connected_at() == self.garden.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
-        assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
-        assert garden_page.get_num_missed_updates() == str(self.garden.num_missed_updates)
-        assert garden_page.get_water_level() == str(self.garden.get_water_level_display())
+        self.assert_garden_info_is_correct(garden_page)
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
-        assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
-        assert garden_page.field_is_in_watering_station_table('Watering Station Number')
-        assert garden_page.field_is_in_watering_station_table('Plant Type')
-        assert garden_page.field_is_in_watering_station_table('Moisture Threshold')
-        assert garden_page.field_is_in_watering_station_table('Watering Duration')
+        self.assert_watering_station_table_contains_correct_info(garden_page)
 
         # the user also notices that the row display some information about the watering station
         selected_watering_station = 1
@@ -88,3 +74,26 @@ class TestGardenSetup(Base):
         assert ws_page.moisture_threshold == moisture_threshold
         assert ws_page.watering_duration == watering_duration
         assert ws_page.plant_type == plant_type
+
+    def assert_watering_station_has_default_values(self, page):
+        assert page.moisture_threshold == str(_default_moisture_threshold())
+        assert page.watering_duration == derive_duration_string(_default_watering_duration())
+        assert page.plant_type == ''
+
+    def assert_garden_info_is_correct(self, garden_page):
+        assert garden_page.get_status() == self.garden.status
+        assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
+        assert garden_page.get_last_connected_at() == self.garden.get_formatted_last_connection_time()
+        self.assert_next_expected_update_is_correct(garden_page)
+        assert garden_page.get_num_missed_updates() == str(self.garden.num_missed_updates)
+        assert garden_page.get_water_level() == str(self.garden.get_water_level_display())
+
+    def assert_next_expected_update_is_correct(self, garden_page):
+        assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
+
+    def assert_watering_station_table_contains_correct_info(self, garden_page):
+        assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
+        assert garden_page.field_is_in_watering_station_table('Watering Station Number')
+        assert garden_page.field_is_in_watering_station_table('Plant Type')
+        assert garden_page.field_is_in_watering_station_table('Moisture Threshold')
+        assert garden_page.field_is_in_watering_station_table('Watering Duration')
