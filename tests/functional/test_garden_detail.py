@@ -33,7 +33,7 @@ class TestGardenSetup(Base):
         assert garden_page.get_status() == self.garden.status
         assert garden_page.get_last_connected_form() == str(self.garden.last_connection_ip)
         assert garden_page.get_last_connected_at() == str(self.garden.last_connection_time)
-        assert garden_page.get_next_expected_update() == self.garden.calc_time_till_next_update()
+        assert garden_page.get_next_expected_update() == str(self.garden.calc_time_till_next_update())
         assert garden_page.get_num_missed_updates() == self.garden.num_missed_updates
         assert garden_page.get_water_level() == self.garden.water_level
 

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.urls import reverse
@@ -22,6 +22,10 @@ def _default_is_connected():
     return False
 
 
+def _default_update_interval():
+    return timedelta(minutes=5)
+
+
 CONNECTED_STR = 'Connected'
 DISCONNECTED_STR = 'Disconnected'
 
@@ -32,6 +36,7 @@ class Garden(models.Model):
     is_connected = models.BooleanField(default=_default_is_connected)
     last_connection_ip = models.GenericIPAddressField(null=True)
     last_connection_time = models.DateTimeField(null=True)
+    update_interval = models.DurationField(default=_default_update_interval)
 
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
@@ -39,6 +44,16 @@ class Garden(models.Model):
     @property
     def status(self):
         return CONNECTED_STR if self.is_connected else DISCONNECTED_STR
+
+    def calc_time_till_next_update(self):
+        if self.last_connection_time is None:
+            return None
+        factor = 1
+        next_update = self.last_connection_time + factor * self.update_interval - datetime.utcnow()
+        while next_update.total_seconds() < 0:
+            factor += 1
+            next_update = self.last_connection_time + factor * self.update_interval - datetime.utcnow()
+        return next_update
 
 
 class WateringStation(models.Model):
