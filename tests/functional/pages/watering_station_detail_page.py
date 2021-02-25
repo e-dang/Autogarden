@@ -15,9 +15,14 @@ class WateringDurationInput(TextInput):
     LOCATOR = 'id_watering_duration'
 
 
+class PlantTypeInput(TextInput):
+    LOCATOR = 'id_plant_type'
+
+
 class WateringStationDetailPage(BasePage):
     moisture_threshold = MoistureThresholdInput()
     watering_duration = WateringDurationInput()
+    plant_type = PlantTypeInput()
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'

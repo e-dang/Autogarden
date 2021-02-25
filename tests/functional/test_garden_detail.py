@@ -20,6 +20,7 @@ class TestGardenSetup(Base):
     def assert_watering_station_has_default_values(self, page):
         assert page.moisture_threshold == str(_default_moisture_threshold())
         assert page.watering_duration == derive_duration_string(_default_watering_duration())
+        assert page.plant_type == ''
 
     @pytest.mark.django_db
     def test_user_can_modify_a_garden(self):
@@ -42,8 +43,10 @@ class TestGardenSetup(Base):
         # the user then changes these values and submits the form
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
+        plant_type = 'lettuce'
         ws_page.moisture_threshold = moisture_threshold
         ws_page.watering_duration = watering_duration
+        ws_page.plant_type = plant_type
         ws_page.submit_watering_station_update()
 
         # they then go back to the garden detail view and select a different watering station page.
@@ -58,3 +61,4 @@ class TestGardenSetup(Base):
         ws_page.go_to_watering_station_page(selected_watering_station)
         assert ws_page.moisture_threshold == moisture_threshold
         assert ws_page.watering_duration == watering_duration
+        assert ws_page.plant_type == plant_type
