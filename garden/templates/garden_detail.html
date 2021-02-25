@@ -6,11 +6,91 @@
 
 {% block main_content %}
 
-<div class="row">
-    <h2>{{garden.name}}</h2>
+<div class="row mt-3">
+    <div class="col-4 align-self-end">
+        <h1>{{garden.name}}</h1>
+        <img src="/static/images/default_garden.png" width="300" height="200" alt="">
+    </div>
+    <div class="col align-self-end">
+        <div class="row">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Status</div>
+                    <div class="card-body">
+                        {% if garden.is_connected %}
+                        <p class="card-text text-center"><span id="connectionStatus"
+                                class="badge badge-pill badge-success">{{garden.status}}</span></p>
+                        {% else %}
+                        <p class="card-text text-center"><span id="connectionStatus"
+                                class="badge badge-pill badge-danger">{{garden.status}}</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Last Connected From</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">{{garden.last_connection_ip}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Last Connected At</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">{{garden.last_connection_time}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Next Expected Update</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">{{garden.calc_time_till_next_update}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Number of Missed Updates</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">{{garden.num_missed_updates}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Water Level</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">{{garden.num_missed_updates}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <hr>
+
+<div class="row">
+    <div class="col">
+        <h3>Watering Stations</h3>
+    </div>
+    <div class="col">
+        <div class="float-right">
+            <button class="btn btn-outline-success">
+                Add Watering Station
+            </button>
+            <button class="btn btn-outline-danger">
+                Deactivate All
+            </button>
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <div class="col">
@@ -19,6 +99,7 @@
                 <thead>
                     <tr>
                         <th scope="col text-capitalize">Watering Station Number</th>
+                        <th scope="col">Status</th>
                         <th scope="col text-capitalize">Plant Type</th>
                         <th scope="col text-capitalize">Moisture Threshold</th>
                         <th scope="col text-capitalize">Watering Duration</th>
@@ -31,6 +112,7 @@
                             <a id="wateringStation{{ forloop.counter }}"
                                 href="{{ watering_station.get_absolute_url }}">{{ forloop.counter }}</a>
                         </td>
+                        <td scope="row">Active</td>
                         <td scope="row">{{ watering_station.plant_type }}</td>
                         <td scope="row">{{ watering_station.moisture_threshold }}</td>
                         <td scope="row">{{ watering_station.get_formatted_duration }}</td>
