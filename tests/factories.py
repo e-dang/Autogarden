@@ -22,7 +22,10 @@ class GardenFactory(factory.django.DjangoModelFactory):
 
         if count:
             for _ in range(count):
-                WateringStationFactory(garden=self)
+                if kwargs.get('defaults') == True:
+                    WateringStation(garden=self).save()
+                else:
+                    WateringStationFactory(garden=self)
 
 
 class WateringStationFactory(factory.django.DjangoModelFactory):
