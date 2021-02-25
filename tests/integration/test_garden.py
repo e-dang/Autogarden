@@ -134,7 +134,7 @@ class TestGardenListView:
     def test_GET_renders_garden_html_template(self, client, url):
         resp = client.get(url)
 
-        assert_template_is_rendered(resp, 'gardens.html')
+        assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_new_garden_data):

@@ -39,7 +39,7 @@ class GardenListView(View):
     def get(self, request):
         form = NewGardenForm()
         gardens = Garden.objects.all()
-        return render(request, 'gardens.html', context={'gardens': gardens, 'form': form})
+        return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request):
         form = NewGardenForm(data=request.POST)
