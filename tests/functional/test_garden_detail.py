@@ -5,7 +5,7 @@ from django.urls import reverse
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.watering_station_detail_page import WateringStationDetailPage
-from garden.models import _default_moisture_threshold, _default_watering_duration
+from garden.models import Garden, _default_moisture_threshold, _default_watering_duration
 
 
 class TestGardenSetup(Base):
@@ -46,10 +46,15 @@ class TestGardenSetup(Base):
         ws_page.watering_duration = watering_duration
         ws_page.submit_watering_station_update()
 
-        assert False, 'Finish the test'
-        # # they then click to another watering station and then back again and see that the changes have persisted
-        # page.watering_station = selected_watering_station + 1
-        # self.assert_watering_station_has_default_values(page)
-        # page.watering_station = selected_watering_station
-        # assert page.moisture_threshold == moisture_threshold
-        # assert page.watering_duration == watering_duration
+        # they then go back to the garden detail view and select a different watering station page.
+        ws_page.go_back_to_garden_detail()
+        self.wait_for_page_to_be_loaded(garden_page)
+        garden_page.watering_station = selected_watering_station + 1
+        self.wait_for_page_to_be_loaded(ws_page)
+        self.assert_watering_station_has_default_values(garden_page)
+
+        # they then use the navbar to go directly to the watering station page that they had edited and see that their
+        # configurations have persisted
+        ws_page.go_to_watering_station_page(selected_watering_station)
+        assert ws_page.moisture_threshold == moisture_threshold
+        assert ws_page.watering_duration == watering_duration
