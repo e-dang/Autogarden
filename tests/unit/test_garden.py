@@ -1,8 +1,9 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
 import pytest
+import pytz
 from django.http.request import HttpRequest
 from garden import models
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
@@ -67,9 +68,9 @@ class TestGardenModel:
 
     def test_calc_time_till_next_update_returns_expected_time_to_within_a_second(self, garden_factory):
         error_margin = timedelta(seconds=1)
-        last_connection_time = datetime.utcnow() - timedelta(minutes=20)
+        last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=20)
         update_interval = timedelta(minutes=10)
-        expected = last_connection_time + update_interval - datetime.utcnow()
+        expected = last_connection_time + update_interval - datetime.now(pytz.UTC)
         garden = garden_factory.build(last_connection_time=last_connection_time, update_interval=update_interval)
 
         ret_val = garden.calc_time_till_next_update()
@@ -88,9 +89,9 @@ class TestGardenModel:
         error_margin = timedelta(seconds=1)
         num_updates_missed = 2
         update_interval_minutes = 5
-        last_connection_time = datetime.utcnow() - timedelta(minutes=update_interval_minutes * num_updates_missed)
+        last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=update_interval_minutes * num_updates_missed)
         update_interval = timedelta(minutes=update_interval_minutes)
-        expected = last_connection_time + (num_updates_missed + 1) * update_interval - datetime.utcnow()
+        expected = last_connection_time + (num_updates_missed + 1) * update_interval - datetime.now(pytz.UTC)
         garden = garden_factory.build(last_connection_time=last_connection_time, update_interval=update_interval)
 
         ret_val = garden.calc_time_till_next_update()

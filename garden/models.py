@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.urls import reverse
+import pytz
 
 from .utils import derive_duration_string
 
@@ -35,6 +36,13 @@ DISCONNECTED_STR = 'Disconnected'
 
 
 class Garden(models.Model):
+    OK = 'ok'
+    LOW = 'lo'
+    WATER_LEVEL_CHOICES = [
+        (OK, 'Ok'),
+        (LOW, 'Low'),
+    ]
+
     uuid = models.UUIDField(unique=True)
     name = models.CharField(max_length=255, default=_default_garden_name)
     is_connected = models.BooleanField(default=_default_is_connected)
@@ -42,6 +50,7 @@ class Garden(models.Model):
     last_connection_time = models.DateTimeField(null=True)
     update_interval = models.DurationField(default=_default_update_interval)
     num_missed_updates = models.PositiveIntegerField(default=_default_num_missed_updates)
+    water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
@@ -54,10 +63,10 @@ class Garden(models.Model):
         if self.last_connection_time is None:
             return None
         factor = 1
-        next_update = self.last_connection_time + factor * self.update_interval - datetime.utcnow()
+        next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
         while next_update.total_seconds() < 0:
             factor += 1
-            next_update = self.last_connection_time + factor * self.update_interval - datetime.utcnow()
+            next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
         return next_update
 
 

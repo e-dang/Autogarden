@@ -241,9 +241,10 @@ class TestGardenModel:
     @pytest.mark.parametrize('garden_factory, nulled_data', [
         (None, {'last_connection_ip': None}),
         (None, {'last_connection_time': None}),
+        (None, {'water_level': None})
     ],
         indirect=['garden_factory'],
-        ids=['last_connection_ip', 'last_connection_time'])
+        ids=['last_connection_ip', 'last_connection_time', 'water_level'])
     def test_fields_can_be_null_field(self, garden_factory, nulled_data):
         garden_factory(**nulled_data)  # should not raise
 
