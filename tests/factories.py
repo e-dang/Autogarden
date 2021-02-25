@@ -5,6 +5,7 @@ class GardenFactory(factory.django.DjangoModelFactory):
     uuid = factory.Faker('uuid4')
     name = factory.Sequence(lambda x: f'Garden{x}')
     is_connected = factory.Sequence(lambda x: x % 2 == 0)
+    last_connection_ip = factory.Faker('ipv4')
 
     class Meta:
         model = 'garden.Garden'

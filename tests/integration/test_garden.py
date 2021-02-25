@@ -238,6 +238,10 @@ class TestGardenModel:
             assert 'UNIQUE' in err
 
     @pytest.mark.django_db
+    def test_last_connection_ip_can_be_null_field(self, garden_factory):
+        garden_factory(last_connection_ip=None)  # should not raise
+
+    @pytest.mark.django_db
     def test_get_absolute_url_returns_correct_url(self, garden_factory):
         garden = garden_factory()
 

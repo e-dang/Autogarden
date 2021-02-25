@@ -30,6 +30,7 @@ class Garden(models.Model):
     uuid = models.UUIDField(unique=True)
     name = models.CharField(max_length=255, default=_default_garden_name)
     is_connected = models.BooleanField(default=_default_is_connected)
+    last_connection_ip = models.GenericIPAddressField(null=True)
 
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
