@@ -1,13 +1,14 @@
-from datetime import timedelta
-from garden.utils import build_duration_string, derive_duration_string
 import uuid
 
 import pytest
 from django.db.utils import IntegrityError
 from django.forms import ValidationError
-from garden.forms import NewGardenForm, NUM_WATERING_STATIONS_ERROR_MSG
+from garden.forms import (NUM_WATERING_STATIONS_ERROR_MSG,
+                          REQUIRED_FIELD_ERR_MSG, NewGardenForm,
+                          UpdateWateringStationForm)
 from garden.models import Garden
 from garden.serializers import GardenSerializer, WateringStationSerializer
+from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -33,8 +34,30 @@ def data_GET_api_watering_stations(garden_factory):
     return num_watering_stations, garden, url
 
 
-def is_template_rendered(template_name, response):
-    return template_name in (template.name for template in response.templates)
+@pytest.fixture
+def valid_watering_station_data():
+    return {'moisture_threshold': 89,
+            'watering_duration': build_duration_string(5, 65),
+            'plant_type': 'lettuce'
+            }
+
+
+@pytest.fixture
+def valid_garden_data():
+    return {'name': 'My Garden',
+            'num_watering_stations': 3}
+
+
+def assert_template_is_rendered(response, template_name):
+    assert response.status_code == status.HTTP_200_OK
+    assert template_name in (template.name for template in response.templates)
+
+
+def assert_data_present_in_json_response_html(response, values):
+    json = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    for value in values:
+        assert str(value) in json['html']
 
 
 @pytest.mark.integration
@@ -114,11 +137,6 @@ class TestGardenListView:
         return reverse('garden-list')
 
     @pytest.fixture
-    def valid_new_garden_data(self):
-        return {'name': 'My Garden',
-                'num_watering_stations': 3}
-
-    @pytest.fixture
     def invalid_new_garden_data(self):
         return {'name': 'My Garden',
                 'num_watering_stations': -1}
@@ -127,21 +145,20 @@ class TestGardenListView:
     def test_GET_renders_garden_html_template(self, client, url):
         resp = client.get(url)
 
-        assert resp.status_code == 200
-        assert is_template_rendered('gardens.html', resp)
+        assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_new_garden_data):
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_garden_data):
         prev_num_gardens = Garden.objects.all().count()
 
-        client.post(url, data=valid_new_garden_data)
+        client.post(url, data=valid_garden_data)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert Garden.objects.first().watering_stations.count() == valid_new_garden_data['num_watering_stations']
+        assert Garden.objects.first().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_new_garden_data):
-        resp = client.post(url, data=valid_new_garden_data, follow=False)
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_garden_data):
+        resp = client.post(url, data=valid_garden_data, follow=False)
 
         data = resp.json()
         assert data['success'] == True
@@ -175,66 +192,38 @@ class TestGardenDetailView:
 
         resp = client.get(url)
 
-        assert resp.status_code == status.HTTP_200_OK
-        assert is_template_rendered('garden_detail.html', resp)
+        assert_template_is_rendered(resp, 'garden_detail.html')
 
 
 @pytest.mark.integration
 class TestWateringStationDetailView:
-    @pytest.fixture
-    def garden(self, garden_factory):
-        return garden_factory(watering_stations=5)
+    @pytest.mark.django_db
+    def test_GET_renders_watering_station_html_template(self, client, watering_station_factory):
+        station = watering_station_factory()
 
-    @pytest.fixture
-    def valid_watering_station_data(self):
-        return {'moisture_threshold': 89,
-                'watering_duration': build_duration_string(5, 65)
-                }
+        resp = client.get(station.get_absolute_url())
 
-    def create_url(self, pk, idx):
-        return reverse('watering-station-detail', kwargs={'pk': pk, 'idx': idx})
-
-    def test_view_has_correct_url(self):
-        pk = 1
-        idx = 1
-        assert self.create_url(pk, idx) == f'/gardens/{pk}/watering-stations/{idx}/'
+        assert_template_is_rendered(resp, 'watering_station.html')
 
     @pytest.mark.django_db
-    def test_GET_returns_json_response_with_update_watering_station_form_html(self, client, garden):
-        idx = 1
-        url = self.create_url(garden.pk, idx)
+    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, watering_station_factory, valid_watering_station_data):
+        station = watering_station_factory()
 
-        resp = client.get(url)
+        resp = client.post(station.get_absolute_url(), data=valid_watering_station_data)
 
-        json = resp.json()
-        assert resp.status_code == status.HTTP_200_OK
-        assert "Moisture Threshold" in json['html']
-        assert "Watering Duration" in json['html']
+        assert_data_present_in_json_response_html(resp, valid_watering_station_data.values())
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, garden, valid_watering_station_data):
-        idx = 1
-        url = self.create_url(garden.pk, idx)
+    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, watering_station_factory, valid_watering_station_data):
+        station = watering_station_factory()
 
-        resp = client.post(url, data=valid_watering_station_data)
+        resp = client.post(station.get_absolute_url(), data=valid_watering_station_data)
 
-        json = resp.json()
+        station.refresh_from_db()
         assert resp.status_code == status.HTTP_200_OK
-        assert str(valid_watering_station_data['moisture_threshold']) in json['html']
-        assert valid_watering_station_data['watering_duration'] in json['html']
-
-    @pytest.mark.django_db
-    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, garden, valid_watering_station_data):
-        idx = 1
-        url = self.create_url(garden.pk, idx)
-
-        resp = client.post(url, data=valid_watering_station_data)
-
-        watering_station = list(garden.watering_stations.all())[idx - 1]
-        assert resp.status_code == status.HTTP_200_OK
-        assert watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
-        assert derive_duration_string(
-            watering_station.watering_duration) == valid_watering_station_data['watering_duration']
+        assert station.moisture_threshold == valid_watering_station_data['moisture_threshold']
+        assert derive_duration_string(station.watering_duration) == valid_watering_station_data['watering_duration']
+        assert station.plant_type == valid_watering_station_data['plant_type']
 
 
 @pytest.mark.integration
@@ -247,6 +236,14 @@ class TestGardenModel:
         with pytest.raises(IntegrityError) as err:
             Garden(uuid=id_).save()
             assert 'UNIQUE' in err
+
+    @pytest.mark.django_db
+    def test_get_absolute_url_returns_correct_url(self, garden_factory):
+        garden = garden_factory()
+
+        url = garden.get_absolute_url()
+
+        assert url == f'/gardens/{garden.pk}/'
 
 
 @pytest.mark.integration
@@ -270,6 +267,19 @@ class TestGardenSerializer:
 
 @pytest.mark.integration
 class TestNewGardenForm:
+    @pytest.mark.parametrize('valid_garden_data, missing_field', [
+        (None, 'name'),
+        (None, 'num_watering_stations'),
+    ],
+        indirect=['valid_garden_data'],
+        ids=['name', 'num_watering_stations'])
+    def test_fields_are_required(self, valid_garden_data, missing_field):
+        valid_garden_data.pop(missing_field)
+        form = NewGardenForm(data=valid_garden_data)
+
+        assert not form.is_valid()
+        assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
+
     @pytest.mark.django_db
     def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self):
         data = {
@@ -296,3 +306,38 @@ class TestNewGardenForm:
 
         with pytest.raises(ValidationError):
             form.clean_num_watering_stations()
+
+
+@pytest.mark.integration
+class TestWateringStationModel:
+    @pytest.mark.django_db
+    def test_get_absolute_url_returns_correct_url(self, watering_station_factory):
+        station = watering_station_factory()
+        garden = station.garden
+
+        url = station.get_absolute_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/{station.pk}/'
+
+
+@pytest.mark.integration
+class TestUpdateWateringStationForm:
+
+    @pytest.mark.parametrize('valid_watering_station_data, missing_field', [
+        (None, 'moisture_threshold'),
+        (None, 'watering_duration')
+    ],
+        indirect=['valid_watering_station_data'],
+        ids=['moisture_threshold', 'watering_duration'])
+    def test_fields_are_required(self, valid_watering_station_data, missing_field):
+        valid_watering_station_data.pop(missing_field)
+        form = UpdateWateringStationForm(data=valid_watering_station_data)
+
+        assert not form.is_valid()
+        assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
+
+    def test_plant_type_field_is_not_required(self, valid_watering_station_data):
+        valid_watering_station_data.pop('plant_type')
+        form = UpdateWateringStationForm(data=valid_watering_station_data)
+
+        assert form.is_valid()

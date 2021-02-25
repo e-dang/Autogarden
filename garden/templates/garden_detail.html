@@ -1,39 +1,45 @@
 {% extends 'base.html' %}
 
+{% block navbar%}
+{% include 'garden_detail_nav.html' with garden=garden %}
+{% endblock %}
+
 {% block main_content %}
 
 <div class="row">
     <h2>{{garden.name}}</h2>
 </div>
 
+<hr>
+
 <div class="row">
     <div class="col">
-        {% for watering_station in garden.watering_stations.all %}
-        {% url 'watering-station-detail' garden.pk forloop.counter as the_url %}
-        <button id="wateringStationBtn{{ forloop.counter }}" class="btn btn-secondary"
-            onclick="getWateringStationForm('{{the_url}}')">{{ forloop.counter }}</button>
-        {% endfor %}
+        <div class="table-responsive-md">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col text-capitalize">Watering Station Number</th>
+                        <th scope="col text-capitalize">Plant Type</th>
+                        <th scope="col text-capitalize">Moisture Threshold</th>
+                        <th scope="col text-capitalize">Watering Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="hererer">
+                    {% for watering_station in garden.watering_stations.all %}
+                    <tr>
+                        <td scope="row">
+                            <a id="wateringStation{{ forloop.counter }}"
+                                href="{{ watering_station.get_absolute_url }}">{{ forloop.counter }}</a>
+                        </td>
+                        <td scope="row">{{ watering_station.plant_type }}</td>
+                        <td scope="row">{{ watering_station.moisture_threshold }}</td>
+                        <td scope="row">{{ watering_station.get_formatted_duration }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<hr>
-
-<div id="wsFormContainer" class="row">
-</div>
-{% endblock %}
-
-{% block javascript %}
-<script>
-    function updateHTML(url, data) {
-        $('#wsFormContainer').html(data.html);
-        $('#updateWateringStationForm').on('submit', (event) => {
-            event.preventDefault();
-            $.post(url, $('#updateWateringStationForm').serialize(), (data) => updateHTML(url, data));
-        });
-    };
-
-    function getWateringStationForm(url) {
-        $.get(url, (data) => updateHTML(url, data));
-    };
-</script>
 {% endblock %}

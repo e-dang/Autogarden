@@ -11,6 +11,7 @@ NEW_GARDEN_FORM_ID = 'newGardenForm'
 NEW_GARDEN_SUBMIT_ID = 'submitBtn'
 UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
 
+REQUIRED_FIELD_ERR_MSG = 'This field is required.'
 NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
 
 
@@ -55,14 +56,17 @@ class UpdateWateringStationForm(forms.ModelForm):
 
     class Meta:
         model = WateringStation
-        fields = ['moisture_threshold', 'watering_duration']
+        fields = ['moisture_threshold', 'watering_duration', 'plant_type']
+        error_messages = {
+            'moisture_threshold': {'required': REQUIRED_FIELD_ERR_MSG},
+            'watering_duration': {'required': REQUIRED_FIELD_ERR_MSG}
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
-        self.helper.form_action = 'watering-station-detail'
         self.helper.add_input(Submit('submit', 'Update', css_id=UPDATE_WATERING_STATION_SUBMIT_ID))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
