@@ -20,6 +20,9 @@ class Garden(models.Model):
     uuid = models.UUIDField(unique=True)
     name = models.CharField(max_length=255, default=_default_garden_name)
 
+    def get_absolute_url(self):
+        return reverse('garden-detail', kwargs={'pk': self.pk})
+
 
 class WateringStation(models.Model):
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)

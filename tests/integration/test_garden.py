@@ -231,6 +231,14 @@ class TestGardenModel:
             Garden(uuid=id_).save()
             assert 'UNIQUE' in err
 
+    @pytest.mark.django_db
+    def test_get_absolute_url_returns_correct_url(self, garden_factory):
+        garden = garden_factory()
+
+        url = garden.get_absolute_url()
+
+        assert url == f'/gardens/{garden.pk}/'
+
 
 @pytest.mark.integration
 class TestGardenSerializer:
