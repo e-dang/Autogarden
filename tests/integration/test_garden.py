@@ -42,6 +42,12 @@ def valid_watering_station_data():
             }
 
 
+@pytest.fixture
+def valid_garden_data():
+    return {'name': 'My Garden',
+            'num_watering_stations': 3}
+
+
 def assert_template_is_rendered(response, template_name):
     assert response.status_code == status.HTTP_200_OK
     assert template_name in (template.name for template in response.templates)
@@ -131,11 +137,6 @@ class TestGardenListView:
         return reverse('garden-list')
 
     @pytest.fixture
-    def valid_new_garden_data(self):
-        return {'name': 'My Garden',
-                'num_watering_stations': 3}
-
-    @pytest.fixture
     def invalid_new_garden_data(self):
         return {'name': 'My Garden',
                 'num_watering_stations': -1}
@@ -147,17 +148,17 @@ class TestGardenListView:
         assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_new_garden_data):
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_garden_data):
         prev_num_gardens = Garden.objects.all().count()
 
-        client.post(url, data=valid_new_garden_data)
+        client.post(url, data=valid_garden_data)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert Garden.objects.first().watering_stations.count() == valid_new_garden_data['num_watering_stations']
+        assert Garden.objects.first().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_new_garden_data):
-        resp = client.post(url, data=valid_new_garden_data, follow=False)
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_garden_data):
+        resp = client.post(url, data=valid_garden_data, follow=False)
 
         data = resp.json()
         assert data['success'] == True
@@ -266,6 +267,19 @@ class TestGardenSerializer:
 
 @pytest.mark.integration
 class TestNewGardenForm:
+    @pytest.mark.parametrize('valid_garden_data, missing_field', [
+        (None, 'name'),
+        (None, 'num_watering_stations'),
+    ],
+        indirect=['valid_garden_data'],
+        ids=['name', 'num_watering_stations'])
+    def test_fields_are_required(self, valid_garden_data, missing_field):
+        valid_garden_data.pop(missing_field)
+        form = NewGardenForm(data=valid_garden_data)
+
+        assert not form.is_valid()
+        assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
+
     @pytest.mark.django_db
     def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self):
         data = {
