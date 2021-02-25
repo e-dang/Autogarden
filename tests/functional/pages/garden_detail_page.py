@@ -40,7 +40,7 @@ class GardenDetailPage(BasePage):
     def get_status(self):
         return self._get_inner_text('connectionStatus')
 
-    def get_last_connected_form(self):
+    def get_last_connected_from(self):
         return self._get_inner_text('lastConnectionFrom')
 
     def get_last_connected_at(self):

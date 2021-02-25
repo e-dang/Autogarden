@@ -11,7 +11,7 @@ from garden.models import _default_moisture_threshold, _default_watering_duratio
 class TestGardenSetup(Base):
     @pytest.fixture(autouse=True)
     def garden(self, garden_factory):
-        self.garden = garden_factory(watering_stations=10)
+        self.garden = garden_factory(watering_stations=10, watering_stations__defaults=True)
 
     @pytest.fixture(autouse=True)
     def url(self, live_server):
@@ -31,11 +31,11 @@ class TestGardenSetup(Base):
 
         # the user sees information about the garden
         assert garden_page.get_status() == self.garden.status
-        assert garden_page.get_last_connected_form() == str(self.garden.last_connection_ip)
-        assert garden_page.get_last_connected_at() == str(self.garden.last_connection_time)
-        assert garden_page.get_next_expected_update() == str(self.garden.calc_time_till_next_update())
+        assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
+        assert garden_page.get_last_connected_at() == self.garden.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
+        assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
         assert garden_page.get_num_missed_updates() == str(self.garden.num_missed_updates)
-        assert garden_page.get_water_level() == str(self.garden.water_level)
+        assert garden_page.get_water_level() == str(self.garden.get_water_level_display())
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
