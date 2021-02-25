@@ -39,7 +39,8 @@
                 <div class="card h-100">
                     <div class="card-header text-center h-50">Last Connected At</div>
                     <div class="card-body">
-                        <p id="lastConnectedAt" class="card-text text-center">{{garden.last_connection_time}}</p>
+                        <p id="lastConnectedAt" class="card-text text-center">
+                            {{garden.last_connection_time|date:'n/d/Y h:i A'}}</p>
                     </div>
                 </div>
             </div>
@@ -50,7 +51,8 @@
                 <div class="card h-100">
                     <div class="card-header text-center h-50">Next Expected Update</div>
                     <div class="card-body">
-                        <p id="nextExpectedUpdate" class="card-text text-center">{{garden.calc_time_till_next_update}}
+                        <p id="nextExpectedUpdate" class="card-text text-center">
+                            {{garden.calc_time_till_next_update}}
                         </p>
                     </div>
                 </div>
