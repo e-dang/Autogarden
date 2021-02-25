@@ -37,6 +37,27 @@ class GardenDetailPage(BasePage):
         cols = rows[ws_idx - 1].find_elements_by_tag_name('td')
         return cols[idx].get_attribute('innerText')
 
+    def get_status(self):
+        return self._get_inner_text('connectionStatus')
+
+    def get_last_connected_form(self):
+        return self._get_inner_text('lastConnectionFrom')
+
+    def get_last_connected_at(self):
+        return self._get_inner_text('lastConnectedAt')
+
+    def get_next_expected_update(self):
+        return self._get_inner_text('nextExpectedUpdate')
+
+    def get_num_missed_updates(self):
+        return self._get_inner_text('numMissedUpdates')
+
+    def get_water_level(self):
+        return self._get_inner_text('waterLevel')
+
+    def _get_inner_text(self, id_):
+        return self.driver.find_element_by_id(id_).get_attribute('innerText')
+
     def _get_field_index(self, field_name):
         if self.field_mapping is None:
             self._cache_field_mappings()

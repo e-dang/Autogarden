@@ -5,7 +5,7 @@ from django.urls import reverse
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.watering_station_detail_page import WateringStationDetailPage
-from garden.models import Garden, _default_moisture_threshold, _default_watering_duration
+from garden.models import _default_moisture_threshold, _default_watering_duration
 
 
 class TestGardenSetup(Base):
@@ -28,6 +28,14 @@ class TestGardenSetup(Base):
         self.driver.get(self.url)
         garden_page = GardenDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(garden_page)
+
+        # the user sees information about the garden
+        assert garden_page.get_status() == self.garden.status
+        assert garden_page.get_last_connected_form() == self.garden.last_connection_ip
+        assert garden_page.get_last_connected_at() == self.garden.last_connection_time
+        assert garden_page.get_next_expected_update() == self.garden.calc_time_till_next_update()
+        assert garden_page.get_num_missed_updates() == self.garden.num_missed_updates
+        assert garden_page.get_water_level() == self.garden.water_level
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
