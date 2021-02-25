@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block navbar%}
+{% include 'garden_detail_nav.html' with garden=garden %}
+{% endblock %}
+
 {% block main_content %}
 
 <div class="row">

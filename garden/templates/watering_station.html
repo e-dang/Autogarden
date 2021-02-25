@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block navbar %}
+{% include 'watering_station_nav.html' with watering_station=form.instance %}
+{% endblock %}
+
 {% block main_content %}
 
 <div class="row">

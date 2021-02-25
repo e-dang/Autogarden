@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block navbar %}
+{% include 'garden_nav.html' %}
+{% endblock %}
+
 {% block main_content %}
 <div class="row justify-content-center my-5">
     <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#newGardenModal">Add New
