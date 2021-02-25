@@ -4,9 +4,10 @@ from unittest.mock import Mock, create_autospec, patch
 import garden.utils as utils
 import pytest
 from django.http.request import HttpRequest
-from garden.models import (Garden, WateringStation, _default_garden_name,
-                           _default_moisture_threshold,
-                           _default_watering_duration)
+# from garden.models import (Garden, WateringStation, _default_garden_name,
+#                            _default_moisture_threshold,
+#                            _default_watering_duration, _default_is_connected)
+from garden import models
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
 from garden.views import GardenDetailView, WateringStationDetailView
@@ -43,24 +44,38 @@ class TestGardenSerializer:
 @pytest.mark.unit
 class TestGardenModel:
     @pytest.mark.parametrize('field, get_default', [
-        ('name', _default_garden_name),
+        ('name', models._default_garden_name),
+        ('is_connected', models._default_is_connected)
     ],
-        ids=['name'])
+        ids=['name', 'is_connected'])
     def test_field_is_given_a_default_value(self, field, get_default):
-        garden = Garden()
+        garden = models.Garden()
 
         assert getattr(garden, field) == get_default()
+
+    @pytest.mark.parametrize('garden_factory, is_connected, expected', [
+        (None, True, models.CONNECTED_STR),
+        (None, False, models.DISCONNECTED_STR),
+    ],
+        indirect=['garden_factory'],
+        ids=['connected', 'disconnected'])
+    def test_status_returns_connected_if_is_connected_is_true(self, garden_factory, is_connected, expected):
+        garden = garden_factory.build(is_connected=is_connected)
+
+        ret_val = garden.status
+
+        assert ret_val == expected
 
 
 @pytest.mark.unit
 class TestWateringStationModel:
     @pytest.mark.parametrize('field, get_default', [
-        ('moisture_threshold', _default_moisture_threshold),
-        ('watering_duration', _default_watering_duration)
+        ('moisture_threshold', models._default_moisture_threshold),
+        ('watering_duration', models._default_watering_duration)
     ],
         ids=['moisture_threshold', 'watering_duration'])
     def test_field_is_given_a_default_value(self, field, get_default):
-        watering_station = WateringStation(garden=Garden())
+        watering_station = models.WateringStation(garden=models.Garden())
 
         assert getattr(watering_station, field) == get_default()
 
@@ -68,7 +83,7 @@ class TestWateringStationModel:
     def test_get_formatted_duration_calls_derive_duration_string_with_watering_duration_field(self, mock_derive_duration_string):
         mock_ws = Mock()
 
-        WateringStation.get_formatted_duration(mock_ws)
+        models.WateringStation.get_formatted_duration(mock_ws)
 
         mock_derive_duration_string.assert_called_once_with(mock_ws.watering_duration)
 
@@ -76,7 +91,7 @@ class TestWateringStationModel:
     def test_get_formatted_duration_returns_return_value_of_derive_duration_string(self, mock_derive_duration_string):
         mock_ws = Mock()
 
-        ret_val = WateringStation.get_formatted_duration(mock_ws)
+        ret_val = models.WateringStation.get_formatted_duration(mock_ws)
 
         assert ret_val == mock_derive_duration_string.return_value
 
@@ -133,7 +148,7 @@ class TestUtils:
     ],
         ids=['<', '>', '='])
     def test_set_num_watering_stations_calls_create_on_garden_related_manager_until_garden_has_the_specified_num_of_watering_stations(self, curr_num, target_num):
-        mock_garden = create_autospec(Garden)
+        mock_garden = create_autospec(models.Garden)
         mock_garden.watering_stations.count.return_value = curr_num
         num_watering_stations = target_num
 

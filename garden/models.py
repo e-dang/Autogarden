@@ -18,12 +18,25 @@ def _default_garden_name():
     return 'My Garden'
 
 
+def _default_is_connected():
+    return False
+
+
+CONNECTED_STR = 'Connected'
+DISCONNECTED_STR = 'Disconnected'
+
+
 class Garden(models.Model):
     uuid = models.UUIDField(unique=True)
     name = models.CharField(max_length=255, default=_default_garden_name)
+    is_connected = models.BooleanField(default=_default_is_connected)
 
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
+
+    @property
+    def status(self):
+        return CONNECTED_STR if self.is_connected else DISCONNECTED_STR
 
 
 class WateringStation(models.Model):

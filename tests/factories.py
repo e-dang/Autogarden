@@ -4,6 +4,7 @@ import factory
 class GardenFactory(factory.django.DjangoModelFactory):
     uuid = factory.Faker('uuid4')
     name = factory.Sequence(lambda x: f'Garden{x}')
+    is_connected = factory.Sequence(lambda x: x % 2 == 0)
 
     class Meta:
         model = 'garden.Garden'
@@ -20,6 +21,9 @@ class GardenFactory(factory.django.DjangoModelFactory):
 
 class WateringStationFactory(factory.django.DjangoModelFactory):
     garden = factory.SubFactory(GardenFactory)
+    moisture_threshold = factory.Faker('random_int', min=0, max=100)
+    watering_duration = factory.Faker('time_delta')
+    plant_type = factory.Sequence(lambda x: f'lettuce{x}')
 
     class Meta:
         model = 'garden.WateringStation'
