@@ -180,35 +180,15 @@ class TestGardenDetailView:
     def garden(self, garden_factory):
         return garden_factory(watering_stations=5)
 
-    def create_url(self, pk):
-        return reverse('garden-detail', kwargs={'pk': pk})
-
     def test_view_has_correct_url(self):
         pk = 1
-        assert self.create_url(pk) == f'/gardens/{pk}/'
+        assert reverse('garden-detail', kwargs={'pk': pk}) == f'/gardens/{pk}/'
 
     @pytest.mark.django_db
     def test_GET_renders_garden_detail_html_template(self, client, garden):
-        url = self.create_url(garden.pk)
-
-        resp = client.get(url)
+        resp = client.get(garden.get_absolute_url())
 
         assert_template_is_rendered(resp, 'garden_detail.html')
-
-    @pytest.mark.django_db
-    def test_POST_creates_a_new_default_watering_station(self, client, garden):
-        prev_num_watering_stations = garden.watering_stations.count()
-
-        client.post(garden.get_absolute_url())
-
-        assert prev_num_watering_stations + 1 == garden.watering_stations.count()
-
-    @pytest.mark.django_db
-    def test_POST_redicrects_to_garden_detail(self, client, garden):
-        resp = client.post(garden.get_absolute_url())
-
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == garden.get_absolute_url()
 
 
 @pytest.mark.integration
@@ -260,6 +240,23 @@ class TestWateringStationListView:
         data = {'status': False}
 
         resp = client.patch(garden.get_watering_stations_url(), data=data)
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == garden.get_absolute_url()
+
+    @pytest.mark.django_db
+    def test_POST_creates_a_new_default_watering_station(self, client, garden_factory):
+        garden = garden_factory(watering_stations=5)
+        prev_num_watering_stations = garden.watering_stations.count()
+
+        client.post(garden.get_watering_stations_url())
+
+        assert prev_num_watering_stations + 1 == garden.watering_stations.count()
+
+    @pytest.mark.django_db
+    def test_POST_redicrects_to_garden_detail(self, client, garden_factory):
+        garden = garden_factory(watering_stations=5)
+        resp = client.post(garden.get_watering_stations_url())
 
         assert resp.status_code == status.HTTP_302_FOUND
         assert resp.url == garden.get_absolute_url()

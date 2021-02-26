@@ -62,11 +62,6 @@ class GardenDetailView(View):
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
 
-    def post(self, request, pk):
-        garden = Garden.objects.get(pk=pk)
-        garden.watering_stations.create()
-        return redirect('garden-detail', pk=pk)
-
 
 class WateringStationListView(View):
     def dispatch(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
@@ -74,6 +69,11 @@ class WateringStationListView(View):
         if method == 'patch':
             return self.patch(request, *args, **kwargs)
         return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, pk):
+        garden = Garden.objects.get(pk=pk)
+        garden.watering_stations.create()
+        return redirect('garden-detail', pk=pk)
 
     def patch(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
