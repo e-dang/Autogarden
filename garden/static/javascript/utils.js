@@ -16,3 +16,15 @@ function formAjaxSubmit(formId) {
         });
     });
 }
+
+function getModalDataAjax(url) {
+    $(document).ready(() => {
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: (data) => {
+                $('.modal-body').html(data.html);
+            },
+        });
+    });
+}

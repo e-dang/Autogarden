@@ -15,13 +15,10 @@
     </div>
 </div>
 
-<div id="deleteWateringStationModal" class="modal fade" tabindex="-1" role="dialog"
-    aria-labelledby="deleteWateringStationModal" aria-hidden="true">
+<div id="{{form.DELETE_WATERING_STATION_MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="{{form.DELETE_WATERING_STATION_MODAL_ID}}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Watering Station</h5>
-            </div>
             <div class="modal-body">
             </div>
         </div>
@@ -32,6 +29,7 @@
 
 
 {% block javascript %}
+<script src="/static/javascript/utils.js"></script>
 <script>
     const form = $('#updateWateringStationForm');
     form.on('submit', (event) => {
@@ -46,18 +44,7 @@
         });
     })
 
-    const button = $('#deleteButton');
-    button.on('click', (event) => {
-        $.ajax({
-            type: 'get',
-            url: "{% url 'watering-station-delete' form.instance.garden.pk form.instance.pk %}",
-            success: (data) => {
-                $('.modal-body').html(data.html);
-                $('#deleteWateringStationModal').show();
-                console.log(data.html);
-            }
-        })
-    })
+    getModalDataAjax("{% url 'watering-station-delete' form.instance.garden.pk form.instance.pk %}");
 
 
 </script>

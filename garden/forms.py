@@ -101,7 +101,7 @@ class DeleteWateringStationForm(forms.Form):
             <p>Are you sure you want to delete this watering station?</p>
         """),
             ButtonHolder(
-                Button('delete', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
                        data_dismiss='modal', aria_hidden='true'),
                 Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger')
             )
