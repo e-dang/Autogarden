@@ -84,9 +84,11 @@
         <h3>Watering Stations</h3>
     </div>
     <div class="col">
-        <form class="form-inline float-right" method="post" action="#">
+        <form class="form-inline float-right" method="post" action="{{garden.get_watering_stations_url}}">
+            {% csrf_token %}
             <div class="control-group">
                 <div class="controls">
+                    <input type="hidden" name="_method" value="patch" />
                     <input id="deactivateAllBtn" type="submit" class="btn btn-outline-danger" value="Deactivate All">
                 </div>
             </div>
@@ -135,12 +137,4 @@
     </div>
 </div>
 
-{% endblock %}
-
-{% block javascript %}
-<!-- <script>
-    function addWateringStation() {
-        $()
-    }
-</script> -->
 {% endblock %}

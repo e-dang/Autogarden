@@ -243,6 +243,29 @@ class TestWateringStationDetailView:
 
 
 @pytest.mark.integration
+class TestWateringStationListView:
+    @pytest.mark.django_db
+    def test_PATCH_updates_all_watering_stations_for_a_given_garden_with_the_data(self, client, garden_factory):
+        garden = garden_factory(watering_stations=5)
+        data = {'status': False}
+
+        client.patch(garden.get_watering_stations_url(), data=data)
+
+        for station in garden.watering_stations.all():
+            assert station.status == data['status']
+
+    @pytest.mark.django_db
+    def test_PATCH_redirects_to_garden_detail_page(self, client, garden_factory):
+        garden = garden_factory(watering_stations=5)
+        data = {'status': False}
+
+        resp = client.patch(garden.get_watering_stations_url(), data=data)
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == garden.get_absolute_url()
+
+
+@pytest.mark.integration
 class TestGardenModel:
     @pytest.mark.django_db
     def test_uuid_field_must_be_unique(self):
@@ -271,6 +294,14 @@ class TestGardenModel:
         url = garden.get_absolute_url()
 
         assert url == f'/gardens/{garden.pk}/'
+
+    @pytest.mark.django_db
+    def test_get_watering_station_urls(self, garden_factory):
+        garden = garden_factory()
+
+        url = garden.get_watering_stations_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/'
 
 
 @pytest.mark.integration

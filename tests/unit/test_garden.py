@@ -8,7 +8,7 @@ from django.http.request import HttpRequest
 from garden import models
 from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
                                 GardenSerializer, WateringStationSerializer)
-from garden.views import GardenDetailView, WateringStationDetailView
+from garden.views import GardenDetailView, WateringStationDetailView, WateringStationListView
 from rest_framework.serializers import ValidationError
 
 
@@ -276,3 +276,16 @@ class TestWateringStationDetailView:
         WateringStationDetailView().get(request, garden_pk, ws_pk)
 
         assert_render_context_called_with(mock_render, {'form': mock_form})
+
+
+@pytest.mark.unit
+class TestWateringStationListView:
+    def test_dispatch_calls_patch_when_method_field_on_request_is_patch(self):
+        view = WateringStationListView()
+        view.patch = Mock()
+        request = HttpRequest()
+        request.POST['_method'] = 'patch'
+
+        view.dispatch(request)
+
+        view.patch.assert_called_once_with(request)

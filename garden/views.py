@@ -1,4 +1,7 @@
+from typing import Any
+
 from crispy_forms.utils import render_crispy_form
+from django import http
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
@@ -8,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import NewGardenForm, UpdateWateringStationForm
+from garden.forms import NewGardenForm, UpdateWateringStationForm, WateringStationForm
 
 from .models import Garden
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -62,6 +65,22 @@ class GardenDetailView(View):
     def post(self, request, pk):
         garden = Garden.objects.get(pk=pk)
         garden.watering_stations.create()
+        return redirect('garden-detail', pk=pk)
+
+
+class WateringStationListView(View):
+    def dispatch(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
+        method = request.POST.get('_method', '').lower()
+        if method == 'patch':
+            return self.patch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
+
+    def patch(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+        garden = Garden.objects.get(pk=pk)
+        for station in garden.watering_stations.all():
+            form = WateringStationForm(instance=station, data=request.POST)
+            if form.is_valid():
+                form.save()
         return redirect('garden-detail', pk=pk)
 
 
