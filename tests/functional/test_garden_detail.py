@@ -5,7 +5,7 @@ from django.urls import reverse
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.watering_station_detail_page import WateringStationDetailPage
-from garden.models import _default_moisture_threshold, _default_watering_duration
+from garden.models import _default_moisture_threshold, _default_watering_duration, _default_status
 
 
 class TestGardenSetup(Base):
@@ -35,6 +35,7 @@ class TestGardenSetup(Base):
         selected_watering_station = 1
         assert str(selected_watering_station) == garden_page.get_watering_station_field_value(
             selected_watering_station, 'Watering Station Number')
+        ws_status = garden_page.get_watering_station_field_value(selected_watering_station, 'Status')
         plant_type = garden_page.get_watering_station_field_value(selected_watering_station, 'Plant Type')
         moisture_threshold = garden_page.get_watering_station_field_value(
             selected_watering_station, 'Moisture Threshold')
@@ -47,18 +48,21 @@ class TestGardenSetup(Base):
         garden_page.watering_station = selected_watering_station
         ws_page = WateringStationDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(ws_page)
+        assert ws_page.status == garden_page.convert_watering_station_status_to_bool(ws_status)
         assert ws_page.plant_type == plant_type
         assert ws_page.watering_duration == watering_duration
         assert ws_page.moisture_threshold == moisture_threshold
         self.assert_watering_station_has_default_values(ws_page)
 
         # the user then changes these values and submits the form
+        ws_status = not _default_status()
+        plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
-        plant_type = 'lettuce'
+        ws_page.status = ws_status
+        ws_page.plant_type = plant_type
         ws_page.moisture_threshold = moisture_threshold
         ws_page.watering_duration = watering_duration
-        ws_page.plant_type = plant_type
         ws_page.submit_watering_station_update()
 
         # they then go back to the garden detail view and select a different watering station page.
@@ -71,14 +75,16 @@ class TestGardenSetup(Base):
         # they then use the navbar to go directly to the watering station page that they had edited and see that their
         # configurations have persisted
         ws_page.go_to_watering_station_page(selected_watering_station)
+        assert ws_page.status == ws_status
+        assert ws_page.plant_type == plant_type
         assert ws_page.moisture_threshold == moisture_threshold
         assert ws_page.watering_duration == watering_duration
-        assert ws_page.plant_type == plant_type
 
     def assert_watering_station_has_default_values(self, page):
+        assert page.status == _default_status()
+        assert page.plant_type == ''
         assert page.moisture_threshold == str(_default_moisture_threshold())
         assert page.watering_duration == derive_duration_string(_default_watering_duration())
-        assert page.plant_type == ''
 
     def assert_garden_info_is_correct(self, garden_page):
         assert garden_page.get_status() == self.garden.status
@@ -94,6 +100,7 @@ class TestGardenSetup(Base):
     def assert_watering_station_table_contains_correct_info(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
         assert garden_page.field_is_in_watering_station_table('Watering Station Number')
+        assert garden_page.field_is_in_watering_station_table('Status')
         assert garden_page.field_is_in_watering_station_table('Plant Type')
         assert garden_page.field_is_in_watering_station_table('Moisture Threshold')
         assert garden_page.field_is_in_watering_station_table('Watering Duration')

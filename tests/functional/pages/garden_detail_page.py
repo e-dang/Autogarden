@@ -1,8 +1,10 @@
 import re
 
+from garden.models import WateringStation
+from selenium.common.exceptions import NoSuchElementException
+
 from .base_page import BasePage
 from .elements import ButtonGroup
-from selenium.common.exceptions import NoSuchElementException
 
 
 class WateringStationButtons(ButtonGroup):
@@ -54,6 +56,9 @@ class GardenDetailPage(BasePage):
 
     def get_water_level(self):
         return self._get_inner_text('waterLevel')
+
+    def convert_watering_station_status_to_bool(self, status):
+        return WateringStation.ACTIVE_STATUS_STR if status else WateringStation.INACTIVE_STATUS_STR
 
     def _get_inner_text(self, id_):
         return self.driver.find_element_by_id(id_).get_attribute('innerText')

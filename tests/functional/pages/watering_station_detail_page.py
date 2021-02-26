@@ -1,9 +1,10 @@
+from garden.models import WateringStation
 import re
 
 from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID
 
 from .base_page import BasePage
-from .elements import TextInput
+from .elements import TextInput, ToggleButton
 from ..base import wait_for
 
 
@@ -19,10 +20,15 @@ class PlantTypeInput(TextInput):
     LOCATOR = 'id_plant_type'
 
 
+class StatusCheckBox(ToggleButton):
+    LOCATOR = 'id_status'
+
+
 class WateringStationDetailPage(BasePage):
     moisture_threshold = MoistureThresholdInput()
     watering_duration = WateringDurationInput()
     plant_type = PlantTypeInput()
+    status = StatusCheckBox()
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'
