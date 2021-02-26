@@ -97,3 +97,7 @@ class WateringStation(models.Model):
 
     def get_formatted_duration(self):
         return derive_duration_string(self.watering_duration)
+
+    @property
+    def status_string(self):
+        return self.ACTIVE_STATUS_STR if self.status else self.INACTIVE_STATUS_STR

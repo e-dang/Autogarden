@@ -148,6 +148,19 @@ class TestWateringStationModel:
 
         assert ret_val == mock_derive_duration_string.return_value
 
+    @pytest.mark.parametrize('watering_station_factory, status, expected', [
+        (None, True, models.WateringStation.ACTIVE_STATUS_STR),
+        (None, False, models.WateringStation.INACTIVE_STATUS_STR),
+    ],
+        indirect=['watering_station_factory'],
+        ids=['active', 'inactive'])
+    def test_status_string_returns_correct_string_based_on_status(self, watering_station_factory, status, expected):
+        station = watering_station_factory.build(status=status)
+
+        ret_val = station.status_string
+
+        assert ret_val == expected
+
 
 @pytest.mark.unit
 class TestWateringStationSerializer:

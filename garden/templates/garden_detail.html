@@ -49,6 +49,14 @@
         <div class="row mt-4">
             <div class="col">
                 <div class="card h-100">
+                    <div class="card-header text-center h-50">Water Level</div>
+                    <div class="card-body">
+                        <p id="waterLevel" class="card-text text-center">{{garden.get_water_level_display}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
                     <div class="card-header text-center h-50">Next Expected Update</div>
                     <div class="card-body">
                         <p id="nextExpectedUpdate" class="card-text text-center">
@@ -62,14 +70,6 @@
                     <div class="card-header text-center h-50">Number of Missed Updates</div>
                     <div class="card-body">
                         <p id="numMissedUpdates" class="card-text text-center">{{garden.num_missed_updates}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Water Level</div>
-                    <div class="card-body">
-                        <p id="waterLevel" class="card-text text-center">{{garden.get_water_level_display}}</p>
                     </div>
                 </div>
             </div>
@@ -115,7 +115,7 @@
                             <a id="wateringStation{{ forloop.counter }}"
                                 href="{{ watering_station.get_absolute_url }}">{{ forloop.counter }}</a>
                         </td>
-                        <td scope="row">Active</td>
+                        <td scope="row">{{ watering_station.status_string }}</td>
                         <td scope="row">{{ watering_station.plant_type }}</td>
                         <td scope="row">{{ watering_station.moisture_threshold }}</td>
                         <td scope="row">{{ watering_station.get_formatted_duration }}</td>
