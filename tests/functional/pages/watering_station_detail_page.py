@@ -1,8 +1,8 @@
 import re
 
-from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID
+from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID, WateringStationForm, DeleteWateringStationForm
 
-from ..base import wait_for
+from ..base import wait_for, wait_for_true
 from .base_page import BasePage
 from .elements import Button, TextInput, ToggleButton
 
@@ -28,7 +28,15 @@ class WateringStationFormSubmitButton(Button):
 
 
 class DeleteButton(Button):
-    LOCATOR = 'deleteButton'
+    LOCATOR = WateringStationForm.DELETE_BUTTON_ID
+
+
+class CancelDeleteButton(Button):
+    LOCATOR = DeleteWateringStationForm.CANCEL_DELETE_BTN_ID
+
+
+class ConfirmDeleteButton(Button):
+    LOCATOR = DeleteWateringStationForm.CONFIRM_DELETE_BTN_ID
 
 
 class WateringStationDetailPage(BasePage):
@@ -41,6 +49,9 @@ class WateringStationDetailPage(BasePage):
         super().__init__(driver)
         self.submit_button = WateringStationFormSubmitButton(self)
         self.delete_button = DeleteButton(self)
+        self.cancel_delete_button = CancelDeleteButton(self)
+        self.confirm_delete_button = ConfirmDeleteButton(self)
+        self.modal_id = WateringStationForm.DELETE_WATERING_STATION_MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'

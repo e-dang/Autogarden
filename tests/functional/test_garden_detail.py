@@ -90,12 +90,24 @@ class TestGardenSetup(Base):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert not garden_page.convert_watering_station_status_to_bool(status)
 
-        # the user then goes to watering_station page and presses the delete watering station button. They are then
-        # redirected back to the garden detail page
+        # the user then goes to watering_station page and presses the delete watering station button. They see a modal
+        # pop up asking them to confirm their decision.
         garden_page.watering_station = selected_watering_station + 1
         self.wait_for_page_to_be_loaded(ws_page)
         ws_page.delete_button.click()
+        self.wait_for_modal_to_be_visible(ws_page.modal_id)
+
+        # the user decides not to delete the watering station and clicks cancel and the modal disappears. They then
+        # quickly change their mind and proceed to delete the watering station.
+        ws_page.cancel_delete_button.click()
+        self.wait_for_model_to_disappear(ws_page.modal_id)
+        ws_page.delete_button.click()
+        self.wait_for_modal_to_be_visible(ws_page.modal_id)
+        ws_page.confirm_delete_button.click()
+
+        # They are then redirected back to the garden detail page, where they see 1 less watering station
         self.wait_for_page_to_be_loaded(garden_page)
+        assert garden_page.get_number_watering_stations() == self.num_watering_stations
 
     def assert_watering_station_has_default_values(self, ws_page):
         data = {
