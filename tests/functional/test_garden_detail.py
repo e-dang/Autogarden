@@ -65,9 +65,18 @@ class TestGardenSetup(Base):
         ws_page.watering_duration = watering_duration
         ws_page.submit_watering_station_update()
 
-        # they then go back to the garden detail view and select a different watering station page.
+        # they then go back to the garden detail view and sees that the changes have been persisted in the table
         ws_page.go_back_to_garden_detail()
         self.wait_for_page_to_be_loaded(garden_page)
+        updated_ws_status = garden_page.get_watering_station_field_value(selected_watering_station, 'Status')
+        assert ws_status == garden_page.convert_watering_station_status_to_bool(updated_ws_status)
+        assert plant_type == garden_page.get_watering_station_field_value(selected_watering_station, 'Plant Type')
+        assert moisture_threshold == garden_page.get_watering_station_field_value(
+            selected_watering_station, 'Moisture Threshold')
+        assert watering_duration == garden_page.get_watering_station_field_value(
+            selected_watering_station, 'Watering Duration')
+
+        # the user then selects a different watering station page
         garden_page.watering_station = selected_watering_station + 1
         self.wait_for_page_to_be_loaded(ws_page)
         self.assert_watering_station_has_default_values(ws_page)
