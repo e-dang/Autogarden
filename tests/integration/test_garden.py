@@ -195,6 +195,21 @@ class TestGardenDetailView:
 
         assert_template_is_rendered(resp, 'garden_detail.html')
 
+    @pytest.mark.django_db
+    def test_POST_creates_a_new_default_watering_station(self, client, garden):
+        prev_num_watering_stations = garden.watering_stations.count()
+
+        client.post(garden.get_absolute_url())
+
+        assert prev_num_watering_stations + 1 == garden.watering_stations.count()
+
+    @pytest.mark.django_db
+    def test_POST_redicrects_to_garden_detail(self, client, garden):
+        resp = client.post(garden.get_absolute_url())
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == garden.get_absolute_url()
+
 
 @pytest.mark.integration
 class TestWateringStationDetailView:

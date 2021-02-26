@@ -1,6 +1,6 @@
 from crispy_forms.utils import render_crispy_form
 from django.http.response import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.urls import reverse
 from django.views import View
@@ -58,6 +58,11 @@ class GardenDetailView(View):
     def get(self, request, pk):
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
+
+    def post(self, request, pk):
+        garden = Garden.objects.get(pk=pk)
+        garden.watering_stations.create()
+        return redirect('garden-detail', pk=pk)
 
 
 class WateringStationDetailView(View):

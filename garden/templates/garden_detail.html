@@ -84,14 +84,22 @@
         <h3>Watering Stations</h3>
     </div>
     <div class="col">
-        <div class="float-right">
-            <button class="btn btn-outline-success">
-                Add Watering Station
-            </button>
-            <button class="btn btn-outline-danger">
-                Deactivate All
-            </button>
-        </div>
+        <form class="form-inline float-right" method="post" action="#">
+            <div class="control-group">
+                <div class="controls">
+                    <input id="deactivateAllBtn" type="submit" class="btn btn-outline-danger" value="Deactivate All">
+                </div>
+            </div>
+        </form>
+        <form class="form-inline float-right mr-2" method="post" action="#">
+            {% csrf_token %}
+            <div class="control-group">
+                <div class="controls">
+                    <input id="addWateringStationBtn" type="submit" class="btn btn-outline-success"
+                        value="Add Watering Station">
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -127,4 +135,12 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block javascript %}
+<!-- <script>
+    function addWateringStation() {
+        $()
+    }
+</script> -->
 {% endblock %}
