@@ -5,7 +5,7 @@ from django.db.utils import IntegrityError
 from django.forms import ValidationError
 from garden.forms import (NUM_WATERING_STATIONS_ERROR_MSG,
                           REQUIRED_FIELD_ERR_MSG, NewGardenForm,
-                          UpdateWateringStationForm)
+                          WateringStationForm)
 from garden.models import Garden
 from garden.serializers import GardenSerializer, WateringStationSerializer
 from garden.utils import build_duration_string, derive_duration_string
@@ -379,7 +379,7 @@ class TestWateringStationModel:
 
 
 @pytest.mark.integration
-class TestUpdateWateringStationForm:
+class TestWateringStationForm:
 
     @pytest.mark.parametrize('valid_watering_station_data, missing_field', [
         (None, 'moisture_threshold'),
@@ -389,7 +389,7 @@ class TestUpdateWateringStationForm:
         ids=['moisture_threshold', 'watering_duration'])
     def test_fields_are_required(self, valid_watering_station_data, missing_field):
         valid_watering_station_data.pop(missing_field)
-        form = UpdateWateringStationForm(data=valid_watering_station_data)
+        form = WateringStationForm(data=valid_watering_station_data)
 
         assert not form.is_valid()
         assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
@@ -402,6 +402,6 @@ class TestUpdateWateringStationForm:
         ids=['plant_type', 'status'])
     def test_plant_type_field_is_not_required(self, valid_watering_station_data, missing_field):
         valid_watering_station_data.pop(missing_field)
-        form = UpdateWateringStationForm(data=valid_watering_station_data)
+        form = WateringStationForm(data=valid_watering_station_data)
 
         assert form.is_valid()

@@ -51,7 +51,7 @@ class CustomDurationField(forms.DurationField):
         return value
 
 
-class UpdateWateringStationForm(forms.ModelForm):
+class WateringStationForm(forms.ModelForm):
     watering_duration = CustomDurationField()
 
     class Meta:
@@ -73,7 +73,7 @@ class UpdateWateringStationForm(forms.ModelForm):
         self.fields['watering_duration'].label = 'Watering Duration'
 
 
-class WateringStationForm(UpdateWateringStationForm):
+class BulkUpdateWateringStationForm(WateringStationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():

@@ -266,7 +266,7 @@ class TestGardenDetailView:
 class TestWateringStationDetailView:
     @patch('garden.views.Garden')
     @patch('garden.views.render')
-    @patch('garden.views.UpdateWateringStationForm', autospec=True)
+    @patch('garden.views.WateringStationForm', autospec=True)
     def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_garden):
         garden_pk = 1
         ws_pk = 2

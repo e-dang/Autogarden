@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import NewGardenForm, UpdateWateringStationForm, WateringStationForm
+from garden.forms import NewGardenForm, WateringStationForm, BulkUpdateWateringStationForm
 
 from .models import Garden
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -78,7 +78,7 @@ class WateringStationListView(View):
     def patch(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
         for station in garden.watering_stations.all():
-            form = WateringStationForm(instance=station, data=request.POST)
+            form = BulkUpdateWateringStationForm(instance=station, data=request.POST)
             if form.is_valid():
                 form.save()
         return redirect('garden-detail', pk=pk)
@@ -88,13 +88,13 @@ class WateringStationDetailView(View):
     def get(self, request, garden_pk, ws_pk):
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
-        form = UpdateWateringStationForm(instance=station)
+        form = WateringStationForm(instance=station)
         return render(request, 'watering_station.html', context={'form': form})
 
     def post(self, request, garden_pk, ws_pk):
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
-        form = UpdateWateringStationForm(instance=station, data=request.POST)
+        form = WateringStationForm(instance=station, data=request.POST)
         if form.is_valid():
             form.save()
         form_html = render_crispy_form(form, context=csrf(request))
