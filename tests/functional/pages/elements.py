@@ -40,3 +40,16 @@ class ToggleButton:
 
     def _get_element(self, instance):
         return wait_for(lambda: instance.driver.find_element_by_id(self.LOCATOR))
+
+
+class Button:
+    LOCATOR = None
+
+    def __init__(self, instance):
+        self.instance = instance
+
+    def click(self):
+        self._get_element().click()
+
+    def _get_element(self):
+        return wait_for(lambda: self.instance.driver.find_element_by_id(self.LOCATOR))

@@ -29,18 +29,13 @@ class TestGardenSetup(Base):
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
-        self.assert_watering_station_table_contains_correct_info(garden_page)
+        self.assert_watering_station_table_contains_correct_headers(garden_page)
 
         # the user also notices that the row display some information about the watering station
         selected_watering_station = 1
         assert str(selected_watering_station) == garden_page.get_watering_station_field_value(
             selected_watering_station, 'Watering Station Number')
-        ws_status = garden_page.get_watering_station_field_value(selected_watering_station, 'Status')
-        plant_type = garden_page.get_watering_station_field_value(selected_watering_station, 'Plant Type')
-        moisture_threshold = garden_page.get_watering_station_field_value(
-            selected_watering_station, 'Moisture Threshold')
-        watering_duration = garden_page.get_watering_station_field_value(
-            selected_watering_station, 'Watering Duration')
+        table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
 
         # they click a watering station link and are taken to a page with a form that allows them
         # to edit the configurations of the watering station. The user notices that the values in the form are the same
@@ -48,14 +43,11 @@ class TestGardenSetup(Base):
         garden_page.watering_station = selected_watering_station
         ws_page = WateringStationDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(ws_page)
-        assert ws_page.status == garden_page.convert_watering_station_status_to_bool(ws_status)
-        assert ws_page.plant_type == plant_type
-        assert ws_page.watering_duration == watering_duration
-        assert ws_page.moisture_threshold == moisture_threshold
+        self.assert_watering_station_has_values(table_data, ws_page)
         self.assert_watering_station_has_default_values(ws_page)
 
         # the user then changes these values and submits the form
-        ws_status = not _default_status()
+        ws_status = not table_data['status']
         plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
@@ -63,18 +55,16 @@ class TestGardenSetup(Base):
         ws_page.plant_type = plant_type
         ws_page.moisture_threshold = moisture_threshold
         ws_page.watering_duration = watering_duration
-        ws_page.submit_watering_station_update()
+        ws_page.submit_button.click()
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
         ws_page.go_back_to_garden_detail()
         self.wait_for_page_to_be_loaded(garden_page)
-        updated_ws_status = garden_page.get_watering_station_field_value(selected_watering_station, 'Status')
-        assert ws_status == garden_page.convert_watering_station_status_to_bool(updated_ws_status)
-        assert plant_type == garden_page.get_watering_station_field_value(selected_watering_station, 'Plant Type')
-        assert moisture_threshold == garden_page.get_watering_station_field_value(
-            selected_watering_station, 'Moisture Threshold')
-        assert watering_duration == garden_page.get_watering_station_field_value(
-            selected_watering_station, 'Watering Duration')
+        table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
+        assert ws_status == table_data['status']
+        assert plant_type == table_data['plant_type']
+        assert moisture_threshold == table_data['moisture_threshold']
+        assert watering_duration == table_data['watering_duration']
 
         # the user then selects a different watering station page
         garden_page.watering_station = selected_watering_station + 1
@@ -84,16 +74,20 @@ class TestGardenSetup(Base):
         # they then use the navbar to go directly to the watering station page that they had edited and see that their
         # configurations have persisted
         ws_page.go_to_watering_station_page(selected_watering_station)
-        assert ws_page.status == ws_status
-        assert ws_page.plant_type == plant_type
-        assert ws_page.moisture_threshold == moisture_threshold
-        assert ws_page.watering_duration == watering_duration
+        self.assert_watering_station_has_values(table_data, ws_page)
 
-    def assert_watering_station_has_default_values(self, page):
-        assert page.status == _default_status()
-        assert page.plant_type == ''
-        assert page.moisture_threshold == str(_default_moisture_threshold())
-        assert page.watering_duration == derive_duration_string(_default_watering_duration())
+    def assert_watering_station_has_default_values(self, ws_page):
+        data = {
+            'status': _default_status(),
+            'plant_type': '',
+            'moisture_threshold': str(_default_moisture_threshold()),
+            'watering_duration': derive_duration_string(_default_watering_duration())
+        }
+        self.assert_watering_station_has_values(data, ws_page)
+
+    def assert_watering_station_has_values(self, data, ws_page):
+        for key, value in data.items():
+            assert getattr(ws_page, key) == value
 
     def assert_garden_info_is_correct(self, garden_page):
         assert garden_page.get_status() == self.garden.status
@@ -106,7 +100,7 @@ class TestGardenSetup(Base):
     def assert_next_expected_update_is_correct(self, garden_page):
         assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
 
-    def assert_watering_station_table_contains_correct_info(self, garden_page):
+    def assert_watering_station_table_contains_correct_headers(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
         assert garden_page.field_is_in_watering_station_table('Watering Station Number')
         assert garden_page.field_is_in_watering_station_table('Status')

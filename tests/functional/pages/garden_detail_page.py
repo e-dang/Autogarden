@@ -39,6 +39,19 @@ class GardenDetailPage(BasePage):
         cols = rows[ws_idx - 1].find_elements_by_tag_name('td')
         return cols[idx].get_attribute('innerText')
 
+    def get_water_station_data_from_table(self, ws_idx):
+        ws_status = self.get_watering_station_field_value(ws_idx, 'Status')
+        ws_status = self.convert_watering_station_status_to_bool(ws_status)
+        plant_type = self.get_watering_station_field_value(ws_idx, 'Plant Type')
+        moisture_threshold = self.get_watering_station_field_value(ws_idx, 'Moisture Threshold')
+        watering_duration = self.get_watering_station_field_value(ws_idx, 'Watering Duration')
+        return {
+            'status': ws_status,
+            'plant_type': plant_type,
+            'moisture_threshold': moisture_threshold,
+            'watering_duration': watering_duration
+        }
+
     def get_status(self):
         return self._get_inner_text('connectionStatus')
 
