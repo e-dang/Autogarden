@@ -90,6 +90,13 @@ class TestGardenSetup(Base):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert not garden_page.convert_watering_station_status_to_bool(status)
 
+        # the user then goes to watering_station page and presses the delete watering station button. They are then
+        # redirected back to the garden detail page
+        garden_page.watering_station = selected_watering_station + 1
+        self.wait_for_page_to_be_loaded(ws_page)
+        ws_page.delete_button.click()
+        self.wait_for_page_to_be_loaded(garden_page)
+
     def assert_watering_station_has_default_values(self, ws_page):
         data = {
             'status': _default_status(),

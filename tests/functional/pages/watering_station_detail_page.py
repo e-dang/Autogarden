@@ -27,6 +27,10 @@ class WateringStationFormSubmitButton(Button):
     LOCATOR = UPDATE_WATERING_STATION_SUBMIT_ID
 
 
+class DeleteButton(Button):
+    LOCATOR = 'deleteButton'
+
+
 class WateringStationDetailPage(BasePage):
     moisture_threshold = MoistureThresholdInput()
     watering_duration = WateringDurationInput()
@@ -36,6 +40,7 @@ class WateringStationDetailPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         self.submit_button = WateringStationFormSubmitButton(self)
+        self.delete_button = DeleteButton(self)
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'
