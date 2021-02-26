@@ -58,7 +58,7 @@ class GardenDetailPage(BasePage):
         return self._get_inner_text('waterLevel')
 
     def convert_watering_station_status_to_bool(self, status):
-        return WateringStation.ACTIVE_STATUS_STR if status else WateringStation.INACTIVE_STATUS_STR
+        return True if status == WateringStation.ACTIVE_STATUS_STR else False
 
     def _get_inner_text(self, id_):
         return self.driver.find_element_by_id(id_).get_attribute('innerText')

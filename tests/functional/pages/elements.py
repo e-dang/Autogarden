@@ -1,3 +1,5 @@
+from selenium.webdriver import ActionChains
+
 from ..base import wait_for
 
 
@@ -27,16 +29,14 @@ class ButtonGroup:
 
 class ToggleButton:
     LOCATOR = None
-    element = None
 
     def __set__(self, instance, value):
+        element = self._get_element(instance)
         while self.__get__(instance, instance) != value:
-            self.element.click()
+            ActionChains(instance.driver).move_to_element(element).click().perform()
 
     def __get__(self, instance, owner):
-        if self.element is None:
-            self._get_element(instance)
-        return self.element.is_selected()
+        return self._get_element(instance).is_selected()
 
     def _get_element(self, instance):
-        self.element = wait_for(lambda: instance.driver.find_element_by_id(self.LOCATOR))
+        return wait_for(lambda: instance.driver.find_element_by_id(self.LOCATOR))
