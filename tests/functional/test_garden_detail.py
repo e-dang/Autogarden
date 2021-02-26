@@ -84,6 +84,12 @@ class TestGardenSetup(Base):
         garden_page.add_watering_station_button.click()
         assert garden_page.get_number_watering_stations() == self.num_watering_stations + 1
 
+        # the user then clicks the deactivate all button and all watering stations in the table are deactivated
+        garden_page.deactivate_button.click()
+        for i in range(1, self.num_watering_stations + 1):
+            status = garden_page.get_watering_station_field_value(i, 'Status')
+            assert not garden_page.convert_watering_station_status_to_bool(status)
+
     def assert_watering_station_has_default_values(self, ws_page):
         data = {
             'status': _default_status(),
@@ -98,7 +104,7 @@ class TestGardenSetup(Base):
             assert getattr(ws_page, key) == value
 
     def assert_garden_info_is_correct(self, garden_page):
-        assert garden_page.get_status() == self.garden.status
+        assert garden_page.get_garden_status() == self.garden.status
         assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
         assert garden_page.get_last_connected_at() == self.garden.get_formatted_last_connection_time()
         self.assert_next_expected_update_is_correct(garden_page)

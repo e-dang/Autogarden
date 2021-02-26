@@ -15,6 +15,10 @@ class AddWateringStationButton(Button):
     LOCATOR = 'addWateringStationBtn'
 
 
+class DeactivateButton(Button):
+    LOCATOR = 'deactivateAllBtn'
+
+
 class GardenDetailPage(BasePage):
     watering_station = WateringStationButtons()
 
@@ -24,6 +28,7 @@ class GardenDetailPage(BasePage):
         super().__init__(driver)
         self.field_mapping = None
         self.add_watering_station_button = AddWateringStationButton(self)
+        self.deactivate_button = DeactivateButton(self)
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/$'
@@ -57,7 +62,7 @@ class GardenDetailPage(BasePage):
             'watering_duration': watering_duration
         }
 
-    def get_status(self):
+    def get_garden_status(self):
         return self._get_inner_text('connectionStatus')
 
     def get_last_connected_from(self):
