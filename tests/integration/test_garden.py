@@ -175,10 +175,6 @@ class TestGardenListView:
 
 @pytest.mark.integration
 class TestGardenDetailView:
-    @pytest.fixture
-    def garden(self, garden_factory):
-        return garden_factory(watering_stations=5)
-
     def test_view_has_correct_url(self):
         pk = 1
         assert reverse('garden-detail', kwargs={'pk': pk}) == f'/gardens/{pk}/'
@@ -193,39 +189,33 @@ class TestGardenDetailView:
 @pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.mark.django_db
-    def test_GET_renders_watering_station_html_template(self, client, watering_station_factory):
-        station = watering_station_factory()
-
-        resp = client.get(station.get_absolute_url())
+    def test_GET_renders_watering_station_html_template(self, client, watering_station):
+        resp = client.get(watering_station.get_absolute_url())
 
         assert_template_is_rendered(resp, 'watering_station.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, watering_station_factory, valid_watering_station_data):
-        station = watering_station_factory()
-
-        resp = client.post(station.get_absolute_url(), data=valid_watering_station_data)
+    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, watering_station, valid_watering_station_data):
+        resp = client.post(watering_station.get_absolute_url(), data=valid_watering_station_data)
 
         assert_data_present_in_json_response_html(resp, valid_watering_station_data.values())
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, watering_station_factory, valid_watering_station_data):
-        station = watering_station_factory()
+    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, watering_station, valid_watering_station_data):
+        resp = client.post(watering_station.get_absolute_url(), data=valid_watering_station_data)
 
-        resp = client.post(station.get_absolute_url(), data=valid_watering_station_data)
-
-        station.refresh_from_db()
+        watering_station.refresh_from_db()
         assert resp.status_code == status.HTTP_200_OK
-        assert station.moisture_threshold == valid_watering_station_data['moisture_threshold']
-        assert derive_duration_string(station.watering_duration) == valid_watering_station_data['watering_duration']
-        assert station.plant_type == valid_watering_station_data['plant_type']
+        assert watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
+        assert derive_duration_string(
+            watering_station.watering_duration) == valid_watering_station_data['watering_duration']
+        assert watering_station.plant_type == valid_watering_station_data['plant_type']
 
 
 @pytest.mark.integration
 class TestWateringStationListView:
     @pytest.mark.django_db
-    def test_PATCH_updates_all_watering_stations_for_a_given_garden_with_the_data(self, client, garden_factory):
-        garden = garden_factory(watering_stations=5)
+    def test_PATCH_updates_all_watering_stations_for_a_given_garden_with_the_data(self, client, garden):
         data = {'status': False}
 
         client.patch(garden.get_watering_stations_url(), data=data)
@@ -234,8 +224,7 @@ class TestWateringStationListView:
             assert station.status == data['status']
 
     @pytest.mark.django_db
-    def test_PATCH_redirects_to_garden_detail_page(self, client, garden_factory):
-        garden = garden_factory(watering_stations=5)
+    def test_PATCH_redirects_to_garden_detail_page(self, client, garden):
         data = {'status': False}
 
         resp = client.patch(garden.get_watering_stations_url(), data=data)
@@ -244,8 +233,7 @@ class TestWateringStationListView:
         assert resp.url == garden.get_absolute_url()
 
     @pytest.mark.django_db
-    def test_POST_creates_a_new_default_watering_station(self, client, garden_factory):
-        garden = garden_factory(watering_stations=5)
+    def test_POST_creates_a_new_default_watering_station(self, client, garden):
         prev_num_watering_stations = garden.watering_stations.count()
 
         client.post(garden.get_watering_stations_url())
@@ -253,8 +241,7 @@ class TestWateringStationListView:
         assert prev_num_watering_stations + 1 == garden.watering_stations.count()
 
     @pytest.mark.django_db
-    def test_POST_redicrects_to_garden_detail(self, client, garden_factory):
-        garden = garden_factory(watering_stations=5)
+    def test_POST_redicrects_to_garden_detail(self, client, garden):
         resp = client.post(garden.get_watering_stations_url())
 
         assert resp.status_code == status.HTTP_302_FOUND
@@ -323,17 +310,13 @@ class TestGardenModel:
         garden_factory(**nulled_data)  # should not raise
 
     @pytest.mark.django_db
-    def test_get_absolute_url_returns_correct_url(self, garden_factory):
-        garden = garden_factory()
-
+    def test_get_absolute_url_returns_correct_url(self, garden):
         url = garden.get_absolute_url()
 
         assert url == f'/gardens/{garden.pk}/'
 
     @pytest.mark.django_db
-    def test_get_watering_station_urls(self, garden_factory):
-        garden = garden_factory()
-
+    def test_get_watering_station_urls(self, garden):
         url = garden.get_watering_stations_url()
 
         assert url == f'/gardens/{garden.pk}/watering-stations/'
@@ -404,13 +387,12 @@ class TestNewGardenForm:
 @pytest.mark.integration
 class TestWateringStationModel:
     @pytest.mark.django_db
-    def test_get_absolute_url_returns_correct_url(self, watering_station_factory):
-        station = watering_station_factory()
-        garden = station.garden
+    def test_get_absolute_url_returns_correct_url(self, watering_station):
+        garden = watering_station.garden
 
-        url = station.get_absolute_url()
+        url = watering_station.get_absolute_url()
 
-        assert url == f'/gardens/{garden.pk}/watering-stations/{station.pk}/'
+        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/'
 
 
 @pytest.mark.integration
