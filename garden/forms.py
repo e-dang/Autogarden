@@ -56,7 +56,7 @@ class UpdateWateringStationForm(forms.ModelForm):
 
     class Meta:
         model = WateringStation
-        fields = ['moisture_threshold', 'watering_duration', 'plant_type']
+        fields = ['moisture_threshold', 'watering_duration', 'plant_type', 'status']
         error_messages = {
             'moisture_threshold': {'required': REQUIRED_FIELD_ERR_MSG},
             'watering_duration': {'required': REQUIRED_FIELD_ERR_MSG}

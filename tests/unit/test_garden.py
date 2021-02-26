@@ -123,9 +123,10 @@ class TestGardenModel:
 class TestWateringStationModel:
     @pytest.mark.parametrize('field, get_default', [
         ('moisture_threshold', models._default_moisture_threshold),
-        ('watering_duration', models._default_watering_duration)
+        ('watering_duration', models._default_watering_duration),
+        ('status', models._default_status)
     ],
-        ids=['moisture_threshold', 'watering_duration'])
+        ids=['moisture_threshold', 'watering_duration', 'status'])
     def test_field_is_given_a_default_value(self, field, get_default):
         watering_station = models.WateringStation(garden=models.Garden())
 

@@ -38,7 +38,8 @@ def data_GET_api_watering_stations(garden_factory):
 def valid_watering_station_data():
     return {'moisture_threshold': 89,
             'watering_duration': build_duration_string(5, 65),
-            'plant_type': 'lettuce'
+            'plant_type': 'lettuce',
+            'status': True
             }
 
 
@@ -347,8 +348,14 @@ class TestUpdateWateringStationForm:
         assert not form.is_valid()
         assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
 
-    def test_plant_type_field_is_not_required(self, valid_watering_station_data):
-        valid_watering_station_data.pop('plant_type')
+    @pytest.mark.parametrize('valid_watering_station_data, missing_field', [
+        (None, 'plant_type'),
+        (None, 'status')
+    ],
+        indirect=['valid_watering_station_data'],
+        ids=['plant_type', 'status'])
+    def test_plant_type_field_is_not_required(self, valid_watering_station_data, missing_field):
+        valid_watering_station_data.pop(missing_field)
         form = UpdateWateringStationForm(data=valid_watering_station_data)
 
         assert form.is_valid()

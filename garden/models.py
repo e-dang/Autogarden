@@ -31,6 +31,10 @@ def _default_num_missed_updates():
     return 0
 
 
+def _default_status():
+    return True
+
+
 CONNECTED_STR = 'Connected'
 DISCONNECTED_STR = 'Disconnected'
 
@@ -76,10 +80,14 @@ class Garden(models.Model):
 
 
 class WateringStation(models.Model):
+    ACTIVE_STATUS_STR = 'Active'
+    INACTIVE_STATUS_STR = 'Inactive'
+
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)
     moisture_threshold = models.IntegerField(default=_default_moisture_threshold)
     watering_duration = models.DurationField(default=_default_watering_duration)
     plant_type = models.CharField(max_length=255, blank=True)
+    status = models.BooleanField(default=_default_status)
 
     class Meta:
         ordering = ['id']

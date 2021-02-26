@@ -32,6 +32,7 @@ class WateringStationFactory(factory.django.DjangoModelFactory):
     garden = factory.SubFactory(GardenFactory)
     moisture_threshold = factory.Faker('random_int', min=0, max=100)
     plant_type = factory.Sequence(lambda x: f'lettuce{x}')
+    status = factory.Sequence(lambda x: x % 2 == 0)
 
     class Meta:
         model = WateringStation
