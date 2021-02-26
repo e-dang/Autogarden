@@ -4,11 +4,15 @@ from garden.models import WateringStation
 from selenium.common.exceptions import NoSuchElementException
 
 from .base_page import BasePage
-from .elements import ButtonGroup
+from .elements import Button, ButtonGroup
 
 
 class WateringStationButtons(ButtonGroup):
     LOCATOR = 'wateringStation'
+
+
+class AddWateringStationButton(Button):
+    LOCATOR = 'addWateringStationBtn'
 
 
 class GardenDetailPage(BasePage):
@@ -19,6 +23,7 @@ class GardenDetailPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         self.field_mapping = None
+        self.add_watering_station_button = AddWateringStationButton(self)
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/$'

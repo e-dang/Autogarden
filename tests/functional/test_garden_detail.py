@@ -11,7 +11,8 @@ from garden.models import _default_moisture_threshold, _default_watering_duratio
 class TestGardenSetup(Base):
     @pytest.fixture(autouse=True)
     def garden(self, garden_factory):
-        self.garden = garden_factory(watering_stations=10, watering_stations__defaults=True)
+        self.num_watering_stations = 10
+        self.garden = garden_factory(watering_stations=self.num_watering_stations, watering_stations__defaults=True)
 
     @pytest.fixture(autouse=True)
     def url(self, live_server):
@@ -75,6 +76,13 @@ class TestGardenSetup(Base):
         # configurations have persisted
         ws_page.go_to_watering_station_page(selected_watering_station)
         self.assert_watering_station_has_values(table_data, ws_page)
+
+        # the user then goes back to the garden detail page and clicks on the add watering station button and sees
+        # that the page now displays and extra watering station in the table
+        ws_page.go_back_to_garden_detail()
+        self.wait_for_page_to_be_loaded(garden_page)
+        garden_page.add_watering_station_button.click()
+        assert garden_page.get_number_watering_stations() == self.num_watering_stations + 1
 
     def assert_watering_station_has_default_values(self, ws_page):
         data = {
