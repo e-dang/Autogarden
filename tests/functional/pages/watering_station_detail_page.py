@@ -1,8 +1,8 @@
 import re
 
-from garden.forms import UPDATE_WATERING_STATION_SUBMIT_ID, WateringStationForm, DeleteWateringStationForm
+from garden.forms import WateringStationForm, DeleteWateringStationForm
 
-from ..base import wait_for, wait_for_true
+from ..base import wait_for
 from .base_page import BasePage
 from .elements import Button, TextInput, ToggleButton
 
@@ -24,7 +24,7 @@ class StatusCheckBox(ToggleButton):
 
 
 class WateringStationFormSubmitButton(Button):
-    LOCATOR = UPDATE_WATERING_STATION_SUBMIT_ID
+    LOCATOR = WateringStationForm.UPDATE_WATERING_STATION_SUBMIT_ID
 
 
 class DeleteButton(Button):
@@ -58,7 +58,7 @@ class WateringStationDetailPage(BasePage):
         return re.search(pattern, self.driver.current_url) is not None
 
     def submit_watering_station_update(self):
-        self.driver.find_element_by_id(UPDATE_WATERING_STATION_SUBMIT_ID).click()
+        self.driver.find_element_by_id(WateringStationForm.UPDATE_WATERING_STATION_SUBMIT_ID).click()
 
     def go_back_to_garden_detail(self):
         wait_for(lambda: self.driver.find_element_by_id('navGardenDetail')).click()

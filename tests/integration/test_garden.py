@@ -3,8 +3,7 @@ import uuid
 import pytest
 from django.db.utils import IntegrityError
 from django.forms import ValidationError
-from garden.forms import (NUM_WATERING_STATIONS_ERROR_MSG,
-                          REQUIRED_FIELD_ERR_MSG, NewGardenForm,
+from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
                           WateringStationForm)
 from garden.models import Garden, WateringStation
 from garden.serializers import GardenSerializer, WateringStationSerializer
@@ -13,7 +12,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 
-@pytest.fixture
+@ pytest.fixture
 def data_POST_api_garden():
     num_watering_stations = 4
     url = reverse('api-garden')
@@ -171,7 +170,7 @@ class TestGardenListView:
 
         data = resp.json()
         assert data['success'] == False
-        assert NUM_WATERING_STATIONS_ERROR_MSG in data['html']
+        assert NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG in data['html']
 
 
 @pytest.mark.integration

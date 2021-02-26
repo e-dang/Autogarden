@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils

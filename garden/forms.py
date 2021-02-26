@@ -7,15 +7,15 @@ from django import forms
 from .models import Garden, WateringStation
 from .utils import create_unique_garden_uuid, set_num_watering_stations, derive_duration_string
 
-NEW_GARDEN_FORM_ID = 'newGardenForm'
-NEW_GARDEN_SUBMIT_ID = 'submitBtn'
-UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
-NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
 
 
 class NewGardenForm(forms.ModelForm):
+    NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
+    NEW_GARDEN_FORM_ID = 'newGardenForm'
+    NEW_GARDEN_SUBMIT_ID = 'submitBtn'
+
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
 
     class Meta:
@@ -25,15 +25,15 @@ class NewGardenForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = NEW_GARDEN_FORM_ID
+        self.helper.form_id = self.NEW_GARDEN_FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'garden-list'
-        self.helper.add_input(Submit('submit', 'Create', css_id=NEW_GARDEN_SUBMIT_ID))
+        self.helper.add_input(Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID))
 
     def clean_num_watering_stations(self):
         data = self.cleaned_data['num_watering_stations']
         if data < 0:
-            raise forms.ValidationError(NUM_WATERING_STATIONS_ERROR_MSG)
+            raise forms.ValidationError(self.NUM_WATERING_STATIONS_ERROR_MSG)
 
         return data
 
@@ -52,6 +52,7 @@ class CustomDurationField(forms.DurationField):
 
 
 class WateringStationForm(forms.ModelForm):
+    UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
     DELETE_WATERING_STATION_MODAL_ID = 'deleteWateringStationModal'
     DELETE_BUTTON_ID = 'deleteButton'
 
@@ -70,7 +71,7 @@ class WateringStationForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Update', css_id=UPDATE_WATERING_STATION_SUBMIT_ID))
+        self.helper.add_input(Submit('submit', 'Update', css_id=self.UPDATE_WATERING_STATION_SUBMIT_ID))
         self.helper.add_input(Button('delete', 'Delete', css_id=self.DELETE_BUTTON_ID, css_class='btn btn-danger',
                                      data_toggle='modal', data_target=f'#{self.DELETE_WATERING_STATION_MODAL_ID}'))
 
