@@ -7,9 +7,24 @@
 {% block main_content %}
 
 <div class="row">
-    <div class="col">
-        {% load crispy_forms_tags %}
-        {% crispy form %}
+    <div class="col-md-5">
+        <div class="card card-body">
+            {% load crispy_forms_tags %}
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+
+<div id="deleteWateringStationModal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="deleteWateringStationModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Watering Station</h5>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
     </div>
 </div>
 
@@ -30,5 +45,20 @@
             },
         });
     })
+
+    const button = $('#deleteButton');
+    button.on('click', (event) => {
+        $.ajax({
+            type: 'get',
+            url: "{% url 'watering-station-delete' form.instance.garden.pk form.instance.pk %}",
+            success: (data) => {
+                $('.modal-body').html(data.html);
+                $('#deleteWateringStationModal').show();
+                console.log(data.html);
+            }
+        })
+    })
+
+
 </script>
 {% endblock %}

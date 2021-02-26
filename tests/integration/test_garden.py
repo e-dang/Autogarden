@@ -6,7 +6,7 @@ from django.forms import ValidationError
 from garden.forms import (NUM_WATERING_STATIONS_ERROR_MSG,
                           REQUIRED_FIELD_ERR_MSG, NewGardenForm,
                           WateringStationForm)
-from garden.models import Garden
+from garden.models import Garden, WateringStation
 from garden.serializers import GardenSerializer, WateringStationSerializer
 from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
@@ -260,6 +260,45 @@ class TestWateringStationListView:
 
         assert resp.status_code == status.HTTP_302_FOUND
         assert resp.url == garden.get_absolute_url()
+
+
+@pytest.mark.integration
+class TestWateringStationDeleteView:
+    @pytest.mark.django_db
+    def test_GET_returns_json_response_with_form_html_that_posts_to_watering_station_delete(self, client, watering_station):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+        expected = [
+            'method="post"',
+            f'action="{url}"'
+        ]
+
+        resp = client.get(url)
+
+        assert_data_present_in_json_response_html(resp, expected)
+
+    @pytest.mark.django_db
+    def test_POST_deletes_watering_station_with_given_pk(self, client, watering_station):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+
+        client.post(url)
+
+        with pytest.raises(WateringStation.DoesNotExist):
+            WateringStation.objects.get(pk=ws_pk)
+
+    @pytest.mark.django_db
+    def test_POST_redirects_to_garden_detail_view(self, client, watering_station):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+
+        resp = client.post(url)
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == reverse('garden-detail', kwargs={'pk': garden_pk})
 
 
 @pytest.mark.integration

@@ -1,7 +1,7 @@
 import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import ButtonHolder, HTML, Layout, Submit, Button
 from django import forms
 
 from .models import Garden, WateringStation
@@ -52,6 +52,9 @@ class CustomDurationField(forms.DurationField):
 
 
 class WateringStationForm(forms.ModelForm):
+    DELETE_WATERING_STATION_MODAL_ID = 'deleteWateringStationModal'
+    DELETE_BUTTON_ID = 'deleteButton'
+
     watering_duration = CustomDurationField()
 
     class Meta:
@@ -68,6 +71,8 @@ class WateringStationForm(forms.ModelForm):
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Update', css_id=UPDATE_WATERING_STATION_SUBMIT_ID))
+        self.helper.add_input(Button('delete', 'Delete', css_id=self.DELETE_BUTTON_ID, css_class='btn btn-danger',
+                                     data_toggle='modal', data_target=f'#{self.DELETE_WATERING_STATION_MODAL_ID}'))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'
@@ -78,3 +83,25 @@ class BulkUpdateWateringStationForm(WateringStationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.required = False
+
+
+class DeleteWateringStationForm(forms.Form):
+    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
+    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
+    FORM_ID = 'deleteWateringStationForm'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = self.FORM_ID
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            HTML("""
+            <p>Are you sure you want to delete this watering station?</p>
+        """),
+            ButtonHolder(
+                Button('delete', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                       data_dismiss='modal', aria_hidden='true'),
+                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger')
+            )
+        )

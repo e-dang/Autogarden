@@ -2,7 +2,7 @@ from typing import Any
 
 from crispy_forms.utils import render_crispy_form
 from django import http
-from django.http.response import JsonResponse
+from django.http.response import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.urls import reverse
@@ -11,9 +11,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import NewGardenForm, WateringStationForm, BulkUpdateWateringStationForm
+from garden.forms import DeleteWateringStationForm, NewGardenForm, WateringStationForm, BulkUpdateWateringStationForm
 
-from .models import Garden
+from .models import Garden, WateringStation
 from .serializers import GardenSerializer, WateringStationSerializer
 
 
@@ -99,3 +99,16 @@ class WateringStationDetailView(View):
             form.save()
         form_html = render_crispy_form(form, context=csrf(request))
         return JsonResponse({'html': form_html})
+
+
+class WateringStationDeleteView(View):
+    def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
+        form = DeleteWateringStationForm()
+        form.helper.form_action = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+        form_html = render_crispy_form(form, context=csrf(request))
+        return JsonResponse({'html': form_html})
+
+    def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
+        station = WateringStation.objects.get(garden=garden_pk, pk=ws_pk)
+        station.delete()
+        return redirect('garden-detail', pk=garden_pk)
