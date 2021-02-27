@@ -252,25 +252,19 @@ class TestWateringStationListView:
 class TestWateringStationDeleteView:
     @pytest.mark.django_db
     def test_GET_returns_json_response_with_form_html_that_posts_to_watering_station_delete(self, client, watering_station):
-        garden_pk = watering_station.garden.pk
-        ws_pk = watering_station.pk
-        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
         expected = [
             'method="post"',
-            f'action="{url}"'
+            f'action="{watering_station.get_delete_url()}"'
         ]
 
-        resp = client.get(url)
+        resp = client.get(watering_station.get_delete_url())
 
         assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
     def test_POST_deletes_watering_station_with_given_pk(self, client, watering_station):
-        garden_pk = watering_station.garden.pk
         ws_pk = watering_station.pk
-        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
-
-        client.post(url)
+        client.post(watering_station.get_delete_url())
 
         with pytest.raises(WateringStation.DoesNotExist):
             WateringStation.objects.get(pk=ws_pk)
@@ -278,10 +272,8 @@ class TestWateringStationDeleteView:
     @pytest.mark.django_db
     def test_POST_redirects_to_garden_detail_view(self, client, watering_station):
         garden_pk = watering_station.garden.pk
-        ws_pk = watering_station.pk
-        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
 
-        resp = client.post(url)
+        resp = client.post(watering_station.get_delete_url())
 
         assert resp.status_code == status.HTTP_302_FOUND
         assert resp.url == reverse('garden-detail', kwargs={'pk': garden_pk})
@@ -393,6 +385,14 @@ class TestWateringStationModel:
         url = watering_station.get_absolute_url()
 
         assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/'
+
+    @pytest.mark.django_db
+    def test_get_delete_url_returns_correct_url(self, watering_station):
+        garden = watering_station.garden
+
+        url = watering_station.get_delete_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/delete/'
 
 
 @pytest.mark.integration
