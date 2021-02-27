@@ -57,9 +57,6 @@ class WateringStationDetailPage(BasePage):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/$'
         return re.search(pattern, self.driver.current_url) is not None
 
-    def submit_watering_station_update(self):
-        self.driver.find_element_by_id(WateringStationForm.UPDATE_WATERING_STATION_SUBMIT_ID).click()
-
     def go_back_to_garden_detail(self):
         wait_for(lambda: self.driver.find_element_by_id('navGardenDetail')).click()
 

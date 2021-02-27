@@ -25,14 +25,14 @@ class TestGardenSetup(Base):
         # they also see an option to create a new garden, which they click and immediately see a modal that prompts
         # them for the garden name. The default garden name is displayed in that text box. They are also prompted for
         # the number of watering stations that are going to be in this garden
-        list_page.click_add_new_garden()
+        list_page.new_garden_button.click()
         assert list_page.new_garden_name == _default_garden_name()
         assert list_page.num_watering_stations == ''
 
         # they enter a negative number for the number of watering stations and hit enter, and they see a error message
         # appear
         list_page.num_watering_stations = -1
-        list_page.submit_new_garden()
+        list_page.submit_new_garden_button.click()
         wait_for(lambda: self.driver.find_element_by_id('error_1_id_num_watering_stations'))
 
         # now they enter a garden name and valid number of watering stations and see a new garden appear in the list of
@@ -41,7 +41,7 @@ class TestGardenSetup(Base):
         num_watering_stations = 3
         list_page.new_garden_name = garden_name
         list_page.num_watering_stations = num_watering_stations
-        list_page.submit_new_garden()
+        list_page.submit_new_garden_button.click()
         list_page.wait_for_garden_in_list(garden_name)
 
         # they click on the garden and are taken to the associated garden page
@@ -54,5 +54,5 @@ class TestGardenSetup(Base):
 
         # the user then clicks the AutoGarden tag in the nav bar to navigate home and is taken back to the garden
         # list page
-        list_page.click_home()
+        list_page.home_button.click()
         self.wait_for_page_to_be_loaded(list_page)
