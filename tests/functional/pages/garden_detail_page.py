@@ -19,6 +19,10 @@ class DeactivateButton(Button):
     LOCATOR = 'deactivateAllBtn'
 
 
+class EditButton(Button):
+    LOCATOR = 'editButton'
+
+
 class GardenDetailPage(BasePage):
     watering_station = WateringStationButtons()
 
@@ -29,6 +33,7 @@ class GardenDetailPage(BasePage):
         self.field_mapping = None
         self.add_watering_station_button = AddWateringStationButton(self)
         self.deactivate_button = DeactivateButton(self)
+        self.edit_button = EditButton(self)
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/$'
