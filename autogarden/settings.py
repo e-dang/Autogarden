@@ -132,3 +132,7 @@ STATICFILES_FINDERS = (
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+MEDIA_URL = '/images/'
+MEDIA_ROOT = BASE_DIR / 'static' / 'images'

@@ -1,7 +1,7 @@
 import datetime
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import ButtonHolder, HTML, Layout, Submit, Button
+from crispy_forms.layout import ButtonHolder, Field, HTML, Layout, Submit, Button
 from django import forms
 
 from .models import Garden, WateringStation
@@ -42,6 +42,31 @@ class NewGardenForm(forms.ModelForm):
         garden = Garden.objects.create(name=self.cleaned_data['name'], uuid=uuid)
         set_num_watering_stations(garden, self.cleaned_data['num_watering_stations'])
         return garden
+
+
+class UpdateGardenForm(forms.ModelForm):
+    SUBMIT_BTN_ID = 'submitBtn'
+    DELETE_BTN_ID = 'deleteBtn'
+    DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
+
+    class Meta:
+        model = Garden
+        fields = ['name', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            Field('name'),
+            Field('image', id='id_image'),
+            Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID)
+        )
+
+
+class DeleteGardenForm(forms.Form):
+    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
+    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
 
 
 class CustomDurationField(forms.DurationField):

@@ -35,6 +35,10 @@ def _default_status():
     return True
 
 
+def _default_garden_image():
+    return '/static/images/default_garden.png'
+
+
 CONNECTED_STR = 'Connected'
 DISCONNECTED_STR = 'Disconnected'
 
@@ -49,6 +53,7 @@ class Garden(models.Model):
 
     uuid = models.UUIDField(unique=True)
     name = models.CharField(max_length=255, default=_default_garden_name)
+    image = models.ImageField(default=_default_garden_image)
     is_connected = models.BooleanField(default=_default_is_connected)
     last_connection_ip = models.GenericIPAddressField(null=True)
     last_connection_time = models.DateTimeField(null=True)
@@ -61,6 +66,9 @@ class Garden(models.Model):
 
     def get_watering_stations_url(self):
         return reverse('watering-station-list', kwargs={'pk': self.pk})
+
+    def get_update_url(self):
+        return reverse('garden-update', kwargs={'pk': self.pk})
 
     @property
     def status(self):

@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import DeleteWateringStationForm, NewGardenForm, WateringStationForm, BulkUpdateWateringStationForm
+from garden.forms import DeleteWateringStationForm, NewGardenForm, UpdateGardenForm, WateringStationForm, BulkUpdateWateringStationForm
 
 from .models import Garden, WateringStation
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -61,6 +61,20 @@ class GardenDetailView(View):
     def get(self, request, pk):
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
+
+
+class GardenUpdateView(View):
+    def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+        garden = Garden.objects.get(pk=pk)
+        form = UpdateGardenForm(instance=garden)
+        return render(request, 'garden_update.html', context={'form': form})
+
+    def post(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+        garden = Garden.objects.get(pk=pk)
+        form = UpdateGardenForm(request.POST, request.FILES, instance=garden)
+        if form.is_valid():
+            form.save()
+        return redirect('garden-update', pk=pk)
 
 
 class WateringStationListView(View):

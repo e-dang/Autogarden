@@ -13,9 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from garden.views import GardenView, WateringStationListView, WateringStationView, GardenListView, GardenDetailView, WateringStationDetailView, WateringStationDeleteView
+from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
+                          GardenView, WateringStationDeleteView,
+                          WateringStationDetailView, WateringStationListView,
+                          WateringStationView)
 
 API_PREFIX = 'api/'
 
@@ -26,9 +31,12 @@ urlpatterns = [
          WateringStationView.as_view(), name='api-watering-stations'),
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
+    path('gardens/<int:pk>/update/', GardenUpdateView.as_view(), name='garden-update'),
     path('gardens/<int:pk>/watering-stations/', WateringStationListView.as_view(), name='watering-station-list'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/delete/',
          WateringStationDeleteView.as_view(), name='watering-station-delete'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

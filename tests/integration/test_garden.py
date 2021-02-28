@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import IntegrityError
 from django.forms import ValidationError
 from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
@@ -10,9 +11,10 @@ from garden.serializers import GardenSerializer, WateringStationSerializer
 from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
+from tests.conftest import TEST_IMAGE_DIR, assert_image_files_equal
 
 
-@ pytest.fixture
+@pytest.fixture
 def data_POST_api_garden():
     num_watering_stations = 4
     url = reverse('api-garden')
@@ -46,6 +48,17 @@ def valid_watering_station_data():
 def valid_garden_data():
     return {'name': 'My Garden',
             'num_watering_stations': 3}
+
+
+@pytest.fixture
+def valid_update_garden_data():
+    image_path = str(TEST_IMAGE_DIR / 'test_garden_image.png')
+    with open(image_path, 'rb') as f:
+        file = SimpleUploadedFile('test_garden_image.png', f.read(), content_type='image/png')
+        return {
+            'name': 'new garden name',
+            'image': file
+        }
 
 
 def assert_template_is_rendered(response, template_name):
@@ -187,6 +200,30 @@ class TestGardenDetailView:
 
 
 @pytest.mark.integration
+class TestGardenUpdateView:
+    @pytest.mark.django_db
+    def test_GET_renders_garden_update_html_template(self, client, garden):
+        resp = client.get(garden.get_update_url())
+
+        assert_template_is_rendered(resp, 'garden_update.html')
+
+    @pytest.mark.django_db
+    def test_POST_updates_garden_instance_fields(self, client, garden, valid_update_garden_data):
+        client.post(garden.get_update_url(), data=valid_update_garden_data)
+
+        garden.refresh_from_db()
+        assert garden.name == valid_update_garden_data['name']
+        assert_image_files_equal(garden.image.url, valid_update_garden_data['image'].name)
+
+    @pytest.mark.django_db
+    def test_POST_redirects_to_garden_update_view(self, client, garden, valid_update_garden_data):
+        resp = client.post(garden.get_update_url(), data=valid_update_garden_data)
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == garden.get_update_url()
+
+
+@pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.mark.django_db
     def test_GET_renders_watering_station_html_template(self, client, watering_station):
@@ -312,6 +349,12 @@ class TestGardenModel:
         url = garden.get_watering_stations_url()
 
         assert url == f'/gardens/{garden.pk}/watering-stations/'
+
+    @pytest.mark.django_db
+    def test_get_update_url_returns_correct_url(self, garden):
+        url = garden.get_update_url()
+
+        assert url == f'/gardens/{garden.pk}/update/'
 
 
 @pytest.mark.integration
