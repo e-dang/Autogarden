@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+{% include 'garden_detail_nav.html' with garden=form.instance %}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="row">
+    <div class="col">
+        <div class="card card-body">
+            <div class="row">
+                <h1>{{form.instance.name}}</h1>
+            </div>
+            <div class="row">
+                <img src="{{form.instance.image.url}}" width="300" height="200" alt="">
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card card-body">
+            {% load crispy_forms_tags %}
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+{% endblock %}
