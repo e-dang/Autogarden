@@ -2,7 +2,7 @@ from typing import Any
 
 from crispy_forms.utils import render_crispy_form
 from django import http
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.urls import reverse
@@ -11,7 +11,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import DeleteGardenForm, DeleteWateringStationForm, NewGardenForm, UpdateGardenForm, WateringStationForm, BulkUpdateWateringStationForm
+from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
+                          DeleteWateringStationForm, NewGardenForm,
+                          UpdateGardenForm, WateringStationForm)
 
 from .models import Garden, WateringStation
 from .serializers import GardenSerializer, WateringStationSerializer

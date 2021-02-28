@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from django import http
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import IntegrityError
 from django.forms import ValidationError
@@ -71,6 +72,11 @@ def assert_data_present_in_json_response_html(response, values):
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
+
+
+def assert_redirect(response: http.HttpResponse, redirect_url: str):
+    assert response.status_code == status.HTTP_302_FOUND
+    assert response.url == redirect_url
 
 
 @pytest.mark.integration
@@ -219,8 +225,7 @@ class TestGardenUpdateView:
     def test_POST_redirects_to_garden_update_view(self, client, garden, valid_update_garden_data):
         resp = client.post(garden.get_update_url(), data=valid_update_garden_data)
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == garden.get_update_url()
+        assert_redirect(resp, garden.get_update_url())
 
 
 @pytest.mark.integration
@@ -247,8 +252,7 @@ class TestGardenDeleteView:
     def test_POST_redirects_to_garden_list_page(self, client, garden):
         resp = client.post(garden.get_delete_url())
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == reverse('garden-list')
+        assert_redirect(resp, reverse('garden-list'))
 
 
 @pytest.mark.integration
@@ -294,8 +298,7 @@ class TestWateringStationListView:
 
         resp = client.patch(garden.get_watering_stations_url(), data=data)
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == garden.get_absolute_url()
+        assert_redirect(resp, garden.get_absolute_url())
 
     @pytest.mark.django_db
     def test_POST_creates_a_new_default_watering_station(self, client, garden):
@@ -309,8 +312,7 @@ class TestWateringStationListView:
     def test_POST_redicrects_to_garden_detail(self, client, garden):
         resp = client.post(garden.get_watering_stations_url())
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == garden.get_absolute_url()
+        assert_redirect(resp, garden.get_absolute_url())
 
 
 @pytest.mark.integration
@@ -340,8 +342,7 @@ class TestWateringStationDeleteView:
 
         resp = client.post(watering_station.get_delete_url())
 
-        assert resp.status_code == status.HTTP_302_FOUND
-        assert resp.url == reverse('garden-detail', kwargs={'pk': garden_pk})
+        assert_redirect(resp, reverse('garden-detail', kwargs={'pk': garden_pk}))
 
 
 @pytest.mark.integration
