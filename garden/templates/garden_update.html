@@ -13,7 +13,7 @@
                 <h1>{{form.instance.name}}</h1>
             </div>
             <div class="row">
-                <img src="{{form.instance.image.url}}" width="300" height="200" alt="">
+                <img id="gardenImage" src="{{form.instance.image.url}}" width="300" height="200" alt="">
             </div>
         </div>
     </div>
@@ -24,4 +24,22 @@
         </div>
     </div>
 </div>
+
+<div id="{{form.DELETE_GARDEN_MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="{{form.DELETE_GARDEN_MODAL_ID}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="/static/javascript/utils.js"></script>
+<script>
+    getModalDataAjax("{% url 'garden-delete' form.instance.pk %}");
+</script>
 {% endblock %}

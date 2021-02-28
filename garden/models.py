@@ -70,6 +70,9 @@ class Garden(models.Model):
     def get_update_url(self):
         return reverse('garden-update', kwargs={'pk': self.pk})
 
+    def get_delete_url(self):
+        return reverse('garden-delete', kwargs={'pk': self.pk})
+
     @property
     def status(self):
         return CONNECTED_STR if self.is_connected else DISCONNECTED_STR

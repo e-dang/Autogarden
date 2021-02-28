@@ -1,12 +1,14 @@
 import datetime
 
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import ButtonHolder, Field, HTML, Layout, Submit, Button
+from crispy_forms.layout import (HTML, Button, ButtonHolder, Field, Layout,
+                                 Submit)
 from django import forms
 
 from .models import Garden, WateringStation
-from .utils import create_unique_garden_uuid, set_num_watering_stations, derive_duration_string
-
+from .utils import (create_unique_garden_uuid, derive_duration_string,
+                    set_num_watering_stations)
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
 
@@ -60,13 +62,28 @@ class UpdateGardenForm(forms.ModelForm):
         self.helper.layout = Layout(
             Field('name'),
             Field('image', id='id_image'),
-            Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID)
+            Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID),
+            Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
+                   data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
         )
 
 
 class DeleteGardenForm(forms.Form):
     CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
     CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.helper = FormHelper()
+        self.method = 'post'
+        self.helper.layout = Layout(
+            FormActions(
+                HTML('<p>Are you sure you want to delete this garden?</p>'),
+                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                       data_dismiss='modal', aria_hidden='true'),
+                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
+            )
+        )
 
 
 class CustomDurationField(forms.DurationField):
@@ -122,9 +139,7 @@ class DeleteWateringStationForm(forms.Form):
         self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
-            HTML("""
-            <p>Are you sure you want to delete this watering station?</p>
-        """),
+            HTML('<p>Are you sure you want to delete this watering station?</p>'),
             ButtonHolder(
                 Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
                        data_dismiss='modal', aria_hidden='true'),

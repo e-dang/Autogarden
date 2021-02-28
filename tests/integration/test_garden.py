@@ -224,6 +224,20 @@ class TestGardenUpdateView:
 
 
 @pytest.mark.integration
+class TestGardenDeleteView:
+    @pytest.mark.django_db
+    def test_GET_returns_json_response_with_garden_delete_form_html(self, client, garden):
+        expected = [
+            'method="post"',
+            f'action="{garden.get_delete_url()}"'
+        ]
+
+        resp = client.get(garden.get_delete_url())
+
+        assert_data_present_in_json_response_html(resp, expected)
+
+
+@pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.mark.django_db
     def test_GET_renders_watering_station_html_template(self, client, watering_station):
@@ -355,6 +369,12 @@ class TestGardenModel:
         url = garden.get_update_url()
 
         assert url == f'/gardens/{garden.pk}/update/'
+
+    @pytest.mark.django_db
+    def test_get_delete_url_returns_correct_url(self, garden):
+        url = garden.get_delete_url()
+
+        assert url == f'/gardens/{garden.pk}/delete/'
 
 
 @pytest.mark.integration

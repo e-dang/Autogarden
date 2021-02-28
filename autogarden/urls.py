@@ -17,7 +17,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
+from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
                           GardenView, WateringStationDeleteView,
                           WateringStationDetailView, WateringStationListView,
                           WateringStationView)
@@ -32,6 +32,7 @@ urlpatterns = [
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
     path('gardens/<int:pk>/update/', GardenUpdateView.as_view(), name='garden-update'),
+    path('gardens/<int:pk>/delete/', GardenDeleteView.as_view(), name='garden-delete'),
     path('gardens/<int:pk>/watering-stations/', WateringStationListView.as_view(), name='watering-station-list'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),

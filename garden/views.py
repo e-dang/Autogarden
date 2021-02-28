@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from garden.forms import DeleteWateringStationForm, NewGardenForm, UpdateGardenForm, WateringStationForm, BulkUpdateWateringStationForm
+from garden.forms import DeleteGardenForm, DeleteWateringStationForm, NewGardenForm, UpdateGardenForm, WateringStationForm, BulkUpdateWateringStationForm
 
 from .models import Garden, WateringStation
 from .serializers import GardenSerializer, WateringStationSerializer
@@ -75,6 +75,17 @@ class GardenUpdateView(View):
         if form.is_valid():
             form.save()
         return redirect('garden-update', pk=pk)
+
+
+class GardenDeleteView(View):
+    def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+        form = DeleteGardenForm()
+        form.helper.form_action = reverse('garden-delete', kwargs={'pk': pk})
+        form_html = render_crispy_form(form, context=csrf(request))
+        return JsonResponse({'html': form_html})
+
+    def post(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+        pass
 
 
 class WateringStationListView(View):
