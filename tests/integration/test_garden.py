@@ -236,6 +236,20 @@ class TestGardenDeleteView:
 
         assert_data_present_in_json_response_html(resp, expected)
 
+    @pytest.mark.django_db
+    def test_POST_deletes_the_specified_garden(self, client, garden):
+        client.post(garden.get_delete_url())
+
+        with pytest.raises(Garden.DoesNotExist):
+            garden.refresh_from_db()
+
+    @pytest.mark.django_db
+    def test_POST_redirects_to_garden_list_page(self, client, garden):
+        resp = client.post(garden.get_delete_url())
+
+        assert resp.status_code == status.HTTP_302_FOUND
+        assert resp.url == reverse('garden-list')
+
 
 @pytest.mark.integration
 class TestWateringStationDetailView:

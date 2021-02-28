@@ -85,7 +85,9 @@ class GardenDeleteView(View):
         return JsonResponse({'html': form_html})
 
     def post(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
-        pass
+        garden = Garden.objects.get(pk=pk)
+        garden.delete()
+        return redirect('garden-list')
 
 
 class WateringStationListView(View):
