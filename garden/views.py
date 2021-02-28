@@ -41,12 +41,12 @@ class WateringStationView(APIView):
 
 
 class GardenListView(View):
-    def get(self, request):
+    def get(self, request: http.HttpRequest) -> http.HttpResponse:
         form = NewGardenForm()
         gardens = Garden.objects.all()
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
-    def post(self, request):
+    def post(self, request: http.HttpRequest) -> http.JsonResponse:
         form = NewGardenForm(data=request.POST)
         if form.is_valid():
             form.save()
@@ -60,7 +60,7 @@ class GardenListView(View):
 
 
 class GardenDetailView(View):
-    def get(self, request, pk):
+    def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
 
@@ -80,7 +80,7 @@ class GardenUpdateView(View):
 
 
 class GardenDeleteView(View):
-    def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+    def get(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         form = DeleteGardenForm()
         form.helper.form_action = reverse('garden-delete', kwargs={'pk': pk})
         form_html = render_crispy_form(form, context=csrf(request))
@@ -99,7 +99,7 @@ class WateringStationListView(View):
             return self.patch(request, *args, **kwargs)
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, pk):
+    def post(self, request, pk) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
         garden.watering_stations.create()
         return redirect('garden-detail', pk=pk)
@@ -114,13 +114,13 @@ class WateringStationListView(View):
 
 
 class WateringStationDetailView(View):
-    def get(self, request, garden_pk, ws_pk):
+    def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
         form = WateringStationForm(instance=station)
         return render(request, 'watering_station.html', context={'form': form})
 
-    def post(self, request, garden_pk, ws_pk):
+    def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
         form = WateringStationForm(instance=station, data=request.POST)

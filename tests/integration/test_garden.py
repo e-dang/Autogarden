@@ -62,12 +62,12 @@ def valid_update_garden_data():
         }
 
 
-def assert_template_is_rendered(response, template_name):
+def assert_template_is_rendered(response: http.HttpResponse, template_name: str):
     assert response.status_code == status.HTTP_200_OK
     assert template_name in (template.name for template in response.templates)
 
 
-def assert_data_present_in_json_response_html(response, values):
+def assert_data_present_in_json_response_html(response: http.HttpResponse, values):
     json = response.json()
     assert response.status_code == status.HTTP_200_OK
     for value in values:
