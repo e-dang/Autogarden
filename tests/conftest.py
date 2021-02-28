@@ -1,9 +1,12 @@
 import pytest
+from django.conf import settings
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from selenium import webdriver
 
 from . import factories
+
+TEST_IMAGE_DIR = settings.BASE_DIR / 'tests' / 'images'
 
 register(factories.GardenFactory)
 register(factories.WateringStationFactory)
@@ -35,3 +38,12 @@ def faker_seed():
 @pytest.fixture
 def api_client():
     return APIClient()
+
+
+@pytest.fixture(autouse=True)
+def use_tmp_static_dir(settings, tmp_path_factory):
+    settings.MEDIA_ROOT = tmp_path_factory.getbasetemp()
+
+
+def assert_image_files_equal(image_path1, image_path2):
+    assert image_path1.split('/')[-1] == image_path2.split('/')[-1]
