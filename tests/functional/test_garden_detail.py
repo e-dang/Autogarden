@@ -8,6 +8,7 @@ from .pages.watering_station_detail_page import WateringStationDetailPage
 from garden.models import _default_moisture_threshold, _default_watering_duration, _default_status
 from .pages.garden_list_page import GardenListPage
 from .pages.garden_update_page import GardenUpdatePage
+from tests.conftest import assert_image_files_equal
 
 
 class TestGardenSetup(Base):
@@ -61,7 +62,7 @@ class TestGardenSetup(Base):
         ws_page.submit_button.click()
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
-        ws_page.go_back_to_garden_detail()
+        ws_page.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
         table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
         assert ws_status == table_data['status']
@@ -81,7 +82,7 @@ class TestGardenSetup(Base):
 
         # the user then goes back to the garden detail page and clicks on the add watering station button and sees
         # that the page now displays and extra watering station in the table
-        ws_page.go_back_to_garden_detail()
+        ws_page.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
         garden_page.add_watering_station_button.click()
         assert garden_page.get_number_watering_stations() == self.num_watering_stations + 1
@@ -109,22 +110,23 @@ class TestGardenSetup(Base):
         # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
         # and delete the garden. They enter a new name and photo for the garden and submit the form.
         new_garden_name = 'My new garden name'
-        new_garden_image = './images/test_garden_image.png'
+        new_garden_image = 'test_garden_image.png'
         update_gpage.garden_name = new_garden_name
         update_gpage.garden_image = new_garden_image
         update_gpage.submit_button.click()
 
-        # the user is redirected to the garden detail page where they see the new name and image
+        # goes back to the garden detail page where they see the new name and image
+        update_gpage.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
         assert garden_page.get_garden_name() == new_garden_name
-        assert garden_page.get_garden_image_src() == new_garden_image
+        assert_image_files_equal(garden_page.get_garden_image_src(), new_garden_image)
 
         # the user the clicks edit again and is taken back to the update garden page, where they see their new data
         # prefilled in the form
         garden_page.edit_button.click()
         self.wait_for_page_to_be_loaded(update_gpage)
         assert update_gpage.garden_name == new_garden_name
-        assert update_gpage.garden_image == new_garden_image
+        assert_image_files_equal(update_gpage.garden_image, new_garden_image)
 
         # the user then deletes the garden
         self.perform_delete_modal_checks(update_gpage)

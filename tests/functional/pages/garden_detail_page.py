@@ -2,6 +2,7 @@ import re
 
 from garden.models import WateringStation
 from selenium.common.exceptions import NoSuchElementException
+from tests.functional.base import wait_for
 
 from .base_page import BasePage
 from .elements import Button, ButtonGroup
@@ -87,6 +88,12 @@ class GardenDetailPage(BasePage):
 
     def convert_watering_station_status_to_bool(self, status):
         return True if status == WateringStation.ACTIVE_STATUS_STR else False
+
+    def get_garden_name(self):
+        return wait_for(lambda: self.driver.find_element_by_id('gardenName')).get_attribute('innerText')
+
+    def get_garden_image_src(self):
+        return wait_for(lambda: self.driver.find_element_by_id('gardenImage')).get_attribute('src')
 
     def _get_inner_text(self, id_):
         return self.driver.find_element_by_id(id_).get_attribute('innerText')

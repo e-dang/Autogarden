@@ -1,3 +1,5 @@
+from tests.conftest import TEST_IMAGE_DIR
+
 from selenium.webdriver import ActionChains
 
 from ..base import wait_for
@@ -53,3 +55,14 @@ class Button:
 
     def _get_element(self):
         return wait_for(lambda: self.instance.driver.find_element_by_id(self.LOCATOR))
+
+
+class ImageInput:
+    INPUT_LOCATOR = None
+    IMAGE_LOCATOR = None
+
+    def __set__(self, instance, value):
+        instance.driver.find_element_by_id(self.INPUT_LOCATOR).send_keys(str(TEST_IMAGE_DIR / value))
+
+    def __get__(self, instance, owner):
+        return instance.driver.find_element_by_id(self.IMAGE_LOCATOR).get_attribute('src')

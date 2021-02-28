@@ -3,15 +3,16 @@ import re
 from garden.forms import DeleteGardenForm, UpdateGardenForm
 
 from .base_page import BasePage
-from .elements import Button, TextInput
+from .elements import Button, TextInput, ImageInput
 
 
 class GardenNameInput(TextInput):
     LOCATOR = 'id_name'
 
 
-class GardenImageInput(TextInput):
-    LOCATOR = 'id_image'
+class GardenImageInput(ImageInput):
+    INPUT_LOCATOR = 'id_image'
+    IMAGE_LOCATOR = 'gardenImage'
 
 
 class SubmitButton(Button):
