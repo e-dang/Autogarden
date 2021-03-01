@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Garden, WateringStation
 
 
-class GardenSerializer(serializers.ModelSerializer):
+class GardenGetSerializer(serializers.ModelSerializer):
     update_interval = serializers.SerializerMethodField()
 
     class Meta:
@@ -12,6 +12,12 @@ class GardenSerializer(serializers.ModelSerializer):
 
     def get_update_interval(self, obj):
         return obj.update_interval.total_seconds()
+
+
+class GardenPatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Garden
+        fields = ['water_level']
 
 
 class WateringStationSerializer(serializers.ModelSerializer):

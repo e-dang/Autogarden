@@ -1,14 +1,15 @@
-from garden.utils import build_duration_string, derive_duration_string
 import pytest
 from django.urls import reverse
+from garden.models import (_default_moisture_threshold, _default_status,
+                           _default_watering_duration)
+from garden.utils import build_duration_string, derive_duration_string
+from tests.conftest import assert_image_files_equal
 
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
-from .pages.watering_station_detail_page import WateringStationDetailPage
-from garden.models import _default_moisture_threshold, _default_watering_duration, _default_status
 from .pages.garden_list_page import GardenListPage
 from .pages.garden_update_page import GardenUpdatePage
-from tests.conftest import assert_image_files_equal
+from .pages.watering_station_detail_page import WateringStationDetailPage
 
 
 class TestGardenModification(Base):

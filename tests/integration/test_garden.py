@@ -108,6 +108,35 @@ class TestGardenAPIView:
 
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('api_client, water_level', [
+        (None, Garden.LOW),
+        (None, Garden.OK),
+    ],
+        indirect=['api_client'],
+        ids=['low', 'ok'])
+    def test_PATCH_updates_the_garden_with_request_data(self, api_client, water_level):
+        self.garden.water_level = Garden.OK if water_level == Garden.LOW else Garden.LOW
+        self.garden.save()
+        data = {
+            'water_level': water_level
+        }
+
+        api_client.patch(self.url, data=data)
+
+        self.garden.refresh_from_db()
+        assert self.garden.water_level == data['water_level']
+
+    @pytest.mark.django_db
+    def test_PATCH_returns_204_status_code(self, api_client):
+        data = {
+            'water_level': Garden.LOW
+        }
+
+        resp = api_client.patch(self.url, data=data)
+
+        assert resp.status_code == status.HTTP_204_NO_CONTENT
+
 
 @pytest.mark.integration
 class TestWateringStationAPIView:

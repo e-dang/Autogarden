@@ -7,8 +7,9 @@ import pytest
 import pytz
 from django.http.request import HttpRequest
 from garden import models
-from garden.serializers import WateringStationSerializer, GardenSerializer
-from garden.views import GardenDetailView, GardenUpdateView, WateringStationDetailView, WateringStationListView
+from garden.serializers import GardenGetSerializer, WateringStationSerializer
+from garden.views import (GardenDetailView, GardenUpdateView,
+                          WateringStationDetailView, WateringStationListView)
 
 
 def assert_render_context_called_with(mock_render, kwarg):
@@ -25,14 +26,14 @@ class TestGardenSerializer:
     def test_field_is_serialized(self, garden_factory, field):
         garden = garden_factory.build()
 
-        serializer = GardenSerializer(garden)
+        serializer = GardenGetSerializer(garden)
 
         assert field in serializer.data
 
     def test_get_update_interval_returns_return_value_of_total_seconds_method_call(self):
         mock_garden = Mock()
 
-        ret_val = GardenSerializer().get_update_interval(mock_garden)
+        ret_val = GardenGetSerializer().get_update_interval(mock_garden)
 
         assert ret_val == mock_garden.update_interval.total_seconds.return_value
 

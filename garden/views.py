@@ -8,22 +8,31 @@ from django.template.context_processors import csrf
 from django.urls import reverse
 from django.views import View
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.request import Request
+
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
                           DeleteWateringStationForm, NewGardenForm,
                           UpdateGardenForm, WateringStationForm)
 
 from .models import Garden, WateringStation
-from .serializers import GardenSerializer, WateringStationSerializer
+from .serializers import (GardenGetSerializer, GardenPatchSerializer,
+                          WateringStationSerializer)
 
 
 class GardenAPIView(APIView):
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
-        serializer = GardenSerializer(instance=garden)
+        serializer = GardenGetSerializer(instance=garden)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request: Request, pk: int) -> Response:
+        garden = Garden.objects.get(pk=pk)
+        serializer = GardenPatchSerializer(data=request.data, instance=garden, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
 class WateringStationAPIView(APIView):
