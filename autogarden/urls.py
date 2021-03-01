@@ -18,24 +18,29 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
-                          GardenAPIView, WateringStationDeleteView,
-                          WateringStationDetailView, WateringStationListView,
+                          GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
+                          WateringStationUpdateView, WateringStationListView,
                           WateringStationAPIView)
 
 API_PREFIX = 'api/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path(API_PREFIX + 'garden/<int:pk>/', GardenAPIView.as_view(), name='api-garden'),
     path(API_PREFIX + 'garden/<int:pk>/watering-stations/',
          WateringStationAPIView.as_view(), name='api-watering-stations'),
+
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
     path('gardens/<int:pk>/update/', GardenUpdateView.as_view(), name='garden-update'),
     path('gardens/<int:pk>/delete/', GardenDeleteView.as_view(), name='garden-delete'),
+
     path('gardens/<int:pk>/watering-stations/', WateringStationListView.as_view(), name='watering-station-list'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),
+    path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/update/',
+         WateringStationUpdateView.as_view(), name='watering-station-update'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/delete/',
          WateringStationDeleteView.as_view(), name='watering-station-delete'),
 ]

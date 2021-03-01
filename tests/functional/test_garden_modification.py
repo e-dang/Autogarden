@@ -80,12 +80,16 @@ class TestGardenModification(Base):
 
         # the user then selects a different watering station page
         garden_page.watering_station = selected_watering_station + 1
+        self.wait_for_page_to_be_loaded(detail_ws_page)
+        detail_ws_page.edit_button.click()
         self.wait_for_page_to_be_loaded(update_ws_page)
         self.assert_watering_station_has_default_values(update_ws_page)
 
         # they then use the navbar to go directly to the watering station page that they had edited and see that their
         # configurations have persisted
         update_ws_page.go_to_watering_station_page(selected_watering_station)
+        detail_ws_page.edit_button.click()
+        self.wait_for_page_to_be_loaded(update_ws_page)
         self.assert_watering_station_has_values(table_data, update_ws_page)
 
         # the user then goes back to the garden detail page and clicks on the add watering station button and sees
@@ -103,6 +107,8 @@ class TestGardenModification(Base):
 
         # the user then goes to watering_station page and deletes the watering station
         garden_page.watering_station = selected_watering_station + 1
+        self.wait_for_page_to_be_loaded(detail_ws_page)
+        detail_ws_page.edit_button.click()
         self.wait_for_page_to_be_loaded(update_ws_page)
         self.perform_delete_modal_checks(update_ws_page)
 

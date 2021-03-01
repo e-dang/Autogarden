@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+{% include 'watering_station_nav.html' with watering_station=watering_station %}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col">
+        <a id="editButton" class="btn btn-sm btn-outline-info" href="{{watering_station.get_update_url}}">Edit</a>
+    </div>
+</div>
+{% endblock %}

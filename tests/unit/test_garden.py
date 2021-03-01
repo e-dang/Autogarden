@@ -9,7 +9,7 @@ from django.http.request import HttpRequest
 from garden import models
 from garden.serializers import GardenGetSerializer, WateringStationSerializer
 from garden.views import (GardenDetailView, GardenUpdateView,
-                          WateringStationDetailView, WateringStationListView)
+                          WateringStationUpdateView, WateringStationListView)
 
 
 def assert_render_context_called_with(mock_render, kwarg):
@@ -295,7 +295,7 @@ class TestGardenUpdateView:
 
 
 @pytest.mark.unit
-class TestWateringStationDetailView:
+class TestWateringStationUpdateView:
     @patch('garden.views.Garden')
     @patch('garden.views.render')
     @patch('garden.views.WateringStationForm', autospec=True)
@@ -305,7 +305,7 @@ class TestWateringStationDetailView:
         mock_form = mock_form_class.return_value
         request = HttpRequest()
 
-        WateringStationDetailView().get(request, garden_pk, ws_pk)
+        WateringStationUpdateView().get(request, garden_pk, ws_pk)
 
         assert_render_context_called_with(mock_render, {'form': mock_form})
 

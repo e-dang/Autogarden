@@ -132,6 +132,9 @@ class WateringStation(models.Model):
     def get_absolute_url(self):
         return reverse('watering-station-detail', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
 
+    def get_update_url(self):
+        return reverse('watering-station-update', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
+
     def get_delete_url(self):
         return reverse('watering-station-delete', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
 

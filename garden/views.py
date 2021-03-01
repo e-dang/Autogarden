@@ -127,8 +127,15 @@ class WateringStationDetailView(View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
+        return render(request, 'watering_station_detail.html', context={'watering_station': station})
+
+
+class WateringStationUpdateView(View):
+    def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
+        garden = Garden.objects.get(pk=garden_pk)
+        station = garden.watering_stations.get(pk=ws_pk)
         form = WateringStationForm(instance=station)
-        return render(request, 'watering_station.html', context={'form': form})
+        return render(request, 'watering_station_update.html', context={'form': form})
 
     def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
         garden = Garden.objects.get(pk=garden_pk)
