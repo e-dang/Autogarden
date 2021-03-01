@@ -96,14 +96,6 @@ class Garden(models.Model):
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        img = Image.open(self.image.path)
-        size = 300
-        if img.height > size or img.width > size:
-            img = img.resize((size, size), Image.BOX, reducing_gap=3.0)
-            img.save(self.image.path)
-
     def delete(self, *args, **kwargs):
         try:
             if _default_garden_image() not in self.image.url:

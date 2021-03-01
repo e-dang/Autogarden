@@ -13,7 +13,7 @@
 <div id="gardenList" class="row">
     {% for garden in gardens %}
     <div class="card">
-        <img class="card-img-top" src="{{garden.image.url}}" alt="Garden Image">
+        <img class="card-img-top" src="{{garden.image.url}}" height="200" width="300" alt="Garden Image">
         <div class="card-body">
             <h5 class="card-title text-center"><a href="{% url 'garden-detail' garden.pk %}"
                     class="btn btn-primary">{{garden.name}}</a></h5>
