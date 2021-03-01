@@ -6,7 +6,7 @@ from garden.models import (_default_is_connected,
                            _default_moisture_threshold,
                            _default_num_missed_updates, _default_status,
                            _default_update_interval,
-                           _default_watering_duration)
+                           _default_watering_duration, Garden)
 from garden.utils import derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -47,8 +47,8 @@ class TestAPICommunication(Base):
             assert ws_config['watering_duration'] == _default_watering_duration().total_seconds()
 
         # immediately after the MC sends a GET request to retrieve the garden update interval duration
-        garden_configs_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
-        resp = api_client.get(garden_configs_url)
+        garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
+        resp = api_client.get(garden_url)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
@@ -62,6 +62,15 @@ class TestAPICommunication(Base):
         assert resp.status_code == status.HTTP_201_CREATED
         for record, station in zip(data, self.garden.watering_stations.all()):
             station.records.get(moisture_level=record['moisture_level'])  # should not raise
+
+        # the MC also posts data to the garden api to update its data
+        garden_data = {
+            'water_level': Garden.LOW
+        }
+        resp = api_client.patch(garden_url, data=garden_data)
+        self.garden.refresh_from_db()
+        assert resp.status_code == status.HTTP_204_NO_CONTENT
+        assert self.garden.water_level == garden_data['water_level']
 
         # sometime later a user changes the garden conifigs
         self.driver.get(self.url)
@@ -103,7 +112,7 @@ class TestAPICommunication(Base):
                 assert ws_config['watering_duration'] == _default_watering_duration().total_seconds()
 
         # similarly when it sends a GET request to the garden api, it recieves the new updated configs
-        garden_configs_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
-        resp = api_client.get(garden_configs_url)
+        garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
+        resp = api_client.get(garden_url)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_interval'] == update_interval.total_seconds()
