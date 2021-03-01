@@ -36,6 +36,14 @@ class UpdateInterval(TextInput):
     LOCATOR = 'id_update_interval'
 
 
+class CropButton(Button):
+    LOCATOR = NewGardenForm.CROP_BTN_ID
+
+
+class ResetButton(Button):
+    LOCATOR = NewGardenForm.RESET_BTN_ID
+
+
 class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
@@ -47,6 +55,8 @@ class GardenListPage(BasePage):
         self.new_garden_button = NewGardenButton(self)
         self.submit_new_garden_button = SubmitNewGardenButton(self)
         self.cancel_new_garden_button = CancelNewGardenButton(self)
+        self.crop_image_button = CropButton(self)
+        self.reset_image_button = ResetButton(self)
         self.modal_id = NewGardenForm.NEW_GARDEN_MODAL_ID
 
     def has_correct_url(self):
