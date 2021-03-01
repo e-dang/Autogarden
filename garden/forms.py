@@ -72,9 +72,11 @@ class UpdateGardenForm(forms.ModelForm):
     DELETE_BTN_ID = 'deleteBtn'
     DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
 
+    update_interval = CustomDurationField()
+
     class Meta:
         model = Garden
-        fields = ['name', 'image']
+        fields = ['name', 'image', 'update_interval']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,6 +84,7 @@ class UpdateGardenForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Field('name'),
+            Field('update_interval'),
             Field('image', id='id_image'),
             Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID),
             Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
