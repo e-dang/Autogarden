@@ -32,10 +32,15 @@ class CancelNewGardenButton(Button):
     LOCATOR = NewGardenForm.CANCEL_NEW_GARDEN_BTN_ID
 
 
+class UpdateInterval(TextInput):
+    LOCATOR = 'id_update_interval'
+
+
 class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
     garden_image = GardenImageInput()
+    update_interval = UpdateInterval()
 
     def __init__(self, driver):
         super().__init__(driver)

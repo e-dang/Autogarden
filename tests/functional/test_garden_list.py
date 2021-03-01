@@ -1,6 +1,7 @@
+from garden.utils import derive_duration_string
 import pytest
 from django.urls import reverse
-from garden.models import _default_garden_name
+from garden.models import _default_garden_name, _default_update_interval
 from tests.conftest import assert_image_files_equal
 
 from .base import Base, wait_for
@@ -25,11 +26,12 @@ class TestGardenSetup(Base):
 
         # they also see an option to create a new garden, which they click and immediately see a modal that prompts
         # them for the garden name. The default garden name is displayed in that text box. They are also prompted for
-        # the number of watering stations that are going to be in this garden, and an image
+        # the number of watering stations that are going to be in this garden, an image, and the update interval
         list_page.new_garden_button.click()
         self.wait_for_modal_to_be_visible(list_page.modal_id)
         assert list_page.new_garden_name == _default_garden_name()
         assert list_page.num_watering_stations == ''
+        assert list_page.update_interval == str(derive_duration_string(_default_update_interval()))
         assert list_page.garden_image
 
         # they cancel out of the modal, but then re-enter again
@@ -49,9 +51,11 @@ class TestGardenSetup(Base):
         garden_name = 'My New Garden'
         num_watering_stations = 3
         garden_image = 'test_garden_image.png'
+        update_interval = '0:10:00'
         list_page.new_garden_name = garden_name
         list_page.num_watering_stations = num_watering_stations
         list_page.garden_image = garden_image
+        list_page.update_interval = update_interval
         list_page.submit_new_garden_button.click()
         list_page.wait_for_garden_in_list(garden_name)
         assert_image_files_equal(list_page.get_garden_image(garden_name), garden_image)
