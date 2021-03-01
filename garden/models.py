@@ -150,3 +150,12 @@ class WateringStation(models.Model):
     @property
     def status_string(self):
         return self.ACTIVE_STATUS_STR if self.status else self.INACTIVE_STATUS_STR
+
+
+class WateringStationRecord(models.Model):
+    watering_station = models.ForeignKey(WateringStation, related_name='records', on_delete=models.CASCADE)
+    moisture_level = models.FloatField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created']
