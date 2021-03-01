@@ -98,8 +98,7 @@ class Garden(models.Model):
 
     def delete(self, *args, **kwargs):
         try:
-            if _default_garden_image() not in self.image.url:
-                os.remove(self.get_abs_path_to_image())
+            os.remove(self.get_abs_path_to_image())
         except OSError:
             pass
         super().delete(*args, **kwargs)

@@ -49,9 +49,12 @@ def use_tmp_static_dir(settings, tmp_path):
     src_path = settings.BASE_DIR / 'garden' / 'static' / 'images' / image_name
     static_dir = tmp_path / 'static'
     static_dir.mkdir()
-    dest_path = static_dir / image_name
+    image_dir = static_dir / 'images'
+    image_dir.mkdir()
+    dest_path = image_dir / image_name
     shutil.copyfile(src_path, dest_path)
-    settings.MEDIA_ROOT = static_dir
+    settings.STATIC_ROOT = static_dir
+    settings.MEDIA_ROOT = image_dir
 
 
 def assert_image_files_equal(image_path1, image_path2):

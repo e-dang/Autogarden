@@ -320,12 +320,12 @@ class TestGardenDeleteView:
         assert_redirect(resp, reverse('garden-list'))
 
     @pytest.mark.django_db
-    def test_POST_deletes_image_file_in_static_dir(self, client, garden):
+    def test_POST_deletes_image_file_in_static_dir(self, client, garden, use_tmp_static_dir):
         path = garden.get_abs_path_to_image()
 
         client.post(garden.get_delete_url())
 
-        assert os.path.exists(path)
+        assert not os.path.exists(path)
 
 
 @pytest.mark.integration
