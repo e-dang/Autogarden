@@ -49,7 +49,8 @@ def valid_watering_station_data():
 @pytest.fixture
 def valid_garden_data():
     return {'name': 'My Garden',
-            'num_watering_stations': 3}
+            'num_watering_stations': 3,
+            'update_interval': '10:00'}
 
 
 @pytest.fixture
@@ -59,6 +60,7 @@ def valid_update_garden_data(use_tmp_static_dir):
         file = SimpleUploadedFile('test_garden_image.png', f.read(), content_type='image/png')
         return {
             'name': 'new garden name',
+            'update_interval': '10:00',
             'image': file
         }
 
@@ -81,14 +83,9 @@ def assert_redirect(response: http.HttpResponse, redirect_url: str):
 
 
 @pytest.mark.integration
-class TestAPIViews:
-    @pytest.mark.parametrize('view, kwargs, expected', [
-        ('api-garden', {}, '/api/garden/'),
-        ('api-watering-stations', {'pk': 0}, '/api/garden/0/watering-stations/'),
-    ],
-        ids=['api-garden', 'garden'])
-    def test_view_has_correct_url(self, view, kwargs, expected):
-        assert reverse(view, kwargs=kwargs) == expected
+class TestGardenAPIView:
+    def test_view_has_correct_url(self):
+        assert reverse('api-garden') == '/api/garden/'
 
     @pytest.mark.django_db
     def test_POST_api_garden_creates_garden_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_garden):
@@ -126,6 +123,13 @@ class TestAPIViews:
         resp = api_client.post(url, data=data)
 
         assert int(resp.data['pk']) == garden.pk
+
+
+@pytest.mark.integration
+class TestWateringStationAPIView:
+    def test_view_has_correct_url(self):
+        pk = 0
+        assert reverse('api-watering-stations', kwargs={'pk': pk}) == f'/api/garden/{pk}/watering-stations/'
 
     @pytest.mark.django_db
     def test_GET_api_watering_stations_returns_200_response(self, api_client, data_GET_api_watering_stations):
@@ -436,19 +440,15 @@ class TestNewGardenForm:
         assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
 
     @pytest.mark.django_db
-    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self):
-        data = {
-            'name': 'My Garden',
-            'num_watering_stations': 4
-        }
+    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self, valid_garden_data):
         prev_num_gardens = Garden.objects.all().count()
-        form = NewGardenForm(data=data)
+        form = NewGardenForm(data=valid_garden_data)
 
         assert form.is_valid()
         garden = form.save()
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert garden.watering_stations.count() == data['num_watering_stations']
+        assert garden.watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
     def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):
