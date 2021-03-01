@@ -31,9 +31,14 @@ class CancelDeleteButton(Button):
     LOCATOR = DeleteGardenForm.CANCEL_DELETE_BTN_ID
 
 
+class UpdateInterval(TextInput):
+    LOCATOR = 'id_update_interval'
+
+
 class GardenUpdatePage(BasePage):
     garden_name = GardenNameInput()
     garden_image = GardenImageInput()
+    garden_update_interval = UpdateInterval()
 
     def __init__(self, driver):
         super().__init__(driver)

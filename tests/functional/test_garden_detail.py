@@ -111,7 +111,9 @@ class TestGardenSetup(Base):
         # and delete the garden. They enter a new name and photo for the garden and submit the form.
         new_garden_name = 'My new garden name'
         new_garden_image = 'test_garden_image.png'
+        update_interval = '10:00'
         update_gpage.garden_name = new_garden_name
+        update_gpage.garden_update_interval = update_interval
         update_gpage.garden_image = new_garden_image
         update_gpage.submit_button.click()
 
@@ -126,6 +128,7 @@ class TestGardenSetup(Base):
         garden_page.edit_button.click()
         self.wait_for_page_to_be_loaded(update_gpage)
         assert update_gpage.garden_name == new_garden_name
+        assert update_gpage.garden_update_interval == update_interval
         assert_image_files_equal(update_gpage.garden_image, new_garden_image)
 
         # the user then deletes the garden
