@@ -47,7 +47,7 @@ class GardenListView(View):
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
-        form = NewGardenForm(data=request.POST)
+        form = NewGardenForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return JsonResponse({

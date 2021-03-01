@@ -36,7 +36,7 @@ def _default_status():
 
 
 def _default_garden_image():
-    return '/static/images/default_garden.png'
+    return 'default_garden.png'
 
 
 CONNECTED_STR = 'Connected'

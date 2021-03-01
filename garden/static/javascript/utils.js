@@ -1,16 +1,19 @@
 function formAjaxSubmit(formId) {
-    const form = $(formId);
-    form.on('submit', (event) => {
+    $(formId).on('submit', (event) => {
+        const fd = new FormData(event.target);
         event.preventDefault();
         $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
+            type: $(formId).attr('method'),
+            url: $(formId).attr('action'),
+            data: fd,
+            contentType: false,
+            processData: false,
             success: (data) => {
                 if (data.success) {
                     window.location = data.url;
                 } else {
-                    form.html(data.html);
+                    $('.modal-body').html(data.html);
+                    formAjaxSubmit(formId);
                 }
             },
         });

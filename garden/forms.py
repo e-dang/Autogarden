@@ -22,7 +22,7 @@ class NewGardenForm(forms.ModelForm):
 
     class Meta:
         model = Garden
-        fields = ['name']
+        fields = ['name', 'image']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,7 +30,12 @@ class NewGardenForm(forms.ModelForm):
         self.helper.form_id = self.NEW_GARDEN_FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'garden-list'
-        self.helper.add_input(Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID))
+        self.helper.layout = Layout(
+            Field('name'),
+            Field('num_watering_stations'),
+            Field('image', id='id_image'),
+            Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID)
+        )
 
     def clean_num_watering_stations(self):
         data = self.cleaned_data['num_watering_stations']
@@ -41,8 +46,9 @@ class NewGardenForm(forms.ModelForm):
 
     def save(self):
         uuid = create_unique_garden_uuid()
-        garden = Garden.objects.create(name=self.cleaned_data['name'], uuid=uuid)
-        set_num_watering_stations(garden, self.cleaned_data['num_watering_stations'])
+        num_watering_stations = self.cleaned_data.pop('num_watering_stations')
+        garden = Garden.objects.create(**self.cleaned_data, uuid=uuid)
+        set_num_watering_stations(garden, num_watering_stations)
         return garden
 
 
