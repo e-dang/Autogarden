@@ -1,74 +1,109 @@
-import uuid
 from datetime import timedelta
+import random
+
 import pytest
+from garden.models import (_default_is_connected,
+                           _default_moisture_threshold,
+                           _default_num_missed_updates, _default_status,
+                           _default_update_interval,
+                           _default_watering_duration)
+from garden.utils import derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
-from garden.models import Garden
+
+from .base import Base
+from .pages.garden_detail_page import GardenDetailPage
+from .pages.garden_update_page import GardenUpdatePage
+from .pages.watering_station_detail_page import WateringStationDetailPage
 
 
 @pytest.mark.functional
-class TestGardenInitialization:
+class TestAPICommunication(Base):
+    @pytest.fixture(autouse=True)
+    def garden(self, garden_factory, use_tmp_static_dir):
+        self.num_watering_stations = 16
+        self.garden = garden_factory(watering_stations=self.num_watering_stations,
+                                     watering_stations__defaults=True,
+                                     is_connected=_default_is_connected(),
+                                     last_connection_ip=None,
+                                     last_connection_time=None,
+                                     update_interval=_default_update_interval(),
+                                     num_missed_updates=_default_num_missed_updates())
+
+    @pytest.fixture(autouse=True)
+    def url(self, live_server):
+        self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
+
     @pytest.mark.django_db
-    def test_garden_can_setup_hard_configs_and_get_soft_configs(self, api_client):
-        num_watering_stations = 16
+    def test_microcontroller_interaction_with_server(self, api_client):
+        # the microcontroller sends a GET request to retrieve the watering station configs from the server
+        watering_station_url = reverse('api-watering-stations', kwargs={'pk': self.garden.pk})
+        resp = api_client.get(watering_station_url)
+        assert resp.status_code == status.HTTP_200_OK
+        assert len(resp.data) == self.num_watering_stations
+        for ws_config in resp.data:
+            assert ws_config['status'] == _default_status()
+            assert ws_config['moisture_threshold'] == _default_moisture_threshold()
+            assert ws_config['watering_duration'] == _default_watering_duration().total_seconds()
 
-        # the microcontroller sends a POST request to initialize its configs on the server
-        garden_configs = {
-            'uuid': uuid.uuid4(),
-            'num_watering_stations': num_watering_stations
-        }
+        # immediately after the MC sends a GET request to retrieve the garden update interval duration
+        garden_configs_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
+        resp = api_client.get(garden_configs_url)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
-        init_url = reverse('api-garden')
-        resp = api_client.post(init_url, data=garden_configs)
+        # the MC then performs its operations and POSTs the data from its watering station sensors to the server
+        data = []
+        for i in range(self.num_watering_stations):
+            data.append({
+                'moisture_level': random.uniform(0, 100)
+            })
+        resp = api_client.post(watering_station_url, data=data, format='json')
         assert resp.status_code == status.HTTP_201_CREATED
-        pk = int(resp.data['pk'])  # should not raise
+        for record, station in zip(data, self.garden.watering_stations.all()):
+            station.records.get(moisture_level=record['moisture_level'])  # should not raise
 
-        # the MC then sends a GET request to retrieve the watering station configs from the server
-        watering_station_url = reverse('api-watering-stations', kwargs={'pk': pk})
+        # sometime later a user changes the garden conifigs
+        self.driver.get(self.url)
+        detail_gpage = GardenDetailPage(self.driver)
+        self.wait_for_page_to_be_loaded(detail_gpage)
+        detail_gpage.edit_button.click()
+        update_gpage = GardenUpdatePage(self.driver)
+        self.wait_for_page_to_be_loaded(update_gpage)
+        update_interval = timedelta(minutes=7, seconds=20)
+        update_gpage.garden_update_interval = derive_duration_string(update_interval)
+        update_gpage.submit_button.click()
+        update_gpage.garden_detail_nav_button.click()
+        self.wait_for_page_to_be_loaded(detail_gpage)
+
+        # the user also changes the configs for a watering station
+        selected_watering_station = 1
+        detail_gpage.watering_station = selected_watering_station
+        ws_page = WateringStationDetailPage(self.driver)
+        self.wait_for_page_to_be_loaded(ws_page)
+        ws_status = not list(self.garden.watering_stations.all())[selected_watering_station].status
+        moisture_threshold = 80
+        watering_duration = timedelta(minutes=3, seconds=2)
+        ws_page.status = ws_status
+        ws_page.moisture_threshold = moisture_threshold
+        ws_page.watering_duration = derive_duration_string(watering_duration)
+        ws_page.submit_button.click()
+
+        # when the MC sends another GET request to the watering station api, it recieves the new updated configs
         resp = api_client.get(watering_station_url)
         assert resp.status_code == status.HTTP_200_OK
-        for i in range(num_watering_stations):
-            assert 'moisture_threshold' in resp.data[i]
-            assert 'watering_duration' in resp.data[i]
+        for i, ws_config in enumerate(resp.data, start=1):
+            if i == selected_watering_station:
+                assert ws_config['status'] == ws_status
+                assert ws_config['moisture_threshold'] == moisture_threshold
+                assert ws_config['watering_duration'] == watering_duration.total_seconds()
+            else:
+                assert ws_config['status'] == _default_status()
+                assert ws_config['moisture_threshold'] == _default_moisture_threshold()
+                assert ws_config['watering_duration'] == _default_watering_duration().total_seconds()
 
-        watering_station_data = resp.data
-
-        # sometime later a user changes the watering station and when the MC sends another GET request to the server
-        # the MC recieves the new updated watering station configs
-        mt_diff = 1
-        wd_diff = timedelta(minutes=1)
-        garden = Garden.objects.get(pk=pk)
-        for watering_station in garden.watering_stations.all():
-            watering_station.moisture_threshold += mt_diff
-            watering_station.watering_duration += wd_diff
-            watering_station.save()
-
-        resp = api_client.get(watering_station_url)
+        # similarly when it sends a GET request to the garden api, it recieves the new updated configs
+        garden_configs_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
+        resp = api_client.get(garden_configs_url)
         assert resp.status_code == status.HTTP_200_OK
-        for i in range(num_watering_stations):
-            assert resp.data[i]['moisture_threshold'] == watering_station_data[i]['moisture_threshold'] + mt_diff
-            assert resp.data[i]['watering_duration'] == self.add_time_delta(
-                watering_station_data[i]['watering_duration'], wd_diff)
-
-        watering_station_data = resp.data
-
-        # the MC unexpectedly crashes which causes it to repeat the same operations as before. This time it does not
-        # recieve a HTTP_201_CREATED status code, but recieves the same pk.
-        resp = api_client.post(init_url, data=garden_configs)
-        assert resp.status_code == status.HTTP_409_CONFLICT
-        assert pk == int(resp.data['pk'])
-
-        # it then makes a request for the watering station configs and recieves the same updated watering station
-        # configs as before
-        resp = api_client.get(watering_station_url)
-        assert resp.status_code == status.HTTP_200_OK
-        for i in range(num_watering_stations):
-            assert resp.data[i] == watering_station_data[i]
-
-    def add_time_delta(self, duration, increment):
-        hours, minutes, seconds = duration.split(':')
-        duration = timedelta(hours=int(hours), minutes=int(minutes), seconds=int(seconds))
-        duration = duration + increment
-        hours, remainder = divmod(duration.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        return '{:02}:{:02}:{:02}'.format(hours, minutes, seconds)
+        assert resp.data['update_interval'] == update_interval.total_seconds()
