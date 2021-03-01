@@ -1,5 +1,8 @@
+import shutil
+
 import pytest
 from django.conf import settings
+from garden.models import _default_garden_image
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from selenium import webdriver
@@ -42,8 +45,12 @@ def api_client():
 
 @pytest.fixture()
 def use_tmp_static_dir(settings, tmp_path):
+    image_name = _default_garden_image()
+    src_path = settings.BASE_DIR / 'garden' / 'static' / 'images' / image_name
     static_dir = tmp_path / 'static'
     static_dir.mkdir()
+    dest_path = static_dir / image_name
+    shutil.copyfile(src_path, dest_path)
     settings.MEDIA_ROOT = static_dir
 
 
