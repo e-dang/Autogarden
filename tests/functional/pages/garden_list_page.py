@@ -28,6 +28,10 @@ class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
 
 
+class CancelNewGardenButton(Button):
+    LOCATOR = NewGardenForm.CANCEL_NEW_GARDEN_BTN_ID
+
+
 class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
@@ -37,6 +41,8 @@ class GardenListPage(BasePage):
         super().__init__(driver)
         self.new_garden_button = NewGardenButton(self)
         self.submit_new_garden_button = SubmitNewGardenButton(self)
+        self.cancel_new_garden_button = CancelNewGardenButton(self)
+        self.modal_id = NewGardenForm.NEW_GARDEN_MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/$'

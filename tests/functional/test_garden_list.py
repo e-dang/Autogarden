@@ -27,9 +27,16 @@ class TestGardenSetup(Base):
         # them for the garden name. The default garden name is displayed in that text box. They are also prompted for
         # the number of watering stations that are going to be in this garden, and an image
         list_page.new_garden_button.click()
+        self.wait_for_modal_to_be_visible(list_page.modal_id)
         assert list_page.new_garden_name == _default_garden_name()
         assert list_page.num_watering_stations == ''
         assert list_page.garden_image
+
+        # they cancel out of the modal, but then re-enter again
+        list_page.cancel_new_garden_button.click()
+        self.wait_for_model_to_disappear(list_page.modal_id)
+        list_page.new_garden_button.click()
+        self.wait_for_modal_to_be_visible(list_page.modal_id)
 
         # they enter a negative number for the number of watering stations and hit enter, and they see a error message
         # appear
