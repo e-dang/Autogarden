@@ -17,6 +17,8 @@ class NewGardenForm(forms.ModelForm):
     NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
     NEW_GARDEN_FORM_ID = 'newGardenForm'
     NEW_GARDEN_SUBMIT_ID = 'submitBtn'
+    CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
+    NEW_GARDEN_MODAL_ID = 'newGardenModal'
 
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
 
@@ -34,7 +36,9 @@ class NewGardenForm(forms.ModelForm):
             Field('name'),
             Field('num_watering_stations'),
             Field('image', id='id_image'),
-            Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID)
+            Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID, css_class='btn btn-success'),
+            Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
+                   data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
         )
 
     def clean_num_watering_stations(self):
