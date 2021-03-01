@@ -331,20 +331,29 @@ class TestGardenDeleteView:
 @pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.mark.django_db
-    def test_GET_renders_watering_station_html_template(self, client, watering_station):
+    def test_GET_renders_watering_station_detail_html_template(self, client, watering_station):
         resp = client.get(watering_station.get_absolute_url())
 
-        assert_template_is_rendered(resp, 'watering_station.html')
+        assert_template_is_rendered(resp, 'watering_station_detail.html')
+
+
+@pytest.mark.integration
+class TestWateringStationUpdateView:
+    @pytest.mark.django_db
+    def test_GET_renders_watering_station_update_html_template(self, client, watering_station):
+        resp = client.get(watering_station.get_update_url())
+
+        assert_template_is_rendered(resp, 'watering_station_update.html')
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, watering_station, valid_watering_station_data):
-        resp = client.post(watering_station.get_absolute_url(), data=valid_watering_station_data)
+        resp = client.post(watering_station.get_update_url(), data=valid_watering_station_data)
 
         assert_data_present_in_json_response_html(resp, valid_watering_station_data.values())
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, watering_station, valid_watering_station_data):
-        resp = client.post(watering_station.get_absolute_url(), data=valid_watering_station_data)
+        resp = client.post(watering_station.get_update_url(), data=valid_watering_station_data)
 
         watering_station.refresh_from_db()
         assert resp.status_code == status.HTTP_200_OK
@@ -506,6 +515,7 @@ class TestNewGardenForm:
 
 @pytest.mark.integration
 class TestWateringStationModel:
+
     @pytest.mark.django_db
     def test_get_absolute_url_returns_correct_url(self, watering_station):
         garden = watering_station.garden
@@ -513,6 +523,14 @@ class TestWateringStationModel:
         url = watering_station.get_absolute_url()
 
         assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/'
+
+    @pytest.mark.django_db
+    def test_get_update_url_returns_correct_url(self, watering_station):
+        garden = watering_station.garden
+
+        url = watering_station.get_update_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/update/'
 
     @pytest.mark.django_db
     def test_get_delete_url_returns_correct_url(self, watering_station):
