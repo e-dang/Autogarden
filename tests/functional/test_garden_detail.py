@@ -13,7 +13,7 @@ from tests.conftest import assert_image_files_equal
 
 class TestGardenSetup(Base):
     @pytest.fixture(autouse=True)
-    def garden(self, garden_factory):
+    def garden(self, garden_factory, use_tmp_static_dir):
         self.num_watering_stations = 10
         self.garden = garden_factory(watering_stations=self.num_watering_stations, watering_stations__defaults=True)
 

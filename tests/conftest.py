@@ -40,9 +40,11 @@ def api_client():
     return APIClient()
 
 
-@pytest.fixture(autouse=True)
-def use_tmp_static_dir(settings, tmp_path_factory):
-    settings.MEDIA_ROOT = tmp_path_factory.getbasetemp()
+@pytest.fixture()
+def use_tmp_static_dir(settings, tmp_path):
+    static_dir = tmp_path / 'static'
+    static_dir.mkdir()
+    settings.MEDIA_ROOT = static_dir
 
 
 def assert_image_files_equal(image_path1, image_path2):

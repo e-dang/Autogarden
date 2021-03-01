@@ -52,7 +52,7 @@ def valid_garden_data():
 
 
 @pytest.fixture
-def valid_update_garden_data():
+def valid_update_garden_data(use_tmp_static_dir):
     image_path = str(TEST_IMAGE_DIR / 'test_garden_image.png')
     with open(image_path, 'rb') as f:
         file = SimpleUploadedFile('test_garden_image.png', f.read(), content_type='image/png')

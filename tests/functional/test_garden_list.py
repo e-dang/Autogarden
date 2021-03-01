@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from garden.models import _default_garden_image, _default_garden_name
+from garden.models import _default_garden_name
 from tests.conftest import assert_image_files_equal
 
 from .base import Base, wait_for
@@ -14,7 +14,7 @@ class TestGardenSetup(Base):
         return live_server.url + reverse('garden-list')
 
     @pytest.mark.django_db
-    def test_user_can_create_a_garden(self, url):
+    def test_user_can_create_a_garden(self, url, use_tmp_static_dir):
         # a user goes to the garden page
         self.driver.get(url)
         list_page = GardenListPage(self.driver)
