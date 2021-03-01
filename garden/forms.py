@@ -6,11 +6,18 @@ from crispy_forms.layout import (HTML, Button, ButtonHolder, Field, Layout,
                                  Submit)
 from django import forms
 
-from .models import Garden, WateringStation
+from .models import Garden, WateringStation, _default_update_interval
 from .utils import (create_unique_garden_uuid, derive_duration_string,
                     set_num_watering_stations)
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
+
+
+class CustomDurationField(forms.DurationField):
+    def prepare_value(self, value):
+        if isinstance(value, datetime.timedelta):
+            return derive_duration_string(value)
+        return value
 
 
 class NewGardenForm(forms.ModelForm):
@@ -21,10 +28,11 @@ class NewGardenForm(forms.ModelForm):
     NEW_GARDEN_MODAL_ID = 'newGardenModal'
 
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
+    update_interval = CustomDurationField()
 
     class Meta:
         model = Garden
-        fields = ['name', 'image']
+        fields = ['name', 'image', 'update_interval']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,12 +42,15 @@ class NewGardenForm(forms.ModelForm):
         self.helper.form_action = 'garden-list'
         self.helper.layout = Layout(
             Field('name'),
-            Field('num_watering_stations'),
+            Field('update_interval'),
+            Field('num_watering_stations', ),
             Field('image', id='id_image'),
             Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID, css_class='btn btn-success'),
             Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
                    data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
         )
+
+        self.fields['update_interval'].initial = _default_update_interval()
 
     def clean_num_watering_stations(self):
         data = self.cleaned_data['num_watering_stations']
@@ -94,13 +105,6 @@ class DeleteGardenForm(forms.Form):
                 Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
             )
         )
-
-
-class CustomDurationField(forms.DurationField):
-    def prepare_value(self, value):
-        if isinstance(value, datetime.timedelta):
-            return derive_duration_string(value)
-        return value
 
 
 class WateringStationForm(forms.ModelForm):
