@@ -10,6 +10,7 @@ from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
 from .pages.garden_update_page import GardenUpdatePage
 from .pages.watering_station_detail_page import WateringStationDetailPage
+from .pages.watering_station_update_page import WateringStationUpdatePage
 
 
 class TestGardenModification(Base):
@@ -42,28 +43,34 @@ class TestGardenModification(Base):
             selected_watering_station, 'Watering Station Number')
         table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
 
-        # they click a watering station link and are taken to a page with a form that allows them
-        # to edit the configurations of the watering station. The user notices that the values in the form are the same
-        # as in the table on the previous page
+        # they click a watering station link and are taken to the watering station detail page.
         garden_page.watering_station = selected_watering_station
-        ws_page = WateringStationDetailPage(self.driver)
-        self.wait_for_page_to_be_loaded(ws_page)
-        self.assert_watering_station_has_values(table_data, ws_page)
-        self.assert_watering_station_has_default_values(ws_page)
+        detail_ws_page = WateringStationDetailPage(self.driver)
+        self.wait_for_page_to_be_loaded(detail_ws_page)
+
+        # they see an edit button on the page and click it.
+        detail_ws_page.edit_button.click()
+
+        # they are taken to a page with a form that allows them to edit the configurations of the watering station.
+        # The user notices that the values in the form are the same as in the previous pages
+        update_ws_page = WateringStationUpdatePage(self.driver)
+        self.wait_for_page_to_be_loaded(update_ws_page)
+        self.assert_watering_station_has_values(table_data, update_ws_page)
+        self.assert_watering_station_has_default_values(update_ws_page)
 
         # the user then changes these values and submits the form
         ws_status = not table_data['status']
         plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
-        ws_page.status = ws_status
-        ws_page.plant_type = plant_type
-        ws_page.moisture_threshold = moisture_threshold
-        ws_page.watering_duration = watering_duration
-        ws_page.submit_button.click()
+        update_ws_page.status = ws_status
+        update_ws_page.plant_type = plant_type
+        update_ws_page.moisture_threshold = moisture_threshold
+        update_ws_page.watering_duration = watering_duration
+        update_ws_page.submit_button.click()
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
-        ws_page.garden_detail_nav_button.click()
+        update_ws_page.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
         table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
         assert ws_status == table_data['status']
@@ -73,17 +80,17 @@ class TestGardenModification(Base):
 
         # the user then selects a different watering station page
         garden_page.watering_station = selected_watering_station + 1
-        self.wait_for_page_to_be_loaded(ws_page)
-        self.assert_watering_station_has_default_values(ws_page)
+        self.wait_for_page_to_be_loaded(update_ws_page)
+        self.assert_watering_station_has_default_values(update_ws_page)
 
         # they then use the navbar to go directly to the watering station page that they had edited and see that their
         # configurations have persisted
-        ws_page.go_to_watering_station_page(selected_watering_station)
-        self.assert_watering_station_has_values(table_data, ws_page)
+        update_ws_page.go_to_watering_station_page(selected_watering_station)
+        self.assert_watering_station_has_values(table_data, update_ws_page)
 
         # the user then goes back to the garden detail page and clicks on the add watering station button and sees
         # that the page now displays and extra watering station in the table
-        ws_page.garden_detail_nav_button.click()
+        update_ws_page.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
         garden_page.add_watering_station_button.click()
         assert garden_page.get_number_watering_stations() == self.num_watering_stations + 1
@@ -96,8 +103,8 @@ class TestGardenModification(Base):
 
         # the user then goes to watering_station page and deletes the watering station
         garden_page.watering_station = selected_watering_station + 1
-        self.wait_for_page_to_be_loaded(ws_page)
-        self.perform_delete_modal_checks(ws_page)
+        self.wait_for_page_to_be_loaded(update_ws_page)
+        self.perform_delete_modal_checks(update_ws_page)
 
         # They are then redirected back to the garden detail page, where they see 1 less watering station
         self.wait_for_page_to_be_loaded(garden_page)

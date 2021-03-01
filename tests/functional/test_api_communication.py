@@ -14,6 +14,7 @@ from rest_framework.reverse import reverse
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_update_page import GardenUpdatePage
+from .pages.watering_station_update_page import WateringStationUpdatePage
 from .pages.watering_station_detail_page import WateringStationDetailPage
 
 
@@ -88,15 +89,17 @@ class TestAPICommunication(Base):
         # the user also changes the configs for a watering station
         selected_watering_station = 1
         detail_gpage.watering_station = selected_watering_station
-        ws_page = WateringStationDetailPage(self.driver)
-        self.wait_for_page_to_be_loaded(ws_page)
+        detail_ws_page = WateringStationDetailPage(self.driver)
+        detail_ws_page.edit_button.click()
+        update_ws_page = WateringStationUpdatePage(self.driver)
+        self.wait_for_page_to_be_loaded(update_ws_page)
         ws_status = not list(self.garden.watering_stations.all())[selected_watering_station].status
         moisture_threshold = 80
         watering_duration = timedelta(minutes=3, seconds=2)
-        ws_page.status = ws_status
-        ws_page.moisture_threshold = moisture_threshold
-        ws_page.watering_duration = derive_duration_string(watering_duration)
-        ws_page.submit_button.click()
+        update_ws_page.status = ws_status
+        update_ws_page.moisture_threshold = moisture_threshold
+        update_ws_page.watering_duration = derive_duration_string(watering_duration)
+        update_ws_page.submit_button.click()
 
         # when the MC sends another GET request to the watering station api, it recieves the new updated configs
         resp = api_client.get(watering_station_url)
