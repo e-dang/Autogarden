@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from PIL import Image
+from rest_framework.request import Request
 
 from .utils import derive_duration_string
 
@@ -116,6 +117,12 @@ class Garden(models.Model):
         for segment in self.image.url.split('/'):
             path /= segment
         return path
+
+    def update(self, request: Request):
+        self.is_connected = True
+        self.last_connection_ip = request.META.get('REMOTE_ADDR')
+        self.last_connection_time = datetime.now(pytz.UTC)
+        self.save()
 
 
 class WateringStation(models.Model):

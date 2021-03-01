@@ -1,7 +1,9 @@
 import os
 import uuid
+from datetime import datetime, timedelta
 
 import pytest
+import pytz
 from django import http
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import IntegrityError
@@ -132,7 +134,7 @@ class TestWateringStationAPIView:
         assert reverse('api-watering-stations', kwargs={'pk': pk}) == f'/api/garden/{pk}/watering-stations/'
 
     @pytest.mark.django_db
-    def test_GET_api_watering_stations_returns_200_response(self, api_client, data_GET_api_watering_stations):
+    def test_GET_returns_200_response(self, api_client, data_GET_api_watering_stations):
         _, _, url = data_GET_api_watering_stations
 
         resp = api_client.get(url)
@@ -140,7 +142,7 @@ class TestWateringStationAPIView:
         assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_GET_api_watering_stations_returns_serialized_watering_station_data_belonging_to_garden(self, api_client, data_GET_api_watering_stations):
+    def test_GET_returns_serialized_watering_station_data_belonging_to_garden(self, api_client, data_GET_api_watering_stations):
         num_watering_stations, garden, url = data_GET_api_watering_stations
 
         resp = api_client.get(url)
@@ -149,6 +151,21 @@ class TestWateringStationAPIView:
         watering_stations = list(garden.watering_stations.all())
         for i, watering_station in enumerate(resp.data):
             assert watering_station == WateringStationSerializer(watering_stations[i]).data
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('api_client, garden__is_connected', [
+        (None, False)
+    ],
+        indirect=['api_client'])
+    def test_GET_updates_garden_connection_fields(self, api_client, garden):
+        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+
+        resp = api_client.get(url)
+
+        garden.refresh_from_db()
+        assert garden.is_connected == True
+        assert garden.last_connection_ip == resp.wsgi_request.META.get('REMOTE_ADDR')
+        assert datetime.now(pytz.UTC) - garden.last_connection_time < timedelta(seconds=1)
 
 
 @pytest.mark.integration

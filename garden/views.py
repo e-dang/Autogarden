@@ -10,7 +10,7 @@ from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.request import Request
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
                           DeleteWateringStationForm, NewGardenForm,
                           UpdateGardenForm, WateringStationForm)
@@ -20,7 +20,7 @@ from .serializers import GardenSerializer, WateringStationSerializer
 
 
 class GardenView(APIView):
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         try:
             garden = Garden.objects.get(uuid=request.data['uuid'])
         except Garden.DoesNotExist:
@@ -33,8 +33,9 @@ class GardenView(APIView):
 
 
 class WateringStationView(APIView):
-    def get(self, request, pk):
+    def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
+        garden.update(request)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
