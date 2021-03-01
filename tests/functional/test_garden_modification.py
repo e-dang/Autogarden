@@ -11,7 +11,7 @@ from .pages.garden_update_page import GardenUpdatePage
 from tests.conftest import assert_image_files_equal
 
 
-class TestGardenSetup(Base):
+class TestGardenModification(Base):
     @pytest.fixture(autouse=True)
     def garden(self, garden_factory, use_tmp_static_dir):
         self.num_watering_stations = 10
@@ -22,7 +22,7 @@ class TestGardenSetup(Base):
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
 
     @pytest.mark.django_db
-    def test_user_can_modify_a_garden(self):
+    def test_user_can_modify_a_garden_and_its_watering_stations(self):
         # a user goes to a garden detail page
         self.driver.get(self.url)
         garden_page = GardenDetailPage(self.driver)
