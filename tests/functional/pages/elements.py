@@ -65,4 +65,8 @@ class ImageInput:
         instance.driver.find_element_by_id(self.INPUT_LOCATOR).send_keys(str(TEST_IMAGE_DIR / value))
 
     def __get__(self, instance, owner):
-        return instance.driver.find_element_by_id(self.IMAGE_LOCATOR).get_attribute('src')
+        if self.IMAGE_LOCATOR is None:
+            return instance.driver.find_element_by_xpath(
+                f'//div[@class="form-control custom-file"]//label[@for="{self.INPUT_LOCATOR}"]').get_attribute('innerText')
+        else:
+            return instance.driver.find_element_by_id(self.IMAGE_LOCATOR).get_attribute('src')

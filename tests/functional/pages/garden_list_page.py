@@ -4,7 +4,7 @@ from garden.forms import NewGardenForm
 from selenium.common.exceptions import WebDriverException
 
 from ..base import wait
-from .elements import Button, TextInput
+from .elements import Button, ImageInput, TextInput
 from .base_page import BasePage
 
 
@@ -24,9 +24,14 @@ class SubmitNewGardenButton(Button):
     LOCATOR = NewGardenForm.NEW_GARDEN_SUBMIT_ID
 
 
+class GardenImageInput(ImageInput):
+    INPUT_LOCATOR = 'id_image'
+
+
 class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
+    garden_image = GardenImageInput()
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -47,7 +52,14 @@ class GardenListPage(BasePage):
             if element.get_attribute('innerText') == name:
                 return element
 
-        raise WebDriverException
+        raise WebDriverException('Could not find garden with that name')
+
+    def get_garden_image(self, name):
+        for card in self.driver.find_elements_by_css_selector('.card'):
+            if card.find_elements_by_css_selector('.card-title')[0].get_attribute('innerText') == name:
+                return card.find_elements_by_css_selector('.card-img-top')[0].get_attribute('src')
+
+        raise WebDriverException('Could not find garden with that name')
 
     def click_garden(self, name):
         self.wait_for_garden_in_list(name).click()
