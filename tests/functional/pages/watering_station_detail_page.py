@@ -2,7 +2,6 @@ import re
 
 from .base_page import BasePage
 from .elements import Button
-from ..base import wait_for
 
 
 class EditButton(Button):
