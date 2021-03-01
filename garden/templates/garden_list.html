@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+{% include 'garden_list_nav.html' %}
+{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center my-5">
+    <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#newGardenModal">Add New
+        Garden</button>
+</div>
+
+<div id="gardenList" class="row">
+    {% for garden in gardens %}
+    <div class="card">
+        <img class="card-img-top" src="{{garden.image.url}}" height="200" width="300" alt="Garden Image">
+        <div class="card-body">
+            <h5 class="card-title text-center"><a href="{% url 'garden-detail' garden.pk %}"
+                    class="btn btn-primary">{{garden.name}}</a></h5>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="{{form.NEW_GARDEN_MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="{{form.NEW_GARDEN_MODAL_ID}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Garden</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                {% load crispy_forms_tags %}
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+{% load compress %}
+
+{% compress js %}
+<script src="/static/javascript/utils.js"></script>
+<script src="/static/javascript/gardens.js"></script>
+{% endcompress %}
+
+{% endblock %}

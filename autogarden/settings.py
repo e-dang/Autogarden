@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'garden'
+    'garden',
+    'crispy_forms',
+    'compressor'
 ]
 
 MIDDLEWARE = [
@@ -121,3 +123,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+COMPRESS_ENABLED = True
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+MEDIA_URL = '/images/'
+MEDIA_ROOT = BASE_DIR / 'static' / 'images'

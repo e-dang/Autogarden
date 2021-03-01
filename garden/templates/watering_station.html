@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+{% include 'watering_station_nav.html' with watering_station=form.instance %}
+{% endblock %}
+
+{% block main_content %}
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card card-body">
+            {% load crispy_forms_tags %}
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+
+<div id="{{form.DELETE_WATERING_STATION_MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="{{form.DELETE_WATERING_STATION_MODAL_ID}}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+<script src="/static/javascript/utils.js"></script>
+<script>
+    const form = $('#updateWateringStationForm');
+    form.on('submit', (event) => {
+        event.preventDefault();
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: (data) => {
+                form.html(data.html);
+            },
+        });
+    })
+
+    getModalDataAjax("{% url 'watering-station-delete' form.instance.garden.pk form.instance.pk %}");
+
+
+</script>
+{% endblock %}

@@ -1,3 +1,15 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Garden, WateringStation
+
+
+class GardenAdmin(admin.ModelAdmin):
+    pass
+
+
+class WateringStationAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Garden, GardenAdmin)
+admin.site.register(WateringStation, WateringStationAdmin)
