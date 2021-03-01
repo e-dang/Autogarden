@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
@@ -118,6 +119,16 @@ class TestGardenModel:
         ret_val = garden.get_formatted_last_connection_time()
 
         assert ret_val == str(None)
+
+    @patch('garden.models.settings')
+    def test_get_abs_path_to_image_returns_full_path_to_image_file(self, mock_settings, garden_factory):
+        garden = garden_factory.build()
+        str_path = '/test/root/'
+        mock_settings.STATIC_ROOT = Path(str_path)
+
+        path = garden.get_abs_path_to_image()
+
+        assert str(path) == str_path + f'images/{models._default_garden_image()}'
 
 
 @pytest.mark.unit

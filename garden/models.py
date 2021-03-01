@@ -1,8 +1,11 @@
+import os
 from datetime import datetime, timedelta
 
+import pytz
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
-import pytz
+from PIL import Image
 
 from .utils import derive_duration_string
 
@@ -91,6 +94,28 @@ class Garden(models.Model):
         if self.last_connection_time is None:
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+        size = 300
+        if img.height > size or img.width > size:
+            img = img.resize((size, size), Image.BOX, reducing_gap=3.0)
+            img.save(self.image.path)
+
+    def delete(self, *args, **kwargs):
+        try:
+            if _default_garden_image() not in self.image.url:
+                os.remove(self.get_abs_path_to_image())
+        except OSError:
+            pass
+        super().delete(*args, **kwargs)
+
+    def get_abs_path_to_image(self):
+        path = settings.STATIC_ROOT
+        for segment in self.image.url.split('/'):
+            path /= segment
+        return path
 
 
 class WateringStation(models.Model):
