@@ -1,30 +1,25 @@
 from rest_framework import serializers
 
 from .models import Garden, WateringStation
-from .utils import set_num_watering_stations
-
-NEGATIVE_NUM_WATERING_STATIONS_ERR = 'Cannot have a negative number of watering stations'
 
 
 class GardenSerializer(serializers.ModelSerializer):
-    num_watering_stations = serializers.IntegerField(write_only=True, required=True)
+    update_interval = serializers.SerializerMethodField()
 
     class Meta:
         model = Garden
-        fields = ['uuid', 'num_watering_stations']
+        fields = ['update_interval']
 
-    def validate_num_watering_stations(self, value):
-        if value < 0:
-            raise serializers.ValidationError(NEGATIVE_NUM_WATERING_STATIONS_ERR)
-        return value
-
-    def create(self, validated_data):
-        garden = Garden.objects.create(uuid=validated_data['uuid'])
-        set_num_watering_stations(garden, validated_data['num_watering_stations'])
-        return garden
+    def get_update_interval(self, obj):
+        return obj.update_interval.total_seconds()
 
 
 class WateringStationSerializer(serializers.ModelSerializer):
+    watering_duration = serializers.SerializerMethodField()
+
     class Meta:
         model = WateringStation
-        fields = ['moisture_threshold', 'watering_duration']
+        fields = ['status', 'moisture_threshold', 'watering_duration']
+
+    def get_watering_duration(self, obj):
+        return obj.watering_duration.total_seconds()

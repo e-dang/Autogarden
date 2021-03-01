@@ -1,4 +1,5 @@
 import os
+import random
 import uuid
 from datetime import datetime, timedelta
 
@@ -11,7 +12,7 @@ from django.forms import ValidationError
 from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
                           WateringStationForm)
 from garden.models import Garden, WateringStation
-from garden.serializers import GardenSerializer, WateringStationSerializer
+from garden.serializers import WateringStationSerializer
 from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -86,45 +87,26 @@ def assert_redirect(response: http.HttpResponse, redirect_url: str):
 
 @pytest.mark.integration
 class TestGardenAPIView:
+    @pytest.fixture(autouse=True)
+    def create_url(self, garden):
+        self.garden = garden
+        self.url = reverse('api-garden', kwargs={'pk': garden.pk})
+
+    @pytest.mark.django_db
     def test_view_has_correct_url(self):
-        assert reverse('api-garden') == '/api/garden/'
+        assert self.url == f'/api/garden/{self.garden.pk}/'
 
     @pytest.mark.django_db
-    def test_POST_api_garden_creates_garden_obj_with_specified_num_watering_stations(self, api_client, data_POST_api_garden):
-        num_watering_stations, url, data = data_POST_api_garden
+    def test_GET_returns_200_status_code(self, api_client):
+        resp = api_client.get(self.url)
 
-        api_client.post(url, data=data)
-
-        assert Garden.objects.count() == 1
-        garden = Garden.objects.get(uuid=data['uuid'])
-        assert garden.watering_stations.count() == num_watering_stations
+        assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_POST_api_garden_returns_201_response_with_pk_data(self, api_client, data_POST_api_garden):
-        _, url, data = data_POST_api_garden
+    def test_GET_returns_garden_config_data(self, api_client):
+        resp = api_client.get(self.url)
 
-        resp = api_client.post(url, data=data)
-
-        assert resp.status_code == status.HTTP_201_CREATED
-        assert resp.data['pk'] == Garden.objects.get(uuid=data['uuid']).pk
-
-    @pytest.mark.django_db
-    def test_POST_api_garden_returns_409_response_if_garden_with_uuid_already_exists(self, api_client, garden_factory, data_POST_api_garden):
-        _, url, data = data_POST_api_garden
-        garden_factory(uuid=data['uuid'])
-
-        resp = api_client.post(url, data=data)
-
-        assert resp.status_code == status.HTTP_409_CONFLICT
-
-    @pytest.mark.django_db
-    def test_POST_api_garden_returns_pk_of_garden_if_uuid_already_exists(self, api_client, garden_factory, data_POST_api_garden):
-        _, url, data = data_POST_api_garden
-        garden = garden_factory(uuid=data['uuid'])
-
-        resp = api_client.post(url, data=data)
-
-        assert int(resp.data['pk']) == garden.pk
+        assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
 
 @pytest.mark.integration
@@ -166,6 +148,38 @@ class TestWateringStationAPIView:
         assert garden.is_connected == True
         assert garden.last_connection_ip == resp.wsgi_request.META.get('REMOTE_ADDR')
         assert datetime.now(pytz.UTC) - garden.last_connection_time < timedelta(seconds=1)
+
+    @pytest.mark.django_db
+    def test_POST_adds_a_watering_station_record_to_each_watering_station_in_garden(self, api_client, garden_factory):
+        num_watering_stations = 4
+        garden = garden_factory(watering_stations=num_watering_stations)
+        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+        data = []
+        for _ in range(num_watering_stations):
+            data.append({
+                'moisture_level': random.uniform(0, 100)
+            })
+
+        api_client.post(url, data=data, format='json')
+
+        for record, station in zip(data, garden.watering_stations.all()):
+            assert station.records.all().count() == 1
+            station.records.get(moisture_level=record['moisture_level'])
+
+    @pytest.mark.django_db
+    def test_POST_returns_201_status_code(self, api_client, garden_factory):
+        num_watering_stations = 4
+        garden = garden_factory(watering_stations=num_watering_stations)
+        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+        data = []
+        for _ in range(num_watering_stations):
+            data.append({
+                'moisture_level': random.uniform(0, 100)
+            })
+
+        resp = api_client.post(url, data=data, format='json')
+
+        assert resp.status_code == status.HTTP_201_CREATED
 
 
 @pytest.mark.integration
@@ -420,25 +434,6 @@ class TestGardenModel:
         url = garden.get_delete_url()
 
         assert url == f'/gardens/{garden.pk}/delete/'
-
-
-@pytest.mark.integration
-class TestGardenSerializer:
-    @pytest.mark.django_db
-    def test_serializer_requires_num_watering_stations(self):
-        serializer = GardenSerializer(data={'uuid': uuid.uuid4()})
-
-        assert serializer.is_valid() is False
-        assert serializer.errors['num_watering_stations'][0].code == 'required'
-
-    @pytest.mark.django_db
-    def test_create_adds_num_watering_stations_to_garden_instance(self):
-        num_watering_stations = 16
-        serializer = GardenSerializer()
-
-        garden = serializer.create({'uuid': uuid.uuid4(), 'num_watering_stations': num_watering_stations})
-
-        assert garden.watering_stations.count() == num_watering_stations
 
 
 @pytest.mark.integration

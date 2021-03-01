@@ -7,10 +7,8 @@ import pytest
 import pytz
 from django.http.request import HttpRequest
 from garden import models
-from garden.serializers import (NEGATIVE_NUM_WATERING_STATIONS_ERR,
-                                GardenSerializer, WateringStationSerializer)
+from garden.serializers import WateringStationSerializer, GardenSerializer
 from garden.views import GardenDetailView, GardenUpdateView, WateringStationDetailView, WateringStationListView
-from rest_framework.serializers import ValidationError
 
 
 def assert_render_context_called_with(mock_render, kwarg):
@@ -20,7 +18,7 @@ def assert_render_context_called_with(mock_render, kwarg):
 @pytest.mark.unit
 class TestGardenSerializer:
     @pytest.mark.parametrize('garden_factory, field', [
-        (None, 'uuid'),
+        (None, 'update_interval'),
     ],
         indirect=['garden_factory'],
         ids=['uuid'])
@@ -31,13 +29,12 @@ class TestGardenSerializer:
 
         assert field in serializer.data
 
-    def test_validate_num_watering_stations_raises_validation_error_when_value_is_negative(self):
-        value = -1
-        serializer = GardenSerializer()
+    def test_get_update_interval_returns_return_value_of_total_seconds_method_call(self):
+        mock_garden = Mock()
 
-        with pytest.raises(ValidationError) as err:
-            serializer.validate_num_watering_stations(value)
-            assert str(err) == NEGATIVE_NUM_WATERING_STATIONS_ERR
+        ret_val = GardenSerializer().get_update_interval(mock_garden)
+
+        assert ret_val == mock_garden.update_interval.total_seconds.return_value
 
 
 @pytest.mark.unit
@@ -179,15 +176,23 @@ class TestWateringStationSerializer:
     @pytest.mark.parametrize('watering_station_factory, field', [
         (None, 'moisture_threshold'),
         (None, 'watering_duration'),
+        (None, 'status')
     ],
         indirect=['watering_station_factory'],
-        ids=['moisture_threshold', 'watering_duration'])
+        ids=['moisture_threshold', 'watering_duration', 'status'])
     def test_field_is_serialized(self, watering_station_factory, field):
         watering_station = watering_station_factory.build()
 
         serializer = WateringStationSerializer(watering_station)
 
         assert field in serializer.data
+
+    def test_get_watering_duration_returns_return_value_of_total_seconds_method_call(self):
+        mock_watering_station = Mock()
+
+        ret_val = WateringStationSerializer().get_watering_duration(mock_watering_station)
+
+        assert ret_val == mock_watering_station.watering_duration.total_seconds.return_value
 
 
 @pytest.mark.unit

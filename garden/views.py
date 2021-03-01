@@ -19,26 +19,26 @@ from .models import Garden, WateringStation
 from .serializers import GardenSerializer, WateringStationSerializer
 
 
-class GardenView(APIView):
-    def post(self, request: Request) -> Response:
-        try:
-            garden = Garden.objects.get(uuid=request.data['uuid'])
-        except Garden.DoesNotExist:
-            serializer = GardenSerializer(data=request.data)
-            if serializer.is_valid():
-                garden = serializer.save()
-            return Response({'pk': garden.pk}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'pk': garden.pk}, status=status.HTTP_409_CONFLICT)
+class GardenAPIView(APIView):
+    def get(self, request: Request, pk: int) -> Response:
+        garden = Garden.objects.get(pk=pk)
+        serializer = GardenSerializer(instance=garden)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class WateringStationView(APIView):
+class WateringStationAPIView(APIView):
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
         garden.update(request)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request: Request, pk: int) -> Response:
+        garden = Garden.objects.get(pk=pk)
+        for i, station in enumerate(garden.watering_stations.all()):
+            station.records.create(**request.data[i])
+        return Response({}, status=status.HTTP_201_CREATED)
 
 
 class GardenListView(View):
