@@ -1,3 +1,4 @@
+from ..base import wait_for
 from .elements import Button
 
 
@@ -14,3 +15,6 @@ class BasePage:
         self.driver = driver
         self.home_button = HomeButton(self)
         self.garden_detail_nav_button = GardenDetailButton(self)
+
+    def _get_inner_text(self, id_):
+        return wait_for(lambda: self.driver.find_element_by_id(id_).get_attribute('innerText'))

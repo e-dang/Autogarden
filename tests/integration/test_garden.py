@@ -331,7 +331,7 @@ class TestGardenDeleteView:
 @pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.mark.django_db
-    def test_GET_renders_watering_station_detail_html_templat(self, client, watering_station):
+    def test_GET_renders_watering_station_detail_html_template(self, client, watering_station):
         resp = client.get(watering_station.get_absolute_url())
 
         assert_template_is_rendered(resp, 'watering_station_detail.html')

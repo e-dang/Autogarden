@@ -1,6 +1,5 @@
 import re
 
-from garden.models import WateringStation
 from selenium.common.exceptions import NoSuchElementException
 from tests.functional.base import wait_for
 
@@ -57,7 +56,6 @@ class GardenDetailPage(BasePage):
 
     def get_water_station_data_from_table(self, ws_idx):
         ws_status = self.get_watering_station_field_value(ws_idx, 'Status')
-        ws_status = self.convert_watering_station_status_to_bool(ws_status)
         plant_type = self.get_watering_station_field_value(ws_idx, 'Plant Type')
         moisture_threshold = self.get_watering_station_field_value(ws_idx, 'Moisture Threshold')
         watering_duration = self.get_watering_station_field_value(ws_idx, 'Watering Duration')
@@ -86,17 +84,11 @@ class GardenDetailPage(BasePage):
     def get_water_level(self):
         return self._get_inner_text('waterLevel')
 
-    def convert_watering_station_status_to_bool(self, status):
-        return True if status == WateringStation.ACTIVE_STATUS_STR else False
-
     def get_garden_name(self):
         return wait_for(lambda: self.driver.find_element_by_id('gardenName')).get_attribute('innerText')
 
     def get_garden_image_src(self):
         return wait_for(lambda: self.driver.find_element_by_id('gardenImage')).get_attribute('src')
-
-    def _get_inner_text(self, id_):
-        return self.driver.find_element_by_id(id_).get_attribute('innerText')
 
     def _get_field_index(self, field_name):
         if self.field_mapping is None:

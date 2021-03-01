@@ -5,9 +5,43 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="row">
-    <div class="col">
-        <a id="editButton" class="btn btn-sm btn-outline-info" href="{{watering_station.get_update_url}}">Edit</a>
+<div class="row mt-3">
+    <div class="col-auto">
+        <div class="card card-body">
+            <div class="row">
+                <div class="col-auto">
+                    <h1>Watering Station</h1>
+                </div>
+                <div class="col-auto align-self-center">
+                    <a id="editButton" class="btn btn-sm btn-outline-info"
+                        href="{{watering_station.get_update_url}}">Edit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div clas="col-auto">
+        <div class="card card-body">
+            <table>
+                <tbody class="table">
+                    <tr>
+                        <td>Status: </td>
+                        <td id="status">{{watering_station.status_string}}</td>
+                    </tr>
+                    <tr>
+                        <td>Plant Type: </td>
+                        <td id="plantType">{{watering_station.plant_type}}</td>
+                    </tr>
+                    <tr>
+                        <td>Moisture Threshold: </td>
+                        <td id="moistureThreshold">{{watering_station.moisture_threshold}}</td>
+                    </tr>
+                    <tr>
+                        <td>Watering Duration: </td>
+                        <td id="wateringDuration">{{watering_station.get_formatted_duration}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
