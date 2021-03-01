@@ -30,3 +30,6 @@ class WateringStationDetailPage(BasePage):
 
     def get_watering_duration(self):
         return self._get_inner_text('wateringDuration')
+
+    def get_ws_idx(self):
+        return self._get_inner_text('wsIdx')

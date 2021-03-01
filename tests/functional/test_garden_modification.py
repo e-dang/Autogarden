@@ -51,6 +51,7 @@ class TestGardenModification(Base):
 
         # the user sees that the watering station has the same information as on the table in the previous page
         self.assert_watering_station_has_values(table_data, detail_ws_page)
+        assert detail_ws_page.get_ws_idx() == str(selected_watering_station)
 
         # they see an edit button on the page and click it.
         detail_ws_page.edit_button.click()
