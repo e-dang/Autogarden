@@ -71,3 +71,12 @@ class Base:
             'value': session_key,
             'path': '/'
         })
+
+    def assert_user_is_logged_in(self, first_name):
+        self.driver.find_elements_by_link_text('Log Out')
+        navbar = self.driver.find_element_by_css_selector('.navbar')
+        assert first_name in navbar.text
+
+    def assert_user_is_logged_out(self, first_name):
+        navbar = self.driver.find_element_by_css_selector('.navbar')
+        assert first_name not in navbar.text
