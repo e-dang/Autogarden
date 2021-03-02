@@ -39,6 +39,7 @@ def wait_for_true(fn):
 @pytest.mark.usefixtures('driver_init')
 class Base:
     BOOSTRAP_MODAL_TOGGLE_DELAY = 0.5
+    LOGGED_IN_WELCOME_TEXT = 'Welcome, '
 
     @wait
     def wait_for_page_to_be_loaded(self, page):
@@ -75,8 +76,8 @@ class Base:
     def assert_user_is_logged_in(self, first_name):
         self.driver.find_elements_by_link_text('Log Out')
         navbar = self.driver.find_element_by_css_selector('.navbar')
-        assert first_name in navbar.text
+        assert self.LOGGED_IN_WELCOME_TEXT + first_name in navbar.text
 
     def assert_user_is_logged_out(self, first_name):
         navbar = self.driver.find_element_by_css_selector('.navbar')
-        assert first_name not in navbar.text
+        assert self.LOGGED_IN_WELCOME_TEXT not in navbar.text

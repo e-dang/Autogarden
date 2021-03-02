@@ -23,10 +23,14 @@
         </button>
 
         <div id="navbarSupportedContent" class="collapse navbar-collapse">
-            <ul class="navbar-nav mt-auto mb-auto">
+            <ul class="navbar-nav mt-auto mb-auto mr-auto">
                 {% block navbar%}
                 {% endblock %}
             </ul>
+            {% if user.email %}
+            <span class="navbar-text mr-1">Welcome, {{user.first_name}}!</span>
+            <a id="logoutBtn" href="{% url 'logout' %}">Logout</a>
+            {% endif %}
         </div>
     </nav>
 
