@@ -26,6 +26,9 @@ class NewGardenForm(forms.ModelForm):
     NEW_GARDEN_SUBMIT_ID = 'submitBtn'
     CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
     NEW_GARDEN_MODAL_ID = 'newGardenModal'
+    CROP_BTN_ID = 'cropBtn'
+    RESET_BTN_ID = 'resetBtn'
+    IMAGE_CONTAINER_ID = 'imageContainer'
 
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
     update_interval = CustomDurationField()
@@ -45,6 +48,12 @@ class NewGardenForm(forms.ModelForm):
             Field('update_interval'),
             Field('num_watering_stations', ),
             Field('image', id='id_image'),
+            HTML(f'''
+                <div id="{self.IMAGE_CONTAINER_ID}">
+                </div>
+            '''),
+            Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
+            Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True),
             Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID, css_class='btn btn-success'),
             Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
                    data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
