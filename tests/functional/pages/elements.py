@@ -3,7 +3,6 @@ from tests.conftest import TEST_IMAGE_DIR
 from selenium.webdriver import ActionChains
 
 from ..base import wait_for
-from selenium.webdriver.common.keys import Keys
 
 
 class TextInput:
