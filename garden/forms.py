@@ -77,9 +77,14 @@ class NewGardenForm(forms.ModelForm):
 
 
 class UpdateGardenForm(forms.ModelForm):
+    FORM_ID = 'updateGardenForm'
     SUBMIT_BTN_ID = 'submitBtn'
     DELETE_BTN_ID = 'deleteBtn'
     DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
+    CROP_BTN_ID = 'cropBtn'
+    RESET_BTN_ID = 'resetBtn'
+    IMAGE_CONTAINER_ID = 'imageContainer'
+    FORM_CONTAINER_ID = 'formContainer'
 
     update_interval = CustomDurationField()
 
@@ -90,11 +95,18 @@ class UpdateGardenForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Field('name'),
             Field('update_interval'),
             Field('image', id='id_image'),
+            HTML(f'''
+                <div id="{self.IMAGE_CONTAINER_ID}">
+                </div>
+            '''),
+            Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
+            Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True),
             Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID),
             Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
                    data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
