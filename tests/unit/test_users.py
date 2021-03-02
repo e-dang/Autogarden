@@ -59,7 +59,7 @@ class TestUserManager:
             manager.create_superuser(email, password, **kwargs)
 
     @patch.object(UserManager, 'normalize_email', MagicMock())
-    def test__create_user_raises_value_error_if_normalized_email_is_empty_string(self):
+    def test_create_user_raises_value_error_if_normalized_email_is_empty_string(self):
         manager = UserManager()
         manager.normalize_email.return_value = ''
         email = 'email@demo.com'

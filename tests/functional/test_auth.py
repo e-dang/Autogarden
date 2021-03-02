@@ -13,7 +13,7 @@ class TestAuth(Base):
         self.url = live_server.url + reverse('garden-list')
 
     @pytest.mark.django_db
-    def test_user_can_create_account_and_login(self):
+    def test_user_can_create_account_and_login(self, test_password):
         # a user goes tries to go to the homepage but is redirected to the login page
         self.driver.get(self.url)
         login_page = LoginPage(self.driver)
@@ -27,12 +27,11 @@ class TestAuth(Base):
         email = 'demo@email.com'
         first_name = 'test'
         last_name = 'user'
-        password = 'password123'
         register_page.email = email
         register_page.first_name = first_name
         register_page.last_name = last_name
-        register_page.password = password
-        register_page.confirm_password = password
+        register_page.password = test_password
+        register_page.confirm_password = test_password
         register_page.submit_button.click()
 
         # after successful registration the user is redirected to the home page

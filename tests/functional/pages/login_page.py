@@ -1,11 +1,13 @@
 import re
 
+from users.forms import LoginForm
+
 from .base_page import BasePage
 from .elements import Button
 
 
 class RegisterButton(Button):
-    LOCATOR = 'registerBtn'
+    LOCATOR = LoginForm.REGISTER_BTN_ID
 
 
 class LoginPage(BasePage):
@@ -14,5 +16,5 @@ class LoginPage(BasePage):
         self.register_button = RegisterButton(self)
 
     def has_correct_url(self):
-        pattern = r'/login/$'
+        pattern = r'/login/(\?next=[A-Za-z/-]+)*$'
         return re.search(pattern, self.driver.current_url) is not None
