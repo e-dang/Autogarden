@@ -72,14 +72,3 @@ class TestGardenSetup(Base):
         # list page
         list_page.home_button.click()
         self.wait_for_page_to_be_loaded(list_page)
-
-    def perform_image_crop(self, page, image):
-        # the user selects an image, then crops it
-        page.garden_image = image
-        page.crop_image_button.click()
-
-        # they see the crop button turn into a reset button and they click it
-        page.reset_image_button.click()
-
-        # they then see the reset button turn back to a crop button which they click again
-        page.crop_image_button.click()
