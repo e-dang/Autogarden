@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
     'garden',
     'crispy_forms',
     'compressor'
@@ -136,3 +137,5 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MEDIA_URL = '/images/'
 MEDIA_ROOT = BASE_DIR / 'static' / 'images'
+
+AUTH_USER_MODEL = 'users.User'
