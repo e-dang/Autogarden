@@ -54,8 +54,8 @@ class TestGardenSetup(Base):
         update_interval = '0:10:00'
         list_page.new_garden_name = garden_name
         list_page.num_watering_stations = num_watering_stations
-        list_page.garden_image = garden_image
         list_page.update_interval = update_interval
+        self.perform_image_crop(list_page, garden_image)
         list_page.submit_new_garden_button.click()
         list_page.wait_for_garden_in_list(garden_name)
         assert_image_files_equal(list_page.get_garden_image(garden_name), garden_image)

@@ -68,19 +68,26 @@ def valid_update_garden_data(use_tmp_static_dir):
         }
 
 
-def assert_template_is_rendered(response: http.HttpResponse, template_name: str):
+def assert_template_is_rendered(response: http.HttpResponse, template_name: str) -> None:
     assert response.status_code == status.HTTP_200_OK
     assert template_name in (template.name for template in response.templates)
 
 
-def assert_data_present_in_json_response_html(response: http.HttpResponse, values):
+def assert_successful_json_response(response: http.JsonResponse, url: str) -> None:
+    json = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert json['success'] == True
+    assert json['url'] == url
+
+
+def assert_data_present_in_json_response_html(response: http.HttpResponse, values) -> None:
     json = response.json()
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
 
 
-def assert_redirect(response: http.HttpResponse, redirect_url: str):
+def assert_redirect(response: http.HttpResponse, redirect_url: str) -> None:
     assert response.status_code == status.HTTP_302_FOUND
     assert response.url == redirect_url
 
@@ -287,10 +294,10 @@ class TestGardenUpdateView:
         assert_image_files_equal(garden.image.url, valid_update_garden_data['image'].name)
 
     @pytest.mark.django_db
-    def test_POST_redirects_to_garden_update_view(self, client, garden, valid_update_garden_data):
+    def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, client, garden, valid_update_garden_data):
         resp = client.post(garden.get_update_url(), data=valid_update_garden_data)
 
-        assert_redirect(resp, garden.get_update_url())
+        assert_successful_json_response(resp, garden.get_update_url())
 
 
 @pytest.mark.integration

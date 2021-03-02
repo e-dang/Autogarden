@@ -5,7 +5,6 @@ import pytz
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
-from PIL import Image
 from rest_framework.request import Request
 
 from .utils import derive_duration_string

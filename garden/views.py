@@ -81,12 +81,14 @@ class GardenUpdateView(View):
         form = UpdateGardenForm(instance=garden)
         return render(request, 'garden_update.html', context={'form': form})
 
-    def post(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
+    def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         garden = Garden.objects.get(pk=pk)
         form = UpdateGardenForm(request.POST, request.FILES, instance=garden)
         if form.is_valid():
             form.save()
-        return redirect('garden-update', pk=pk)
+            return JsonResponse({'success': True, 'url': garden.get_update_url()})
+        form_html = render_crispy_form(form, context=csrf(request))
+        return JsonResponse({'success': False, 'html': form_html})
 
 
 class GardenDeleteView(View):

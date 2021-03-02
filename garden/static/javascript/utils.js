@@ -1,6 +1,18 @@
-function formAjaxSubmit(formId) {
+function getModalDataAjax(url) {
+    $(document).ready(() => {
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: (data) => {
+                $('.modal-body').html(data.html);
+            },
+        });
+    });
+}
+
+function addAjaxFormHandler(formId, successCb, failCb, getFormData = (form) => new FormData(form)) {
     $(formId).on('submit', (event) => {
-        const fd = new FormData(event.target);
+        const fd = getFormData(event.target);
         event.preventDefault();
         $.ajax({
             type: $(formId).attr('method'),
@@ -10,24 +22,72 @@ function formAjaxSubmit(formId) {
             processData: false,
             success: (data) => {
                 if (data.success) {
-                    window.location = data.url;
+                    successCb(data);
                 } else {
-                    $('.modal-body').html(data.html);
-                    formAjaxSubmit(formId);
+                    failCb(data);
                 }
             },
         });
     });
 }
 
-function getModalDataAjax(url) {
-    $(document).ready(() => {
-        $.ajax({
-            type: 'get',
-            url: url,
-            success: (data) => {
-                $('.modal-body').html(data.html);
-            },
+function addCropImageHandler(configs) {
+    const imgInput = $(configs.imgInputSelector);
+    const cropBtn = $(configs.cropBtnSelector);
+    const resetBtn = $(configs.resetBtnSelector);
+    const imgContainer = $(configs.imgContainerSelector);
+
+    imgInput.on('change', (event) => {
+        cropBtn.attr('hidden', false);
+        resetBtn.attr('hidden', true);
+
+        const imgData = event.target.files[0];
+        const url = URL.createObjectURL(imgData);
+        imgContainer.html(`<img id="image" src="${url}" alt="">`);
+
+        let img;
+        let cropper;
+        const resetCropper = () => {
+            img = $('#image');
+            img.cropper({
+                aspectRatio: 16 / 9,
+                scalable: false,
+                zoomable: false,
+                cropBoxResizable: false,
+                dragMode: 'none',
+            });
+            cropper = img.data('cropper');
+        };
+        resetCropper();
+
+        cropBtn.on('click', (event) => {
+            const width = cropper.getCropBoxData().width;
+            const height = cropper.getCropBoxData().height;
+            const canvas = cropper.getCroppedCanvas({width: width, height: height});
+            imgContainer.html(canvas);
+            cropBtn.attr('hidden', true);
+            resetBtn.attr('hidden', false);
+            $(configs.formSelector).unbind();
+
+            canvas.toBlob((blob) => {
+                addAjaxFormHandler(configs.formSelector, successCb, failCb, (form) => {
+                    const filename = $(`#script-${configs.imgInputSelector.substring(1)}`)
+                        .parent()
+                        .children('.custom-file-label')
+                        .text();
+                    const fd = new FormData(form);
+                    fd.append('image', blob, filename);
+                    return fd;
+                });
+            });
+        });
+
+        resetBtn.on('click', (event) => {
+            cropBtn.attr('hidden', false);
+            resetBtn.attr('hidden', true);
+            cropper.reset();
+            imgContainer.html(`<img id="image" src="${url}" alt="">`);
+            resetCropper();
         });
     });
 }

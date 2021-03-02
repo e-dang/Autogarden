@@ -13,12 +13,12 @@
                 <h1>{{form.instance.name}}</h1>
             </div>
             <div class="row">
-                <img id="gardenImage" src="{{form.instance.image.url}}" width="300" height="200" alt="">
+                <img id="gardenImage" src="{{form.instance.image.url}}" alt="">
             </div>
         </div>
     </div>
     <div class="col">
-        <div class="card card-body">
+        <div id={{form.FORM_CONTAINER_ID}} class="card card-body">
             {% load crispy_forms_tags %}
             {% crispy form %}
         </div>
@@ -38,8 +38,18 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="/static/javascript/utils.js"></script>
 <script>
-    getModalDataAjax("{% url 'garden-delete' form.instance.pk %}");
+    var deleteUrl = "{{ form.instance.get_delete_url }}"
+    var configs = {
+        imgInputSelector: '#{{form.image.auto_id}}',
+        cropBtnSelector: '#{{form.CROP_BTN_ID}}',
+        resetBtnSelector: '#{{form.RESET_BTN_ID}}',
+        imgContainerSelector: '#{{form.IMAGE_CONTAINER_ID}}',
+        formSelector: '#{{form.FORM_ID}}',
+        deleteUrl: '{{ form.instance.get_delete_url }}',
+        formContainerSelector: '#{{form.FORM_CONTAINER_ID}}'
+    };
 </script>
+<script src="/static/javascript/utils.js"></script>
+<script src="/static/javascript/garden_update.js"></script>
 {% endblock %}

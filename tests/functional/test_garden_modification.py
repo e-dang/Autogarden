@@ -133,7 +133,7 @@ class TestGardenModification(Base):
         update_interval = '10:00'
         update_gpage.garden_name = new_garden_name
         update_gpage.garden_update_interval = update_interval
-        update_gpage.garden_image = new_garden_image
+        self.perform_image_crop(update_gpage, new_garden_image)
         update_gpage.submit_button.click()
 
         # goes back to the garden detail page where they see the new name and image
