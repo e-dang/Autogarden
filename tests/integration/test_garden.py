@@ -2,7 +2,6 @@ import os
 import random
 import uuid
 from datetime import datetime, timedelta
-from typing import Any
 
 import pytest
 import pytz
@@ -18,6 +17,8 @@ from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
 from tests.conftest import TEST_IMAGE_DIR, assert_image_files_equal
+
+from .conftest import assert_template_is_rendered, assert_redirect
 
 
 @pytest.fixture
@@ -69,11 +70,6 @@ def valid_update_garden_data(use_tmp_static_dir):
         }
 
 
-def assert_template_is_rendered(response: http.HttpResponse, template_name: str) -> None:
-    assert response.status_code == status.HTTP_200_OK
-    assert template_name in (template.name for template in response.templates)
-
-
 def assert_successful_json_response(response: http.JsonResponse, url: str) -> None:
     json = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -86,14 +82,6 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
-
-
-def assert_redirect(response: http.HttpResponse, redirect_url: str, *args: Any) -> None:
-    assert response.status_code == status.HTTP_302_FOUND
-    urls = response.url.split('?next=')
-    assert urls[0] == redirect_url
-    for follow_url, expected_follow_url in zip(urls[1:], args):
-        assert follow_url == expected_follow_url
 
 
 @pytest.mark.integration
