@@ -21,7 +21,8 @@ from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, Ga
                           GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
                           WateringStationAPIView)
-from users.views import CreateUserView, LoginView, LogoutView
+from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth import views as auth_views
 
 API_PREFIX = 'api/'
 
@@ -35,6 +36,13 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', CreateUserView.as_view(), name='register'),
+    path('reset_password/', PasswordResetView.as_view(template_name='reset_password.html'), name='reset_password'),
+    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(template_name='reset_password_sent.html'),
+         name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(
+        template_name='reset_password_confirm.html'), name='password_reset_confirm'),
+    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='reset_password_complete.html'), name='password_reset_complete'),
 
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),

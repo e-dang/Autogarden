@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Field, Layout, Submit
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -30,6 +30,8 @@ class UserCreateForm(UserCreationForm):
 class LoginForm(forms.Form):
     FORM_ID = 'loginForm'
     REGISTER_BTN_ID = 'registerBtn'
+    RESET_PASSWORD_BTN = 'resetPasswordBtn'
+    SUBMIT_BTN_ID = 'submitBtn'
 
     email = forms.EmailField()
     password = forms.CharField(
@@ -58,9 +60,12 @@ class LoginForm(forms.Form):
             Field('email'),
             Field('password'),
             FormActions(
-                Submit('submit', 'Login')
+                Submit('submit', 'Login', css_id=self.SUBMIT_BTN_ID)
             ),
-            HTML('<p>Don\'t have an account? <a id="registerBtn" href="{% url \'register\'%}">Sign Up</a>')
+            HTML(
+                f'<p>Don\'t have an account? <a id="{self.REGISTER_BTN_ID}" href="{{% url \'register\' %}}">Sign Up</a>'),
+            HTML(
+                f'<p>Forgot Password? <a id="{self.RESET_PASSWORD_BTN}" href="{{% url \'reset_password\' %}}">Reset Password</a>')
         )
 
     def clean(self):
@@ -102,3 +107,17 @@ class LoginForm(forms.Form):
             code='invalid_login',
             params={'username': self.username_field.verbose_name},
         )
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('submit', 'Reset my password'))
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('submit', 'Reset my password'))

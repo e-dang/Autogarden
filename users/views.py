@@ -1,8 +1,10 @@
 from django import http
+from django.contrib.auth import login, logout, views
 from django.shortcuts import redirect, render
 from django.views import View
-from users.forms import UserCreateForm, LoginForm
-from django.contrib.auth import login, logout
+
+from users.forms import (CustomPasswordResetForm, CustomSetPasswordForm,
+                         LoginForm, UserCreateForm)
 
 
 class LoginView(View):
@@ -38,3 +40,11 @@ class CreateUserView(View):
             login(request, user)
             return redirect('garden-list')
         return render(request, 'register.html', context={'form': form})
+
+
+class PasswordResetView(views.PasswordResetView):
+    form_class = CustomPasswordResetForm
+
+
+class PasswordResetConfirmView(views.PasswordResetConfirmView):
+    form_class = CustomSetPasswordForm
