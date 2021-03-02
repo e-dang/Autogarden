@@ -2,6 +2,7 @@ import os
 import random
 import uuid
 from datetime import datetime, timedelta
+from typing import Any
 
 import pytest
 import pytz
@@ -87,9 +88,12 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
         assert str(value) in json['html']
 
 
-def assert_redirect(response: http.HttpResponse, redirect_url: str) -> None:
+def assert_redirect(response: http.HttpResponse, redirect_url: str, *args: Any) -> None:
     assert response.status_code == status.HTTP_302_FOUND
-    assert response.url == redirect_url
+    urls = response.url.split('?next=')
+    assert urls[0] == redirect_url
+    for follow_url, expected_follow_url in zip(urls[1:], args):
+        assert follow_url == expected_follow_url
 
 
 @pytest.mark.integration
@@ -220,12 +224,13 @@ class TestWateringStationAPIView:
 
 @pytest.mark.integration
 class TestGardenListView:
-    def test_view_has_correct_url(self):
-        assert reverse('garden-list') == f'/gardens/'
 
-    @pytest.fixture
-    def url(self):
-        return reverse('garden-list')
+    @pytest.fixture(autouse=True)
+    def create_url(self):
+        self.url = reverse('garden-list')
+
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/'
 
     @pytest.fixture
     def invalid_new_garden_data(self):
@@ -233,35 +238,46 @@ class TestGardenListView:
                 'num_watering_stations': -1}
 
     @pytest.mark.django_db
-    def test_GET_renders_garden_html_template(self, client, url):
-        resp = client.get(url)
+    def test_GET_renders_garden_html_template(self, auto_login_user):
+        client, _ = auto_login_user()
+
+        resp = client.get(self.url)
 
         assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, client, url, valid_garden_data):
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, auto_login_user, valid_garden_data):
+        client, _ = auto_login_user()
         prev_num_gardens = Garden.objects.all().count()
 
-        client.post(url, data=valid_garden_data)
+        client.post(self.url, data=valid_garden_data)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
         assert Garden.objects.first().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, client, url, valid_garden_data):
-        resp = client.post(url, data=valid_garden_data, follow=False)
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auto_login_user, valid_garden_data):
+        client, _ = auto_login_user()
+        resp = client.post(self.url, data=valid_garden_data, follow=False)
 
-        data = resp.json()
-        assert data['success'] == True
-        assert data['url'] == resp.wsgi_request.build_absolute_uri(reverse('garden-list'))
+        assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
 
     @pytest.mark.django_db
-    def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, client, url, invalid_new_garden_data):
-        resp = client.post(url, data=invalid_new_garden_data)
+    def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auto_login_user, invalid_new_garden_data):
+        client, _ = auto_login_user()
+        expected = [
+            NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG
+        ]
 
-        data = resp.json()
-        assert data['success'] == False
-        assert NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG in data['html']
+        resp = client.post(self.url, data=invalid_new_garden_data)
+
+        assert_data_present_in_json_response_html(resp, expected)
+
+    @pytest.mark.django_db
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
+        resp = client.get(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration

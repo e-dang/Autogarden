@@ -2,6 +2,7 @@ from typing import Any
 
 from crispy_forms.utils import render_crispy_form
 from django import http
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
@@ -50,7 +51,7 @@ class WateringStationAPIView(APIView):
         return Response({}, status=status.HTTP_201_CREATED)
 
 
-class GardenListView(View):
+class GardenListView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
         form = NewGardenForm()
         gardens = Garden.objects.all()

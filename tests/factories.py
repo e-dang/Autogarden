@@ -1,6 +1,9 @@
 import factory
-from garden.models import Garden, WateringStation
 import pytz
+from garden.models import Garden, WateringStation, WateringStationRecord
+from users.models import User
+
+TEST_PASSWORD = 'test-password123'
 
 
 class GardenFactory(factory.django.DjangoModelFactory):
@@ -36,3 +39,29 @@ class WateringStationFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = WateringStation
+
+    @factory.post_generation
+    def records(self, create, count, **kwargs):
+        if not create:
+            return
+
+        if count:
+            for _ in range(count):
+                WateringStationRecordFactory(garden=self)
+
+
+class WateringStationRecordFactory(factory.django.DjangoModelFactory):
+    garden = factory.SubFactory(WateringStationFactory)
+    moisture_level = factory.Faker('random_int', min=0, max=100)
+
+    class Meta:
+        model = WateringStationRecord
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('ascii_email')
+
+    class Meta:
+        model = User

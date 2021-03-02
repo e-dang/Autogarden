@@ -139,3 +139,4 @@ MEDIA_URL = '/images/'
 MEDIA_ROOT = BASE_DIR / 'static' / 'images'
 
 AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = 'login'

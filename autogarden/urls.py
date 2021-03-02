@@ -21,6 +21,7 @@ from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, Ga
                           GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
                           WateringStationAPIView)
+from users.views import LoginView
 
 API_PREFIX = 'api/'
 
@@ -30,6 +31,8 @@ urlpatterns = [
     path(API_PREFIX + 'garden/<int:pk>/', GardenAPIView.as_view(), name='api-garden'),
     path(API_PREFIX + 'garden/<int:pk>/watering-stations/',
          WateringStationAPIView.as_view(), name='api-watering-stations'),
+
+    path('login', LoginView.as_view(), name='login'),
 
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
