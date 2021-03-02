@@ -2,7 +2,7 @@ import datetime
 
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import (HTML, Button, ButtonHolder, Field, Layout,
+from crispy_forms.layout import (HTML, Button, Field, Layout,
                                  Submit)
 from django import forms
 
@@ -18,6 +18,27 @@ class CustomDurationField(forms.DurationField):
         if isinstance(value, datetime.timedelta):
             return derive_duration_string(value)
         return value
+
+
+class DeleteForm(forms.Form):
+    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
+    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
+    FORM_ID = None
+    MESSAGE = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = self.FORM_ID
+        self.helper.method = 'post'
+        self.helper.layout = Layout(
+            FormActions(
+                HTML(self.MESSAGE),
+                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                       data_dismiss='modal', aria_hidden='true'),
+                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
+            )
+        )
 
 
 class CropperMixin(forms.Form):
@@ -112,22 +133,9 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
         )
 
 
-class DeleteGardenForm(forms.Form):
-    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
-    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.helper = FormHelper()
-        self.method = 'post'
-        self.helper.layout = Layout(
-            FormActions(
-                HTML('<p>Are you sure you want to delete this garden?</p>'),
-                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
-                       data_dismiss='modal', aria_hidden='true'),
-                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
-            )
-        )
+class DeleteGardenForm(DeleteForm):
+    FORM_ID = 'deleteGardenForm'
+    MESSAGE = '<p>Are you sure you want to delete this garden?</p>'
 
 
 class WateringStationForm(forms.ModelForm):
@@ -165,21 +173,6 @@ class BulkUpdateWateringStationForm(WateringStationForm):
             field.required = False
 
 
-class DeleteWateringStationForm(forms.Form):
-    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
-    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
+class DeleteWateringStationForm(DeleteForm):
     FORM_ID = 'deleteWateringStationForm'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = self.FORM_ID
-        self.helper.form_method = 'post'
-        self.helper.layout = Layout(
-            HTML('<p>Are you sure you want to delete this watering station?</p>'),
-            ButtonHolder(
-                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
-                       data_dismiss='modal', aria_hidden='true'),
-                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger')
-            )
-        )
+    MESSAGE = '<p>Are you sure you want to delete this watering station?</p>'
