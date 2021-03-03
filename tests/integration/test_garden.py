@@ -510,7 +510,7 @@ class TestWateringStationUpdateView:
 class TestWateringStationUpdateViewErrors:
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
-    def test_GET_redirects_users_who_dont_own_the_watering_station_to_404_page_not_found(self, auth_client, watering_station, method):
+    def test_view_redirects_users_who_dont_own_the_watering_station_to_404_page_not_found(self, auth_client, watering_station, method):
         garden_pk = watering_station.garden.pk
         ws_pk = watering_station.pk
         url = reverse('watering-station-update', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
@@ -597,9 +597,9 @@ class TestWateringStationListView:
 @pytest.mark.integration
 class TestWateringStationDeleteView:
     @pytest.fixture(autouse=True)
-    def setup(self, watering_station):
-        self.watering_station = watering_station
-        self.garden = watering_station.garden
+    def setup(self, auth_user_ws):
+        self.watering_station = auth_user_ws
+        self.garden = auth_user_ws.garden
         self.url = reverse('watering-station-delete',
                            kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.watering_station.pk})
 
@@ -624,18 +624,43 @@ class TestWateringStationDeleteView:
 
     @pytest.mark.django_db
     def test_POST_redirects_to_garden_detail_view(self, auth_client):
-        garden_pk = self.watering_station.garden.pk
+        garden_pk = self.garden.pk
 
         resp = auth_client.post(self.url)
 
         assert_redirect(resp, reverse('garden-detail', kwargs={'pk': garden_pk}))
 
+
+@pytest.mark.integration
+class TestWateringStationListViewErrors:
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
-    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
-        resp = getattr(client, method)(self.url, follow=False)
+    def test_view_redirects_users_who_dont_own_the_watering_station_to_404_page_not_found(self, auth_client, watering_station, method):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
 
-        assert_redirect(resp, reverse('login'), self.url)
+        resp = getattr(auth_client, method)(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_doesnt_delete_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+
+        auth_client.post(url)
+
+        watering_station.refresh_from_db()  # should not raise
+
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        url = reverse('watering-station-delete', kwargs={'garden_pk': 1, 'ws_pk': 1})
+
+        resp = getattr(client, method)(url, follow=False)
+
+        assert_redirect(resp, reverse('login'), url)
 
 
 @pytest.mark.integration

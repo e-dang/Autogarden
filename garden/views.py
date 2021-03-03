@@ -186,12 +186,23 @@ class WateringStationUpdateView(LoginRequiredMixin, View):
 
 class WateringStationDeleteView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
-        form = DeleteWateringStationForm()
-        form.helper.form_action = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
-        form_html = render_crispy_form(form, context=csrf(request))
-        return JsonResponse({'html': form_html})
+        try:
+            request.user.gardens.get(pk=garden_pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            form = DeleteWateringStationForm()
+            form.helper.form_action = reverse('watering-station-delete',
+                                              kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+            form_html = render_crispy_form(form, context=csrf(request))
+            return JsonResponse({'html': form_html})
 
     def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
-        station = WateringStation.objects.get(garden=garden_pk, pk=ws_pk)
-        station.delete()
-        return redirect('garden-detail', pk=garden_pk)
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            station = garden.watering_stations.get(garden=garden_pk, pk=ws_pk)
+            station.delete()
+            return redirect('garden-detail', pk=garden_pk)
