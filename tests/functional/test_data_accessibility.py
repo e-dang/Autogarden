@@ -1,3 +1,5 @@
+from garden.models import Garden
+import re
 import pytest
 
 from .base import Base
@@ -8,9 +10,9 @@ from django.urls import reverse
 
 class TestDataAccessability(Base):
     @pytest.fixture(autouse=True)
-    def create_url(self, live_server, test_password, use_tmp_static_dir):
+    def setup(self, live_server, test_password, use_tmp_static_dir):
         self.live_server = live_server
-        self.url = live_server.url + reverse('garden-list')
+        self.url = self.create_url(reverse('garden-list'))
         self.email = 'email@demo.com'
         self.create_pre_authenticated_session(self.email, test_password, live_server)
 
@@ -49,4 +51,31 @@ class TestDataAccessability(Base):
         # manually enter that url into the browser. They see a 404 error appear instead of the garden
         # detail page
         self.driver.get(detail_url)
+        self.assert_404_error()
+
+        # the user then tries all urls associated with that garden to try and gain access to it, but fails
+        res = re.search(r'/(\d+)/', detail_url)
+        pk = res.groups()[0]
+        garden = Garden.objects.get(pk=pk)
+        watering_station = garden.watering_stations.first()
+
+        self.driver.get(self.create_url(garden.get_update_url()))
+        self.assert_404_error()
+
+        self.driver.get(self.create_url(garden.get_delete_url()))
+        self.assert_404_error()
+
+        self.driver.get(self.create_url(watering_station.get_absolute_url()))
+        self.assert_404_error()
+
+        self.driver.get(self.create_url(watering_station.get_update_url()))
+        self.assert_404_error()
+
+        self.driver.get(self.create_url(watering_station.get_delete_url()))
+        self.assert_404_error()
+
+    def assert_404_error(self):
         assert '404 Error. Page Not Found.' in self.driver.find_element_by_tag_name('body').text
+
+    def create_url(self, path):
+        return self.live_server.url + path
