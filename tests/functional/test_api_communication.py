@@ -20,8 +20,9 @@ from .pages.watering_station_detail_page import WateringStationDetailPage
 
 @pytest.mark.functional
 class TestAPICommunication(Base):
+    @pytest.mark.usefixtures('use_tmp_static_dir')
     @pytest.fixture(autouse=True)
-    def garden(self, garden_factory, use_tmp_static_dir):
+    def setup(self, garden_factory, live_server, test_password):
         self.num_watering_stations = 16
         self.garden = garden_factory(watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True,
@@ -30,10 +31,9 @@ class TestAPICommunication(Base):
                                      last_connection_time=None,
                                      update_interval=_default_update_interval(),
                                      num_missed_updates=_default_num_missed_updates())
-
-    @pytest.fixture(autouse=True)
-    def url(self, live_server):
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
+        self.email = 'email@demo.com'
+        self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
     def test_microcontroller_interaction_with_server(self, api_client):
