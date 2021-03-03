@@ -17,7 +17,7 @@ from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
                           DeleteWateringStationForm, NewGardenForm,
                           UpdateGardenForm, WateringStationForm)
 
-from .models import Garden, WateringStation
+from .models import Garden
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
 

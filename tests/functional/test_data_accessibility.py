@@ -6,6 +6,7 @@ from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
 from django.urls import reverse
+from rest_framework import status
 
 
 class TestDataAccessability(Base):
@@ -17,7 +18,7 @@ class TestDataAccessability(Base):
         self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
-    def test_multiple_users_can_create_their_own_gardens_that_are_not_shared(self, test_password):
+    def test_users_can_only_access_the_data_that_they_own(self, test_password, api_client):
         # an authenticated user goes to the website and adds a garden to their page
         self.driver.get(self.url)
         list_gpage = GardenListPage(self.driver)
@@ -74,8 +75,28 @@ class TestDataAccessability(Base):
         self.driver.get(self.create_url(watering_station.get_delete_url()))
         self.assert_404_error()
 
+        # the user then tries to use the api to view and modify the other users data, but that doesnt work as well
+        resp = api_client.get(self.create_api_url(garden.get_absolute_url()))
+        self.assert_401_unauthorized(resp)
+
+        resp = api_client.patch(self.create_api_url(garden.get_absolute_url()))
+        self.assert_401_unauthorized(resp)
+
+        resp = api_client.get(self.create_api_url(watering_station.get_absolute_url()))
+        self.assert_401_unauthorized(resp)
+
+        resp = api_client.post(self.create_api_url(watering_station.get_absolute_url()))
+        self.assert_401_unauthorized(resp)
+
     def assert_404_error(self):
         assert '404 Error. Page Not Found.' in self.driver.find_element_by_tag_name('body').text
 
+    def assert_401_unauthorized(self, response):
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert 'errors' in response.data
+
     def create_url(self, path):
         return self.live_server.url + path
+
+    def create_api_url(self, path):
+        return ''.join([self.live_server.url, '/api', path])
