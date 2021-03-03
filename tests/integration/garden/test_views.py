@@ -1,72 +1,20 @@
 import os
 import random
-import uuid
 from datetime import datetime, timedelta
 
 import pytest
 import pytz
 from django import http
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.forms import ValidationError
-from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
-                          WateringStationForm)
-from garden.models import Garden, WateringStation
-from garden.serializers import WateringStationSerializer
-from garden.utils import build_duration_string, derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
-from tests.conftest import TEST_IMAGE_DIR, assert_image_files_equal
+from tests.conftest import assert_image_files_equal
+from tests.integration.conftest import (assert_redirect,
+                                        assert_template_is_rendered)
 
-from .conftest import assert_template_is_rendered, assert_redirect, auth_user
-
-
-@pytest.fixture
-def data_POST_api_garden():
-    num_watering_stations = 4
-    url = reverse('api-garden')
-    data = {
-        'uuid': uuid.uuid4(),
-        'num_watering_stations': num_watering_stations
-    }
-
-    return num_watering_stations, url, data
-
-
-@pytest.fixture
-def data_GET_api_watering_stations(garden_factory):
-    num_watering_stations = 4
-    garden = garden_factory(watering_stations=num_watering_stations)
-    url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
-
-    return num_watering_stations, garden, url
-
-
-@pytest.fixture
-def valid_watering_station_data():
-    return {'moisture_threshold': 89,
-            'watering_duration': build_duration_string(5, 65),
-            'plant_type': 'lettuce',
-            'status': True
-            }
-
-
-@pytest.fixture
-def valid_garden_data():
-    return {'name': 'My Garden',
-            'num_watering_stations': 3,
-            'update_interval': '10:00'}
-
-
-@pytest.fixture
-def valid_update_garden_data(use_tmp_static_dir):
-    image_path = str(TEST_IMAGE_DIR / 'test_garden_image.png')
-    with open(image_path, 'rb') as f:
-        file = SimpleUploadedFile('test_garden_image.png', f.read(), content_type='image/png')
-        return {
-            'name': 'new garden name',
-            'update_interval': '10:00',
-            'image': file
-        }
+from garden.forms import NewGardenForm
+from garden.models import Garden, WateringStation
+from garden.serializers import WateringStationSerializer
+from garden.utils import derive_duration_string
 
 
 def assert_successful_json_response(response: http.JsonResponse, url: str) -> None:
@@ -661,146 +609,3 @@ class TestWateringStationListViewErrors:
         resp = getattr(client, method)(url, follow=False)
 
         assert_redirect(resp, reverse('login'), url)
-
-
-@pytest.mark.integration
-class TestGardenModel:
-    @pytest.mark.django_db
-    @pytest.mark.parametrize('garden_factory, nulled_data', [
-        (None, {'last_connection_ip': None}),
-        (None, {'last_connection_time': None}),
-        (None, {'water_level': None})
-    ],
-        indirect=['garden_factory'],
-        ids=['last_connection_ip', 'last_connection_time', 'water_level'])
-    def test_fields_can_be_null_field(self, garden_factory, nulled_data):
-        garden_factory(**nulled_data)  # should not raise
-
-    @pytest.mark.django_db
-    def test_get_absolute_url_returns_correct_url(self, garden):
-        url = garden.get_absolute_url()
-
-        assert url == f'/gardens/{garden.pk}/'
-
-    @pytest.mark.django_db
-    def test_get_watering_station_urls(self, garden):
-        url = garden.get_watering_stations_url()
-
-        assert url == f'/gardens/{garden.pk}/watering-stations/'
-
-    @pytest.mark.django_db
-    def test_get_update_url_returns_correct_url(self, garden):
-        url = garden.get_update_url()
-
-        assert url == f'/gardens/{garden.pk}/update/'
-
-    @pytest.mark.django_db
-    def test_get_delete_url_returns_correct_url(self, garden):
-        url = garden.get_delete_url()
-
-        assert url == f'/gardens/{garden.pk}/delete/'
-
-
-@pytest.mark.integration
-class TestNewGardenForm:
-    @pytest.mark.parametrize('valid_garden_data, missing_field', [
-        (None, 'name'),
-        (None, 'num_watering_stations'),
-    ],
-        indirect=['valid_garden_data'],
-        ids=['name', 'num_watering_stations'])
-    def test_fields_are_required(self, valid_garden_data, missing_field):
-        valid_garden_data.pop(missing_field)
-        form = NewGardenForm(data=valid_garden_data)
-
-        assert not form.is_valid()
-        assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
-
-    @pytest.mark.django_db
-    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self, valid_garden_data, user):
-        prev_num_gardens = Garden.objects.all().count()
-        form = NewGardenForm(data=valid_garden_data)
-
-        assert form.is_valid()
-        garden = form.save(user)
-
-        assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert garden.watering_stations.count() == valid_garden_data['num_watering_stations']
-
-    @pytest.mark.django_db
-    def test_save_sets_new_garden_owner_as_passed_in_user(self, valid_garden_data, user):
-        form = NewGardenForm(data=valid_garden_data)
-
-        assert form.is_valid()
-        garden = form.save(user)
-
-        assert garden in user.gardens.all()
-
-    @pytest.mark.django_db
-    def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):
-        data = {
-            'name': 'My Garden',
-            'num_watering_stations': -1
-        }
-        form = NewGardenForm(data=data)
-        form.cleaned_data = data
-
-        with pytest.raises(ValidationError):
-            form.clean_num_watering_stations()
-
-
-@pytest.mark.integration
-class TestWateringStationModel:
-
-    @pytest.mark.django_db
-    def test_get_absolute_url_returns_correct_url(self, watering_station):
-        garden = watering_station.garden
-
-        url = watering_station.get_absolute_url()
-
-        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/'
-
-    @pytest.mark.django_db
-    def test_get_update_url_returns_correct_url(self, watering_station):
-        garden = watering_station.garden
-
-        url = watering_station.get_update_url()
-
-        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/update/'
-
-    @pytest.mark.django_db
-    def test_get_delete_url_returns_correct_url(self, watering_station):
-        garden = watering_station.garden
-
-        url = watering_station.get_delete_url()
-
-        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/delete/'
-
-
-@pytest.mark.integration
-class TestWateringStationForm:
-
-    @pytest.mark.parametrize('valid_watering_station_data, missing_field', [
-        (None, 'moisture_threshold'),
-        (None, 'watering_duration')
-    ],
-        indirect=['valid_watering_station_data'],
-        ids=['moisture_threshold', 'watering_duration'])
-    def test_fields_are_required(self, valid_watering_station_data, missing_field):
-        valid_watering_station_data.pop(missing_field)
-        form = WateringStationForm(data=valid_watering_station_data)
-
-        assert not form.is_valid()
-        assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
-
-    @pytest.mark.parametrize('valid_watering_station_data, missing_field', [
-        (None, 'plant_type'),
-        (None, 'status')
-    ],
-        indirect=['valid_watering_station_data'],
-        ids=['plant_type', 'status'])
-    def test_plant_type_field_is_not_required(self, valid_watering_station_data, missing_field):
-        valid_watering_station_data.pop(missing_field)
-        form = WateringStationForm(data=valid_watering_station_data)
-
-        assert form.is_valid()
