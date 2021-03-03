@@ -1,4 +1,3 @@
-from enum import auto
 import os
 import random
 import uuid
@@ -8,7 +7,6 @@ import pytest
 import pytz
 from django import http
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db.utils import IntegrityError
 from django.forms import ValidationError
 from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
                           WateringStationForm)
@@ -541,15 +539,6 @@ class TestWateringStationDeleteView:
 @pytest.mark.integration
 class TestGardenModel:
     @pytest.mark.django_db
-    def test_uuid_field_must_be_unique(self):
-        id_ = uuid.uuid4()
-        Garden(uuid=id_).save()
-
-        with pytest.raises(IntegrityError) as err:
-            Garden(uuid=id_).save()
-            assert 'UNIQUE' in err
-
-    @pytest.mark.django_db
     @pytest.mark.parametrize('garden_factory, nulled_data', [
         (None, {'last_connection_ip': None}),
         (None, {'last_connection_time': None}),
@@ -601,15 +590,24 @@ class TestNewGardenForm:
         assert form.errors[missing_field] == [REQUIRED_FIELD_ERR_MSG]
 
     @pytest.mark.django_db
-    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self, valid_garden_data):
+    def test_save_creates_a_new_garden_with_specified_num_of_watering_stations(self, valid_garden_data, user):
         prev_num_gardens = Garden.objects.all().count()
         form = NewGardenForm(data=valid_garden_data)
 
         assert form.is_valid()
-        garden = form.save()
+        garden = form.save(user)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
         assert garden.watering_stations.count() == valid_garden_data['num_watering_stations']
+
+    @pytest.mark.django_db
+    def test_save_sets_new_garden_owner_as_passed_in_user(self, valid_garden_data, user):
+        form = NewGardenForm(data=valid_garden_data)
+
+        assert form.is_valid()
+        garden = form.save(user)
+
+        assert garden in user.gardens.all()
 
     @pytest.mark.django_db
     def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):

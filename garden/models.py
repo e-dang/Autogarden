@@ -54,7 +54,7 @@ class Garden(models.Model):
         (LOW, 'Low'),
     ]
 
-    uuid = models.UUIDField(unique=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default=_default_garden_name)
     image = models.ImageField(default=_default_garden_image)
     is_connected = models.BooleanField(default=_default_is_connected)

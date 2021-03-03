@@ -77,6 +77,7 @@ class TestGardenSetup(Base):
         list_page.home_button.click()
         self.wait_for_page_to_be_loaded(list_page)
 
+    @pytest.mark.django_db
     def test_multiple_users_can_create_their_own_gardens_that_are_not_shared(self, test_password):
         # an authenticated user goes to the website and adds a garden to their page
         self.driver.get(self.url)

@@ -60,7 +60,7 @@ class GardenListView(LoginRequiredMixin, View):
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
         form = NewGardenForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            form.save(request.user)
             return JsonResponse({
                 'success': True,
                 'url': request.build_absolute_uri(reverse('garden-list'))

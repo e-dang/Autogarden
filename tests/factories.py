@@ -6,8 +6,17 @@ from users.models import User
 TEST_PASSWORD = 'test-password123'
 
 
+class UserFactory(factory.django.DjangoModelFactory):
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('ascii_email')
+
+    class Meta:
+        model = User
+
+
 class GardenFactory(factory.django.DjangoModelFactory):
-    uuid = factory.Faker('uuid4')
+    owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda x: f'Garden{x}')
     is_connected = factory.Sequence(lambda x: x % 2 == 0)
     last_connection_ip = factory.Faker('ipv4')
@@ -56,12 +65,3 @@ class WateringStationRecordFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = WateringStationRecord
-
-
-class UserFactory(factory.django.DjangoModelFactory):
-    first_name = factory.Faker('first_name')
-    last_name = factory.Faker('last_name')
-    email = factory.Faker('ascii_email')
-
-    class Meta:
-        model = User
