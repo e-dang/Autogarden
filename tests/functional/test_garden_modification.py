@@ -15,20 +15,19 @@ from .pages.watering_station_update_page import WateringStationUpdatePage
 
 class TestGardenModification(Base):
     @pytest.fixture(autouse=True)
-    def garden(self, garden_factory, use_tmp_static_dir):
+    def setup(self, user_factory, garden_factory, test_password, live_server, use_tmp_static_dir):
+        self.email = 'email@demo.com'
+        self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 10
-        self.garden = garden_factory(watering_stations=self.num_watering_stations, watering_stations__defaults=True)
-
-    @pytest.fixture(autouse=True)
-    def create_url(self, live_server, garden):
-        self.live_server = live_server
+        self.garden = garden_factory(owner=self.user,
+                                     watering_stations=self.num_watering_stations,
+                                     watering_stations__defaults=True)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
+        self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
-    def test_user_can_modify_a_garden_and_its_watering_stations(self, test_password):
+    def test_user_can_modify_a_garden_and_its_watering_stations(self):
         # a user goes to a garden detail page
-        email = 'email@demo.com'
-        self.create_pre_authenticated_session(email, test_password, self.live_server)
         self.driver.get(self.url)
         garden_page = GardenDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(garden_page)

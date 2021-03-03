@@ -3,7 +3,7 @@ from typing import Any
 from crispy_forms.utils import render_crispy_form
 from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import JsonResponse
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.urls import reverse
@@ -72,8 +72,12 @@ class GardenListView(LoginRequiredMixin, View):
 
 class GardenDetailView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=pk)
-        return render(request, 'garden_detail.html', context={'garden': garden})
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            return render(request, 'garden_detail.html', context={'garden': garden})
 
 
 class GardenUpdateView(LoginRequiredMixin, View):

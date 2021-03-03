@@ -16,6 +16,11 @@ from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
 User = get_user_model()
 
 
+@pytest.fixture
+def mock_auth_user():
+    return create_autospec(User, is_authenticated=True)
+
+
 def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
     for key, item in kwarg.items():
         assert mock_render.call_args.kwargs['context'][key] == item
@@ -274,29 +279,27 @@ class TestUtils:
 @pytest.mark.unit
 class TestGardenListView:
     @patch('garden.views.render')
-    def test_GET_only_renders_requesting_users_gardens_in_template(self, mock_render):
-        mock_user = create_autospec(User, is_authenticated=True)
+    def test_GET_only_renders_requesting_users_gardens_in_template(self, mock_render, mock_auth_user):
         request = HttpRequest()
-        request.user = mock_user
+        request.user = mock_auth_user
 
         resp = GardenListView().get(request)
 
-        assert_render_context_called_with(mock_render, {'gardens': mock_user.gardens.all.return_value})
+        assert_render_context_called_with(mock_render, {'gardens': mock_auth_user.gardens.all.return_value})
         assert resp == mock_render.return_value
 
 
 @pytest.mark.unit
 class TestGardenDetailView:
     @patch('garden.views.render')
-    @patch('garden.views.Garden', autospec=True)
-    def test_GET_passes_garden_as_context_to_render(self, mock_garden_clas, mock_render):
-        mock_garden = mock_garden_clas.objects.get.return_value
-        request = HttpRequest()
+    def test_GET_passes_garden_as_context_to_render(self, mock_render, mock_auth_user):
         pk = 0
+        request = HttpRequest()
+        request.user = mock_auth_user
 
         GardenDetailView().get(request, pk)
 
-        assert_render_context_called_with(mock_render, {'garden': mock_garden})
+        assert_render_context_called_with(mock_render, {'garden': mock_auth_user.gardens.get.return_value})
 
 
 @pytest.mark.unit

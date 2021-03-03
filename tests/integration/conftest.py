@@ -6,11 +6,11 @@ from rest_framework import status
 
 
 @pytest.fixture
-def auth_client_user(db, client, user):
+def auth_client_user(db, client, user1):
     """Cheap authenticated client and user tuple"""
 
-    client.force_login(user)
-    yield client, user
+    client.force_login(user1)
+    yield client, user1
 
 
 @pytest.fixture
@@ -62,8 +62,8 @@ def true_auth_user(true_auth_client_user):
     yield true_auth_client_user[1]
 
 
-def assert_template_is_rendered(response: http.HttpResponse, template_name: str) -> None:
-    assert response.status_code == status.HTTP_200_OK
+def assert_template_is_rendered(response: http.HttpResponse, template_name: str, expected_status: int = status.HTTP_200_OK) -> None:
+    assert response.status_code == expected_status
     assert template_name in (template.name for template in response.templates)
 
 

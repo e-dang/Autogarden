@@ -237,7 +237,7 @@ class TestGardenListView:
         auth_client.post(self.url, data=valid_garden_data)
 
         assert prev_num_gardens + 1 == auth_user.gardens.all().count()
-        assert auth_user.gardens.first().watering_stations.count() == valid_garden_data['num_watering_stations']
+        assert auth_user.gardens.last().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, valid_garden_data):
@@ -265,10 +265,13 @@ class TestGardenListView:
 
 @pytest.mark.integration
 class TestGardenDetailView:
+    def create_url(self, pk):
+        return reverse('garden-detail', kwargs={'pk': pk})
+
     @pytest.fixture(autouse=True)
-    def setup(self, garden):
-        self.garden = garden
-        self.url = reverse('garden-detail', kwargs={'pk': garden.pk})
+    def setup(self, auth_user):
+        self.garden = auth_user.gardens.first()
+        self.url = self.create_url(self.garden.pk)
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
@@ -280,11 +283,24 @@ class TestGardenDetailView:
 
         assert_template_is_rendered(resp, 'garden_detail.html')
 
+
+@pytest.mark.integration
+class TestGardenDetailViewErrors:
+    @pytest.mark.django_db
+    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, user2):
+        url = reverse('garden-detail', kwargs={'pk': user2.gardens.first().pk})
+
+        resp = auth_client.get(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
     @pytest.mark.django_db
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
-        resp = client.get(self.url, follow=False)
+        url = reverse('garden-detail', kwargs={'pk': 1})
 
-        assert_redirect(resp, reverse('login'), self.url)
+        resp = client.get(url, follow=False)
+
+        assert_redirect(resp, reverse('login'), url)
 
 
 @pytest.mark.integration

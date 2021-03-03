@@ -21,9 +21,12 @@ from .pages.watering_station_detail_page import WateringStationDetailPage
 @pytest.mark.functional
 class TestAPICommunication(Base):
     @pytest.fixture(autouse=True)
-    def setup(self, garden_factory, live_server, test_password, use_tmp_static_dir):
+    def setup(self, user_factory, garden_factory, live_server, test_password, use_tmp_static_dir):
+        self.email = 'email@demo.com'
+        self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 16
-        self.garden = garden_factory(watering_stations=self.num_watering_stations,
+        self.garden = garden_factory(owner=self.user,
+                                     watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True,
                                      is_connected=_default_is_connected(),
                                      last_connection_ip=None,
@@ -31,7 +34,6 @@ class TestAPICommunication(Base):
                                      update_interval=_default_update_interval(),
                                      num_missed_updates=_default_num_missed_updates())
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
-        self.email = 'email@demo.com'
         self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
