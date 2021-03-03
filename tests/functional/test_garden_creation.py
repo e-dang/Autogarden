@@ -7,7 +7,6 @@ from tests.conftest import assert_image_files_equal
 from .base import Base, wait_for
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
-from .pages.unauthorized_page import UnauthorizedPage
 
 
 class TestGardenSetup(Base):
@@ -109,8 +108,7 @@ class TestGardenSetup(Base):
         assert list_gpage.get_number_of_gardens() == 0
 
         # they somehow know that the previous user had made a garden and could access it at a unique url, so they
-        # manually enter that url into the browser. They see an authorization error appear instead of the garden
+        # manually enter that url into the browser. They see a 404 error appear instead of the garden
         # detail page
         self.driver.get(detail_url)
-        unauthorized_page = UnauthorizedPage(self.driver)
-        self.wait_for_page_to_be_loaded(unauthorized_page)
+        assert '404 Error. Page Not Found.' in self.driver.find_element_by_tag_name('body').text
