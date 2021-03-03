@@ -354,11 +354,10 @@ class TestGardenUpdateViewErrors:
 
 @pytest.mark.integration
 class TestGardenDeleteView:
-
     @pytest.fixture(autouse=True)
-    def setup(self, garden):
-        self.garden = garden
-        self.url = reverse('garden-delete', kwargs={'pk': garden.pk})
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
+        self.url = reverse('garden-delete', kwargs={'pk': auth_user_garden.pk})
 
     @pytest.mark.django_db
     def test_GET_returns_json_response_with_garden_delete_form_html(self, auth_client):
@@ -393,12 +392,40 @@ class TestGardenDeleteView:
 
         assert not os.path.exists(path)
 
+
+@pytest.mark.integration
+class TestGardenDeleteViewErrors:
     @pytest.mark.django_db
+    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+        url = reverse('garden-delete', kwargs={'pk': garden.pk})
+
+        resp = auth_client.get(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+        url = reverse('garden-delete', kwargs={'pk': garden.pk})
+
+        resp = auth_client.post(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_does_not_delete_the_garden(self, auth_client, garden):
+        url = reverse('garden-delete', kwargs={'pk': garden.pk})
+
+        auth_client.post(url)
+
+        garden.refresh_from_db()  # should not raise
+
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
-        resp = getattr(client, method)(self.url, follow=False)
+        url = reverse('garden-delete', kwargs={'pk': 1})
 
-        assert_redirect(resp, reverse('login'), self.url)
+        resp = getattr(client, method)(url, follow=False)
+
+        assert_redirect(resp, reverse('login'), url)
 
 
 @pytest.mark.integration
