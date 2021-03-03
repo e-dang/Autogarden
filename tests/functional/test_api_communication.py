@@ -20,9 +20,8 @@ from .pages.watering_station_detail_page import WateringStationDetailPage
 
 @pytest.mark.functional
 class TestAPICommunication(Base):
-    @pytest.mark.usefixtures('use_tmp_static_dir')
     @pytest.fixture(autouse=True)
-    def setup(self, garden_factory, live_server, test_password):
+    def setup(self, garden_factory, live_server, test_password, use_tmp_static_dir):
         self.num_watering_stations = 16
         self.garden = garden_factory(watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True,
