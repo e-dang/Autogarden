@@ -323,6 +323,7 @@ class TestGardenUpdateView:
 
         self.garden.refresh_from_db()
         assert self.garden.name == valid_update_garden_data['name']
+        assert derive_duration_string(self.garden.update_interval) == valid_update_garden_data['update_interval']
         assert_image_files_equal(self.garden.image.url, valid_update_garden_data['image'].name)
 
     @pytest.mark.django_db
@@ -335,12 +336,23 @@ class TestGardenUpdateView:
 @pytest.mark.integration
 class TestGardenUpdateViewErrors:
     @pytest.mark.django_db
-    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_view_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden, method):
         url = reverse('garden-update', kwargs={'pk': garden.pk})
 
-        resp = auth_client.get(url)
+        resp = getattr(auth_client, method)(url)
 
         assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_doesnt_update_garden_when_accessed_by_user_who_doesnt_own_it(self, auth_client, garden, valid_update_garden_data):
+        url = reverse('garden-update', kwargs={'pk': garden.pk})
+
+        auth_client.post(url, data=valid_update_garden_data)
+
+        garden.refresh_from_db()
+        for key, item in valid_update_garden_data.items():
+            assert getattr(garden, key) != item
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -396,23 +408,16 @@ class TestGardenDeleteView:
 @pytest.mark.integration
 class TestGardenDeleteViewErrors:
     @pytest.mark.django_db
-    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_view_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden, method):
         url = reverse('garden-delete', kwargs={'pk': garden.pk})
 
-        resp = auth_client.get(url)
+        resp = getattr(auth_client, method)(url)
 
         assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
-    def test_POST_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
-        url = reverse('garden-delete', kwargs={'pk': garden.pk})
-
-        resp = auth_client.post(url)
-
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
-
-    @pytest.mark.django_db
-    def test_POST_does_not_delete_the_garden(self, auth_client, garden):
+    def test_POST_does_not_delete_the_garden_when_access_by_user_who_doesnt_own_garden(self, auth_client, garden):
         url = reverse('garden-delete', kwargs={'pk': garden.pk})
 
         auth_client.post(url)
