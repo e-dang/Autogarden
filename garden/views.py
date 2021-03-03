@@ -82,9 +82,13 @@ class GardenDetailView(LoginRequiredMixin, View):
 
 class GardenUpdateView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=pk)
-        form = UpdateGardenForm(instance=garden)
-        return render(request, 'garden_update.html', context={'form': form})
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            form = UpdateGardenForm(instance=garden)
+            return render(request, 'garden_update.html', context={'form': form})
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         garden = Garden.objects.get(pk=pk)

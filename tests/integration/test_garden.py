@@ -17,7 +17,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from tests.conftest import TEST_IMAGE_DIR, assert_image_files_equal
 
-from .conftest import assert_template_is_rendered, assert_redirect
+from .conftest import assert_template_is_rendered, assert_redirect, auth_user
 
 
 @pytest.fixture
@@ -265,13 +265,10 @@ class TestGardenListView:
 
 @pytest.mark.integration
 class TestGardenDetailView:
-    def create_url(self, pk):
-        return reverse('garden-detail', kwargs={'pk': pk})
-
     @pytest.fixture(autouse=True)
-    def setup(self, auth_user):
-        self.garden = auth_user.gardens.first()
-        self.url = self.create_url(self.garden.pk)
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
+        self.url = reverse('garden-detail', kwargs={'pk': self.garden.pk})
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
@@ -287,8 +284,8 @@ class TestGardenDetailView:
 @pytest.mark.integration
 class TestGardenDetailViewErrors:
     @pytest.mark.django_db
-    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, user2):
-        url = reverse('garden-detail', kwargs={'pk': user2.gardens.first().pk})
+    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+        url = reverse('garden-detail', kwargs={'pk': garden.pk})
 
         resp = auth_client.get(url)
 
@@ -306,9 +303,9 @@ class TestGardenDetailViewErrors:
 @pytest.mark.integration
 class TestGardenUpdateView:
     @pytest.fixture(autouse=True)
-    def setup(self, garden):
-        self.garden = garden
-        self.url = reverse('garden-update', kwargs={'pk': garden.pk})
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
+        self.url = reverse('garden-update', kwargs={'pk': self.garden.pk})
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
@@ -334,12 +331,25 @@ class TestGardenUpdateView:
 
         assert_successful_json_response(resp, self.url)
 
+
+@pytest.mark.integration
+class TestGardenUpdateViewErrors:
+    @pytest.mark.django_db
+    def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
+        url = reverse('garden-update', kwargs={'pk': garden.pk})
+
+        resp = auth_client.get(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
-        resp = getattr(client, method)(self.url, follow=False)
+        url = reverse('garden-update', kwargs={'pk': 1})
 
-        assert_redirect(resp, reverse('login'), self.url)
+        resp = getattr(client, method)(url, follow=False)
+
+        assert_redirect(resp, reverse('login'), url)
 
 
 @pytest.mark.integration

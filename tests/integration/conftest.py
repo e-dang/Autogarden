@@ -2,7 +2,10 @@ from typing import Any
 
 import pytest
 from django import http
+from pytest_factoryboy.fixture import LazyFixture
 from rest_framework import status
+from pytest_factoryboy import register
+from tests import factories
 
 
 @pytest.fixture
@@ -60,6 +63,9 @@ def true_auth_user(true_auth_client_user):
     """Expensive authenticated user"""
 
     yield true_auth_client_user[1]
+
+
+register(factories.GardenFactory, 'auth_user_garden', owner=LazyFixture('auth_user'))
 
 
 def assert_template_is_rendered(response: http.HttpResponse, template_name: str, expected_status: int = status.HTTP_200_OK) -> None:

@@ -304,12 +304,12 @@ class TestGardenDetailView:
 
 @pytest.mark.unit
 class TestGardenUpdateView:
-    @patch('garden.views.Garden')
     @patch('garden.views.render')
     @patch('garden.views.UpdateGardenForm')
-    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_garden):
-        request = HttpRequest()
+    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_auth_user):
         pk = 1
+        request = HttpRequest()
+        request.user = mock_auth_user
 
         GardenUpdateView().get(request, pk)
 
