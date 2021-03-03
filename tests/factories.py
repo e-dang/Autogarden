@@ -14,6 +14,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
+    @factory.post_generation
+    def gardens(self, create, count, **kwargs):
+        if not create:
+            return
+
+        if count:
+            for _ in range(count):
+                GardenFactory(owner=self)
+
 
 class GardenFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)

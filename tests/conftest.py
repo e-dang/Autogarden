@@ -16,6 +16,9 @@ register(factories.WateringStationFactory)
 register(factories.WateringStationRecordFactory)
 register(factories.UserFactory)
 
+register(factories.UserFactory, 'user1', gardens=2)
+register(factories.UserFactory, 'user2', gardens=3)
+
 
 def pytest_addoption(parser):
     parser.addoption('--headless', action='store_true', default=False)
