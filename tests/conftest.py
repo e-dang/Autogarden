@@ -51,28 +51,6 @@ def api_client():
 
 
 @pytest.fixture
-def create_user(db, django_user_model, test_password):
-    def make_user(**kwargs):
-        kwargs['password'] = test_password
-        if 'email' not in kwargs:
-            kwargs['email'] = 'email@demo.com'
-        return django_user_model.objects.create_user(**kwargs)
-
-    return make_user
-
-
-@pytest.fixture
-def auto_login_user(db, client, create_user, test_password):
-    def make_auto_login(user=None):
-        if user is None:
-            user = create_user(password=test_password)
-            client.login(email=user.email, password=test_password)
-            return client, user
-
-    return make_auto_login
-
-
-@pytest.fixture
 def use_tmp_static_dir(settings, tmp_path):
     image_name = _default_garden_image()
     src_path = settings.BASE_DIR / 'garden' / 'static' / 'images' / image_name

@@ -57,8 +57,8 @@ class TestLoginView:
 
         assert_redirect(resp, reverse('garden-list'))
 
-    def test_POST_with_invalid_credentials_renders_login_html(self, client, create_user, test_password):
-        user = create_user()
+    @pytest.mark.django_db
+    def test_POST_with_invalid_credentials_renders_login_html(self, client, user, test_password):
         data = {
             'email': user.email,
             'password': test_password + 'extra-chars'
@@ -79,13 +79,11 @@ class TestLogoutView:
         assert self.url == '/logout/'
 
     @pytest.mark.django_db
-    def test_GET_logs_out_the_logged_in_user(self, auto_login_user):
-        client, _ = auto_login_user()
-
-        resp = client.get(self.url)
+    def test_GET_logs_out_the_logged_in_user(self, true_auth_client):
+        resp = true_auth_client.get(self.url)
 
         assert not resp.wsgi_request.user.is_authenticated
-        assert '_auth_user_id' not in client.session
+        assert '_auth_user_id' not in true_auth_client.session
 
 
 @pytest.mark.integration
