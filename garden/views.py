@@ -70,13 +70,13 @@ class GardenListView(LoginRequiredMixin, View):
         return JsonResponse({'success': False, 'html': form_html})
 
 
-class GardenDetailView(View):
+class GardenDetailView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
         return render(request, 'garden_detail.html', context={'garden': garden})
 
 
-class GardenUpdateView(View):
+class GardenUpdateView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=pk)
         form = UpdateGardenForm(instance=garden)
@@ -92,7 +92,7 @@ class GardenUpdateView(View):
         return JsonResponse({'success': False, 'html': form_html})
 
 
-class GardenDeleteView(View):
+class GardenDeleteView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         form = DeleteGardenForm()
         form.helper.form_action = reverse('garden-delete', kwargs={'pk': pk})
@@ -105,7 +105,7 @@ class GardenDeleteView(View):
         return redirect('garden-list')
 
 
-class WateringStationListView(View):
+class WateringStationListView(LoginRequiredMixin, View):
     def dispatch(self, request: http.HttpRequest, *args: Any, **kwargs: Any) -> http.HttpResponse:
         method = request.POST.get('_method', '').lower()
         if method == 'patch':
@@ -126,7 +126,7 @@ class WateringStationListView(View):
         return redirect('garden-detail', pk=pk)
 
 
-class WateringStationDetailView(View):
+class WateringStationDetailView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=garden_pk)
         for i, station in enumerate(garden.watering_stations.all(), start=1):
@@ -134,7 +134,7 @@ class WateringStationDetailView(View):
                 return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
 
 
-class WateringStationUpdateView(View):
+class WateringStationUpdateView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
         garden = Garden.objects.get(pk=garden_pk)
         station = garden.watering_stations.get(pk=ws_pk)
@@ -151,7 +151,7 @@ class WateringStationUpdateView(View):
         return JsonResponse({'html': form_html})
 
 
-class WateringStationDeleteView(View):
+class WateringStationDeleteView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
         form = DeleteWateringStationForm()
         form.helper.form_action = reverse('watering-station-delete', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})

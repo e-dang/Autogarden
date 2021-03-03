@@ -1,3 +1,4 @@
+from enum import auto
 import os
 import random
 import uuid
@@ -87,7 +88,7 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
 @pytest.mark.integration
 class TestGardenAPIView:
     @pytest.fixture(autouse=True)
-    def create_url(self, garden):
+    def setup(self, garden):
         self.garden = garden
         self.url = reverse('api-garden', kwargs={'pk': garden.pk})
 
@@ -214,7 +215,7 @@ class TestWateringStationAPIView:
 class TestGardenListView:
 
     @pytest.fixture(autouse=True)
-    def create_url(self):
+    def setup(self):
         self.url = reverse('garden-list')
 
     def test_view_has_correct_url(self):
@@ -226,40 +227,60 @@ class TestGardenListView:
                 'num_watering_stations': -1}
 
     @pytest.mark.django_db
-    def test_GET_renders_garden_html_template(self, auto_login_user):
-        client, _ = auto_login_user()
-
-        resp = client.get(self.url)
+    def test_GET_renders_garden_html_template(self, auth_client):
+        resp = auth_client.get(self.url)
 
         assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, auto_login_user, valid_garden_data):
-        client, _ = auto_login_user()
+    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, auth_client, valid_garden_data):
         prev_num_gardens = Garden.objects.all().count()
 
-        client.post(self.url, data=valid_garden_data)
+        auth_client.post(self.url, data=valid_garden_data)
 
         assert prev_num_gardens + 1 == Garden.objects.all().count()
         assert Garden.objects.first().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auto_login_user, valid_garden_data):
-        client, _ = auto_login_user()
-        resp = client.post(self.url, data=valid_garden_data, follow=False)
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, valid_garden_data):
+        resp = auth_client.post(self.url, data=valid_garden_data, follow=False)
 
         assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
 
     @pytest.mark.django_db
-    def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auto_login_user, invalid_new_garden_data):
-        client, _ = auto_login_user()
+    def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auth_client, invalid_new_garden_data):
         expected = [
             NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG
         ]
 
-        resp = client.post(self.url, data=invalid_new_garden_data)
+        resp = auth_client.post(self.url, data=invalid_new_garden_data)
 
         assert_data_present_in_json_response_html(resp, expected)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
+
+
+@pytest.mark.integration
+class TestGardenDetailView:
+    @pytest.fixture(autouse=True)
+    def setup(self, garden):
+        self.garden = garden
+        self.url = reverse('garden-detail', kwargs={'pk': garden.pk})
+
+    @pytest.mark.django_db
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/'
+
+    @pytest.mark.django_db
+    def test_GET_renders_garden_detail_html_template(self, auth_client):
+        resp = auth_client.get(self.url)
+
+        assert_template_is_rendered(resp, 'garden_detail.html')
 
     @pytest.mark.django_db
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
@@ -269,173 +290,252 @@ class TestGardenListView:
 
 
 @pytest.mark.integration
-class TestGardenDetailView:
-    def test_view_has_correct_url(self):
-        pk = 1
-        assert reverse('garden-detail', kwargs={'pk': pk}) == f'/gardens/{pk}/'
-
-    @pytest.mark.django_db
-    def test_GET_renders_garden_detail_html_template(self, client, garden):
-        resp = client.get(garden.get_absolute_url())
-
-        assert_template_is_rendered(resp, 'garden_detail.html')
-
-
-@pytest.mark.integration
 class TestGardenUpdateView:
+    @pytest.fixture(autouse=True)
+    def setup(self, garden):
+        self.garden = garden
+        self.url = reverse('garden-update', kwargs={'pk': garden.pk})
+
     @pytest.mark.django_db
-    def test_GET_renders_garden_update_html_template(self, client, garden):
-        resp = client.get(garden.get_update_url())
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/update/'
+
+    @pytest.mark.django_db
+    def test_GET_renders_garden_update_html_template(self, auth_client):
+        resp = auth_client.get(self.url)
 
         assert_template_is_rendered(resp, 'garden_update.html')
 
     @pytest.mark.django_db
-    def test_POST_updates_garden_instance_fields(self, client, garden, valid_update_garden_data):
-        client.post(garden.get_update_url(), data=valid_update_garden_data)
+    def test_POST_updates_garden_instance_fields(self, auth_client, valid_update_garden_data):
+        auth_client.post(self.url, data=valid_update_garden_data)
 
-        garden.refresh_from_db()
-        assert garden.name == valid_update_garden_data['name']
-        assert_image_files_equal(garden.image.url, valid_update_garden_data['image'].name)
+        self.garden.refresh_from_db()
+        assert self.garden.name == valid_update_garden_data['name']
+        assert_image_files_equal(self.garden.image.url, valid_update_garden_data['image'].name)
 
     @pytest.mark.django_db
-    def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, client, garden, valid_update_garden_data):
-        resp = client.post(garden.get_update_url(), data=valid_update_garden_data)
+    def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, auth_client, valid_update_garden_data):
+        resp = auth_client.post(self.url, data=valid_update_garden_data)
 
-        assert_successful_json_response(resp, garden.get_update_url())
+        assert_successful_json_response(resp, self.url)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
 class TestGardenDeleteView:
+
+    @pytest.fixture(autouse=True)
+    def setup(self, garden):
+        self.garden = garden
+        self.url = reverse('garden-delete', kwargs={'pk': garden.pk})
+
     @pytest.mark.django_db
-    def test_GET_returns_json_response_with_garden_delete_form_html(self, client, garden):
+    def test_GET_returns_json_response_with_garden_delete_form_html(self, auth_client):
         expected = [
             'method="post"',
-            f'action="{garden.get_delete_url()}"'
+            f'action="{self.garden.get_delete_url()}"'
         ]
 
-        resp = client.get(garden.get_delete_url())
+        resp = auth_client.get(self.garden.get_delete_url())
 
         assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
-    def test_POST_deletes_the_specified_garden(self, client, garden):
-        client.post(garden.get_delete_url())
+    def test_POST_deletes_the_specified_garden(self, auth_client):
+        auth_client.post(self.garden.get_delete_url())
 
         with pytest.raises(Garden.DoesNotExist):
-            garden.refresh_from_db()
+            self.garden.refresh_from_db()
 
     @pytest.mark.django_db
-    def test_POST_redirects_to_garden_list_page(self, client, garden):
-        resp = client.post(garden.get_delete_url())
+    def test_POST_redirects_to_garden_list_page(self, auth_client):
+        resp = auth_client.post(self.garden.get_delete_url())
 
         assert_redirect(resp, reverse('garden-list'))
 
     @pytest.mark.django_db
-    def test_POST_deletes_image_file_in_static_dir(self, client, garden, use_tmp_static_dir):
-        path = garden.get_abs_path_to_image()
+    @pytest.mark.usefixtures('use_tmp_static_dir')
+    def test_POST_deletes_image_file_in_static_dir(self, auth_client):
+        path = self.garden.get_abs_path_to_image()
 
-        client.post(garden.get_delete_url())
+        auth_client.post(self.garden.get_delete_url())
 
         assert not os.path.exists(path)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
 class TestWateringStationDetailView:
+    @pytest.fixture(autouse=True)
+    def setup(self, watering_station):
+        self.watering_station = watering_station
+        self.garden = watering_station.garden
+        self.url = reverse('watering-station-detail',
+                           kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.watering_station.pk})
+
     @pytest.mark.django_db
-    def test_GET_renders_watering_station_detail_html_template(self, client, watering_station):
-        resp = client.get(watering_station.get_absolute_url())
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/watering-stations/{self.watering_station.pk}/'
+
+    @pytest.mark.django_db
+    def test_GET_renders_watering_station_detail_html_template(self, auth_client):
+        resp = auth_client.get(self.url)
 
         assert_template_is_rendered(resp, 'watering_station_detail.html')
+
+    @pytest.mark.django_db
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
+        resp = client.get(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
 class TestWateringStationUpdateView:
+    @pytest.fixture(autouse=True)
+    def setup(self, watering_station):
+        self.watering_station = watering_station
+        self.garden = watering_station.garden
+        self.url = reverse('watering-station-update',
+                           kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.watering_station.pk})
+
     @pytest.mark.django_db
-    def test_GET_renders_watering_station_update_html_template(self, client, watering_station):
-        resp = client.get(watering_station.get_update_url())
+    def test_GET_renders_watering_station_update_html_template(self, auth_client):
+        resp = auth_client.get(self.url)
 
         assert_template_is_rendered(resp, 'watering_station_update.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, client, watering_station, valid_watering_station_data):
-        resp = client.post(watering_station.get_update_url(), data=valid_watering_station_data)
+    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, auth_client, valid_watering_station_data):
+        resp = auth_client.post(self.url, data=valid_watering_station_data)
 
         assert_data_present_in_json_response_html(resp, valid_watering_station_data.values())
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, client, watering_station, valid_watering_station_data):
-        resp = client.post(watering_station.get_update_url(), data=valid_watering_station_data)
+    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, auth_client, valid_watering_station_data):
+        resp = auth_client.post(self.url, data=valid_watering_station_data)
 
-        watering_station.refresh_from_db()
+        self.watering_station.refresh_from_db()
         assert resp.status_code == status.HTTP_200_OK
-        assert watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
+        assert self.watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
         assert derive_duration_string(
-            watering_station.watering_duration) == valid_watering_station_data['watering_duration']
-        assert watering_station.plant_type == valid_watering_station_data['plant_type']
+            self.watering_station.watering_duration) == valid_watering_station_data['watering_duration']
+        assert self.watering_station.plant_type == valid_watering_station_data['plant_type']
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
 class TestWateringStationListView:
+    @pytest.fixture(autouse=True)
+    def setup(self, garden_factory):
+        self.num_watering_stations = 5
+        self.garden = garden_factory(watering_stations=self.num_watering_stations)
+        self.url = reverse('watering-station-list', kwargs={'pk': self.garden.pk})
+
     @pytest.mark.django_db
-    def test_PATCH_updates_all_watering_stations_for_a_given_garden_with_the_data(self, client, garden):
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/watering-stations/'
+
+    @pytest.mark.django_db
+    def test_PATCH_updates_all_watering_stations_for_a_given_garden_with_the_data(self, auth_client):
         data = {'status': False}
 
-        client.patch(garden.get_watering_stations_url(), data=data)
+        auth_client.patch(self.url, data=data)
 
-        for station in garden.watering_stations.all():
+        for station in self.garden.watering_stations.all():
             assert station.status == data['status']
 
     @pytest.mark.django_db
-    def test_PATCH_redirects_to_garden_detail_page(self, client, garden):
+    def test_PATCH_redirects_to_garden_detail_page(self, auth_client):
         data = {'status': False}
 
-        resp = client.patch(garden.get_watering_stations_url(), data=data)
+        resp = auth_client.patch(self.url, data=data)
 
-        assert_redirect(resp, garden.get_absolute_url())
-
-    @pytest.mark.django_db
-    def test_POST_creates_a_new_default_watering_station(self, client, garden):
-        prev_num_watering_stations = garden.watering_stations.count()
-
-        client.post(garden.get_watering_stations_url())
-
-        assert prev_num_watering_stations + 1 == garden.watering_stations.count()
+        assert_redirect(resp, self.garden.get_absolute_url())
 
     @pytest.mark.django_db
-    def test_POST_redicrects_to_garden_detail(self, client, garden):
-        resp = client.post(garden.get_watering_stations_url())
+    def test_POST_creates_a_new_default_watering_station(self, auth_client):
+        prev_num_watering_stations = self.garden.watering_stations.count()
 
-        assert_redirect(resp, garden.get_absolute_url())
+        auth_client.post(self.url)
+
+        assert prev_num_watering_stations + 1 == self.garden.watering_stations.count()
+
+    @pytest.mark.django_db
+    def test_POST_redicrects_to_garden_detail(self, auth_client):
+        resp = auth_client.post(self.url)
+
+        assert_redirect(resp, self.garden.get_absolute_url())
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get', 'patch'], ids=['post', 'get', 'patch'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
 class TestWateringStationDeleteView:
+    @pytest.fixture(autouse=True)
+    def setup(self, watering_station):
+        self.watering_station = watering_station
+        self.garden = watering_station.garden
+        self.url = reverse('watering-station-delete',
+                           kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.watering_station.pk})
+
     @pytest.mark.django_db
-    def test_GET_returns_json_response_with_form_html_that_posts_to_watering_station_delete(self, client, watering_station):
+    def test_GET_returns_json_response_with_form_html_that_posts_to_watering_station_delete(self, auth_client):
         expected = [
             'method="post"',
-            f'action="{watering_station.get_delete_url()}"'
+            f'action="{self.url}"'
         ]
 
-        resp = client.get(watering_station.get_delete_url())
+        resp = auth_client.get(self.url)
 
         assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
-    def test_POST_deletes_watering_station_with_given_pk(self, client, watering_station):
-        ws_pk = watering_station.pk
-        client.post(watering_station.get_delete_url())
+    def test_POST_deletes_watering_station_with_given_pk(self, auth_client):
+        ws_pk = self.watering_station.pk
+        auth_client.post(self.url)
 
         with pytest.raises(WateringStation.DoesNotExist):
             WateringStation.objects.get(pk=ws_pk)
 
     @pytest.mark.django_db
-    def test_POST_redirects_to_garden_detail_view(self, client, watering_station):
-        garden_pk = watering_station.garden.pk
+    def test_POST_redirects_to_garden_detail_view(self, auth_client):
+        garden_pk = self.watering_station.garden.pk
 
-        resp = client.post(watering_station.get_delete_url())
+        resp = auth_client.post(self.url)
 
         assert_redirect(resp, reverse('garden-detail', kwargs={'pk': garden_pk}))
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url, follow=False)
+
+        assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
