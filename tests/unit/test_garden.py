@@ -318,14 +318,14 @@ class TestGardenUpdateView:
 
 @pytest.mark.unit
 class TestWateringStationUpdateView:
-    @patch('garden.views.Garden')
     @patch('garden.views.render')
     @patch('garden.views.WateringStationForm', autospec=True)
-    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_garden):
+    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_auth_user):
         garden_pk = 1
         ws_pk = 2
         mock_form = mock_form_class.return_value
         request = HttpRequest()
+        request.user = mock_auth_user
 
         WateringStationUpdateView().get(request, garden_pk, ws_pk)
 

@@ -161,19 +161,27 @@ class WateringStationDetailView(LoginRequiredMixin, View):
 
 class WateringStationUpdateView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=garden_pk)
-        station = garden.watering_stations.get(pk=ws_pk)
-        form = WateringStationForm(instance=station)
-        return render(request, 'watering_station_update.html', context={'form': form})
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            station = garden.watering_stations.get(pk=ws_pk)
+            form = WateringStationForm(instance=station)
+            return render(request, 'watering_station_update.html', context={'form': form})
 
     def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
-        garden = Garden.objects.get(pk=garden_pk)
-        station = garden.watering_stations.get(pk=ws_pk)
-        form = WateringStationForm(instance=station, data=request.POST)
-        if form.is_valid():
-            form.save()
-        form_html = render_crispy_form(form, context=csrf(request))
-        return JsonResponse({'html': form_html})
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            station = garden.watering_stations.get(pk=ws_pk)
+            form = WateringStationForm(instance=station, data=request.POST)
+            if form.is_valid():
+                form.save()
+            form_html = render_crispy_form(form, context=csrf(request))
+            return JsonResponse({'html': form_html})
 
 
 class WateringStationDeleteView(LoginRequiredMixin, View):
