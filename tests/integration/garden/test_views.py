@@ -40,7 +40,7 @@ class TestGardenAPIView:
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
-        assert self.url == f'/api/garden/{self.garden.pk}/'
+        assert self.url == f'/api/gardens/{self.garden.pk}/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_status_code(self, api_client):
@@ -88,7 +88,7 @@ class TestGardenAPIView:
 class TestWateringStationAPIView:
     def test_view_has_correct_url(self):
         pk = 0
-        assert reverse('api-watering-stations', kwargs={'pk': pk}) == f'/api/garden/{pk}/watering-stations/'
+        assert reverse('api-watering-stations', kwargs={'pk': pk}) == f'/api/gardens/{pk}/watering-stations/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_response(self, api_client, data_GET_api_watering_stations):
