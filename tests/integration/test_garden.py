@@ -436,9 +436,9 @@ class TestGardenDeleteViewErrors:
 @pytest.mark.integration
 class TestWateringStationDetailView:
     @pytest.fixture(autouse=True)
-    def setup(self, watering_station):
-        self.watering_station = watering_station
-        self.garden = watering_station.garden
+    def setup(self, auth_user_ws):
+        self.watering_station = auth_user_ws
+        self.garden = auth_user_ws.garden
         self.url = reverse('watering-station-detail',
                            kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.watering_station.pk})
 
@@ -452,11 +452,25 @@ class TestWateringStationDetailView:
 
         assert_template_is_rendered(resp, 'watering_station_detail.html')
 
-    @pytest.mark.django_db
-    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
-        resp = client.get(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+@pytest.mark.integration
+class TestWateringStationDetailViewErrors:
+    @pytest.mark.django_db
+    def test_GET_redirects_users_who_dont_own_the_watering_station_to_404_page_not_found(self, auth_client, watering_station):
+        garden_pk = watering_station.garden.pk
+        ws_pk = watering_station.pk
+        url = reverse('watering-station-detail', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+
+        resp = auth_client.get(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
+        url = reverse('watering-station-detail', kwargs={'garden_pk': 1, 'ws_pk': 1})
+
+        resp = client.get(url, follow=False)
+
+        assert_redirect(resp, reverse('login'), url)
 
 
 @pytest.mark.integration

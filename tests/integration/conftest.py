@@ -66,6 +66,7 @@ def true_auth_user(true_auth_client_user):
 
 
 register(factories.GardenFactory, 'auth_user_garden', owner=LazyFixture('auth_user'))
+register(factories.WateringStationFactory, 'auth_user_ws', garden=LazyFixture('auth_user_garden'))
 
 
 def assert_template_is_rendered(response: http.HttpResponse, template_name: str, expected_status: int = status.HTTP_200_OK) -> None:

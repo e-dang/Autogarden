@@ -149,10 +149,14 @@ class WateringStationListView(LoginRequiredMixin, View):
 
 class WateringStationDetailView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=garden_pk)
-        for i, station in enumerate(garden.watering_stations.all(), start=1):
-            if station.pk == ws_pk:
-                return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            for i, station in enumerate(garden.watering_stations.all(), start=1):
+                if station.pk == ws_pk:
+                    return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
 
 
 class WateringStationUpdateView(LoginRequiredMixin, View):
