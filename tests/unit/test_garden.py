@@ -1,19 +1,24 @@
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Dict
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
 import pytest
 import pytz
+from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 from garden import models
 from garden.serializers import GardenGetSerializer, WateringStationSerializer
-from garden.views import (GardenDetailView, GardenUpdateView,
-                          WateringStationUpdateView, WateringStationListView)
+from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
+                          WateringStationListView, WateringStationUpdateView)
+
+User = get_user_model()
 
 
-def assert_render_context_called_with(mock_render, kwarg):
-    assert mock_render.call_args.kwargs['context'] == kwarg
+def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
+    for key, item in kwarg.items():
+        assert mock_render.call_args.kwargs['context'][key] == item
 
 
 @pytest.mark.unit
@@ -264,6 +269,20 @@ class TestUtils:
         assert ret_val == mock_derive.return_value
         mock_derive.assert_called_once_with(mock_timedelta.return_value)
         mock_timedelta.assert_called_once_with(minutes=minutes, seconds=seconds)
+
+
+@pytest.mark.unit
+class TestGardenListView:
+    @patch('garden.views.render')
+    def test_GET_only_renders_requesting_users_gardens_in_template(self, mock_render):
+        mock_user = create_autospec(User, is_authenticated=True)
+        request = HttpRequest()
+        request.user = mock_user
+
+        resp = GardenListView().get(request)
+
+        assert_render_context_called_with(mock_render, {'gardens': mock_user.gardens.all.return_value})
+        assert resp == mock_render.return_value
 
 
 @pytest.mark.unit

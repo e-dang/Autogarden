@@ -54,7 +54,7 @@ class WateringStationAPIView(APIView):
 class GardenListView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
         form = NewGardenForm()
-        gardens = Garden.objects.all()
+        gardens = request.user.gardens.all()
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request: http.HttpRequest) -> http.JsonResponse:

@@ -231,13 +231,13 @@ class TestGardenListView:
         assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_record_with_specified_num_watering_stations(self, auth_client, valid_garden_data):
-        prev_num_gardens = Garden.objects.all().count()
+    def test_POST_with_valid_data_creates_new_garden_for_user_with_specified_num_watering_stations(self, auth_client, auth_user, valid_garden_data):
+        prev_num_gardens = auth_user.gardens.all().count()
 
         auth_client.post(self.url, data=valid_garden_data)
 
-        assert prev_num_gardens + 1 == Garden.objects.all().count()
-        assert Garden.objects.first().watering_stations.count() == valid_garden_data['num_watering_stations']
+        assert prev_num_gardens + 1 == auth_user.gardens.all().count()
+        assert auth_user.gardens.first().watering_stations.count() == valid_garden_data['num_watering_stations']
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, valid_garden_data):
