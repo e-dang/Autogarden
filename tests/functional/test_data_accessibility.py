@@ -82,10 +82,10 @@ class TestDataAccessability(Base):
         resp = api_client.patch(self.create_api_url(garden.get_absolute_url()))
         self.assert_403_forbidden(resp)
 
-        resp = api_client.get(self.create_api_url(watering_station.get_absolute_url()))
+        resp = api_client.get(self.create_api_url(garden.get_watering_stations_url()))
         self.assert_403_forbidden(resp)
 
-        resp = api_client.post(self.create_api_url(watering_station.get_absolute_url()))
+        resp = api_client.post(self.create_api_url(garden.get_watering_stations_url()))
         self.assert_403_forbidden(resp)
 
     def assert_404_error(self):
