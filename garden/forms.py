@@ -7,7 +7,7 @@ from crispy_forms.layout import (HTML, Button, Field, Layout,
 from django import forms
 
 from .models import Garden, WateringStation, _default_update_interval
-from .utils import (create_unique_garden_uuid, derive_duration_string,
+from .utils import (derive_duration_string,
                     set_num_watering_stations)
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
@@ -96,10 +96,9 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
 
         return data
 
-    def save(self):
-        uuid = create_unique_garden_uuid()
+    def save(self, owner):
         num_watering_stations = self.cleaned_data.pop('num_watering_stations')
-        garden = Garden.objects.create(**self.cleaned_data, uuid=uuid)
+        garden = owner.gardens.create(**self.cleaned_data)
         set_num_watering_stations(garden, num_watering_stations)
         return garden
 

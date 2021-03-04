@@ -85,5 +85,13 @@ class GardenListPage(BasePage):
     def click_garden(self, name):
         self.wait_for_garden_in_list(name).click()
 
+    def add_garden(self, garden_name, num_watering_stations, garden_image, update_interval):
+        self.new_garden_button.click()
+        self.new_garden_name = garden_name
+        self.num_watering_stations = num_watering_stations
+        self.garden_image = garden_image
+        self.update_interval = update_interval
+        self.submit_new_garden_button.click()
+
     def _get_garden_list(self):
         return self.driver.find_element_by_id('gardenList')

@@ -1,19 +1,31 @@
 from datetime import datetime, timedelta
+from garden import permissions
+from garden.permissions import TokenPermission
 from pathlib import Path
+from typing import Dict
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
 import pytest
 import pytz
+from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 from garden import models
 from garden.serializers import GardenGetSerializer, WateringStationSerializer
-from garden.views import (GardenDetailView, GardenUpdateView,
-                          WateringStationUpdateView, WateringStationListView)
+from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
+                          WateringStationListView, WateringStationUpdateView)
+
+User = get_user_model()
 
 
-def assert_render_context_called_with(mock_render, kwarg):
-    assert mock_render.call_args.kwargs['context'] == kwarg
+@pytest.fixture
+def mock_auth_user():
+    return create_autospec(User, is_authenticated=True)
+
+
+def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
+    for key, item in kwarg.items():
+        assert mock_render.call_args.kwargs['context'][key] == item
 
 
 @pytest.mark.unit
@@ -267,27 +279,39 @@ class TestUtils:
 
 
 @pytest.mark.unit
+class TestGardenListView:
+    @patch('garden.views.render')
+    def test_GET_only_renders_requesting_users_gardens_in_template(self, mock_render, mock_auth_user):
+        request = HttpRequest()
+        request.user = mock_auth_user
+
+        resp = GardenListView().get(request)
+
+        assert_render_context_called_with(mock_render, {'gardens': mock_auth_user.gardens.all.return_value})
+        assert resp == mock_render.return_value
+
+
+@pytest.mark.unit
 class TestGardenDetailView:
     @patch('garden.views.render')
-    @patch('garden.views.Garden', autospec=True)
-    def test_GET_passes_garden_as_context_to_render(self, mock_garden_clas, mock_render):
-        mock_garden = mock_garden_clas.objects.get.return_value
-        request = HttpRequest()
+    def test_GET_passes_garden_as_context_to_render(self, mock_render, mock_auth_user):
         pk = 0
+        request = HttpRequest()
+        request.user = mock_auth_user
 
         GardenDetailView().get(request, pk)
 
-        assert_render_context_called_with(mock_render, {'garden': mock_garden})
+        assert_render_context_called_with(mock_render, {'garden': mock_auth_user.gardens.get.return_value})
 
 
 @pytest.mark.unit
 class TestGardenUpdateView:
-    @patch('garden.views.Garden')
     @patch('garden.views.render')
     @patch('garden.views.UpdateGardenForm')
-    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_garden):
-        request = HttpRequest()
+    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_auth_user):
         pk = 1
+        request = HttpRequest()
+        request.user = mock_auth_user
 
         GardenUpdateView().get(request, pk)
 
@@ -296,14 +320,14 @@ class TestGardenUpdateView:
 
 @pytest.mark.unit
 class TestWateringStationUpdateView:
-    @patch('garden.views.Garden')
     @patch('garden.views.render')
     @patch('garden.views.WateringStationForm', autospec=True)
-    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_garden):
+    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_auth_user):
         garden_pk = 1
         ws_pk = 2
         mock_form = mock_form_class.return_value
         request = HttpRequest()
+        request.user = mock_auth_user
 
         WateringStationUpdateView().get(request, garden_pk, ws_pk)
 
@@ -321,3 +345,35 @@ class TestWateringStationListView:
         view.dispatch(request)
 
         view.patch.assert_called_once_with(request)
+
+
+@pytest.mark.unit
+class TestTokenPermission:
+    def test_has_object_permission_returns_false_when_no_auth_headers_are_set(self, garden_factory):
+        mock_view = Mock()
+        garden = garden_factory.build()
+        request = HttpRequest()
+
+        ret_val = TokenPermission().has_object_permission(request, mock_view, garden)
+
+        assert ret_val == False
+
+    def test_has_object_permission_returns_false_when_auth_header_token_is_different_than_garden_token(self, garden_factory):
+        mock_view = Mock()
+        garden = garden_factory.build()
+        request = HttpRequest()
+        request.META['HTTP_AUTHORIZATION'] = 'Token ' + str(garden.token.uuid) + 'extra_chars'
+
+        ret_val = TokenPermission().has_object_permission(request, mock_view, garden)
+
+        assert ret_val == False
+
+    def test_has_object_permission_returns_true_when_auth_header_token_matches_garden_token(self, garden_factory):
+        mock_view = Mock()
+        garden = garden_factory.build()
+        request = HttpRequest()
+        request.META['HTTP_AUTHORIZATION'] = 'Token ' + str(garden.token.uuid)
+
+        ret_val = TokenPermission().has_object_permission(request, mock_view, garden)
+
+        assert ret_val == True

@@ -15,13 +15,15 @@ from .pages.watering_station_update_page import WateringStationUpdatePage
 
 class TestGardenModification(Base):
     @pytest.fixture(autouse=True)
-    def garden(self, garden_factory, use_tmp_static_dir):
+    def setup(self, user_factory, garden_factory, test_password, live_server, use_tmp_static_dir):
+        self.email = 'email@demo.com'
+        self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 10
-        self.garden = garden_factory(watering_stations=self.num_watering_stations, watering_stations__defaults=True)
-
-    @pytest.fixture(autouse=True)
-    def url(self, live_server):
+        self.garden = garden_factory(owner=self.user,
+                                     watering_stations=self.num_watering_stations,
+                                     watering_stations__defaults=True)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
+        self.create_authenticated_session(self.user, live_server)
 
     @pytest.mark.django_db
     def test_user_can_modify_a_garden_and_its_watering_stations(self):

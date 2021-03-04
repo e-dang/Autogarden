@@ -1,7 +1,10 @@
 import time
 
 import pytest
+from django.conf import settings
 from selenium.common.exceptions import WebDriverException
+from tests.management.commands.create_session import \
+    create_authenticated_session, create_pre_authenticated_session
 
 TIMEOUT = 10
 
@@ -36,6 +39,7 @@ def wait_for_true(fn):
 @pytest.mark.usefixtures('driver_init')
 class Base:
     BOOSTRAP_MODAL_TOGGLE_DELAY = 0.5
+    LOGGED_IN_WELCOME_TEXT = 'Welcome, '
 
     @wait
     def wait_for_page_to_be_loaded(self, page):
@@ -59,3 +63,30 @@ class Base:
 
         # they then see the reset button turn back to a crop button which they click again
         page.crop_image_button.click()
+
+    def create_pre_authenticated_session(self, email, password, live_server):
+        session_key = create_pre_authenticated_session(email, password)
+        self.driver.get(live_server.url + '/404_no_such_url/')
+        self.driver.add_cookie({
+            'name': settings.SESSION_COOKIE_NAME,
+            'value': session_key,
+            'path': '/'
+        })
+
+    def create_authenticated_session(self, user, live_server):
+        session_key = create_authenticated_session(user)
+        self.driver.get(live_server.url + '/404_no_such_url/')
+        self.driver.add_cookie({
+            'name': settings.SESSION_COOKIE_NAME,
+            'value': session_key,
+            'path': '/'
+        })
+
+    def assert_user_is_logged_in(self, first_name):
+        self.driver.find_elements_by_link_text('Log Out')
+        navbar = self.driver.find_element_by_css_selector('.navbar')
+        assert self.LOGGED_IN_WELCOME_TEXT + first_name in navbar.text
+
+    def assert_user_is_logged_out(self, first_name):
+        navbar = self.driver.find_element_by_css_selector('.navbar')
+        assert self.LOGGED_IN_WELCOME_TEXT not in navbar.text

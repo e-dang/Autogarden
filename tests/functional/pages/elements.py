@@ -47,14 +47,15 @@ class ToggleButton:
 class Button:
     LOCATOR = None
 
-    def __init__(self, instance):
+    def __init__(self, instance, method='find_element_by_id'):
         self.instance = instance
+        self.method = method
 
     def click(self):
         self._get_element().click()
 
     def _get_element(self):
-        return wait_for(lambda: self.instance.driver.find_element_by_id(self.LOCATOR))
+        return wait_for(lambda: getattr(self.instance.driver, self.method)(self.LOCATOR))
 
 
 class ImageInput:

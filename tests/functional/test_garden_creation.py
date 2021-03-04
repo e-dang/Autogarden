@@ -11,13 +11,16 @@ from .pages.garden_list_page import GardenListPage
 
 class TestGardenSetup(Base):
     @pytest.fixture(autouse=True)
-    def url(self, live_server):
-        return live_server.url + reverse('garden-list')
+    def create_url(self, live_server, test_password, use_tmp_static_dir):
+        self.live_server = live_server
+        self.url = live_server.url + reverse('garden-list')
+        self.email = 'email@demo.com'
+        self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
-    def test_user_can_create_a_garden(self, url, use_tmp_static_dir):
+    def test_user_can_create_a_garden(self):
         # a user goes to the garden page
-        self.driver.get(url)
+        self.driver.get(self.url)
         list_page = GardenListPage(self.driver)
         self.wait_for_page_to_be_loaded(list_page)
 
