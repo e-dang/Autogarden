@@ -35,6 +35,7 @@ class GardenAPIView(APIView):
 
     def patch(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
+        self.check_object_permissions(request, garden)
         serializer = GardenPatchSerializer(data=request.data, instance=garden, partial=True)
         if serializer.is_valid():
             serializer.save()
