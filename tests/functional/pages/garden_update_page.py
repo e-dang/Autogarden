@@ -3,7 +3,7 @@ import re
 from garden.forms import DeleteGardenForm, UpdateGardenForm
 
 from .base_page import BasePage
-from .elements import Button, SubmitButton, TextInput, ImageInput
+from .elements import Button, CancelButton, SubmitButton, TextInput, ImageInput
 
 
 class GardenNameInput(TextInput):
@@ -21,10 +21,6 @@ class DeleteButton(Button):
 
 class ConfirmDeleteButton(Button):
     LOCATOR = DeleteGardenForm.CONFIRM_DELETE_BTN_ID
-
-
-class CancelDeleteButton(Button):
-    LOCATOR = DeleteGardenForm.CANCEL_DELETE_BTN_ID
 
 
 class UpdateInterval(TextInput):
@@ -49,7 +45,7 @@ class GardenUpdatePage(BasePage):
         self.submit_button = SubmitButton(self)
         self.delete_button = DeleteButton(self)
         self.confirm_delete_button = ConfirmDeleteButton(self)
-        self.cancel_delete_button = CancelDeleteButton(self)
+        self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
         self.modal_id = UpdateGardenForm.DELETE_GARDEN_MODAL_ID

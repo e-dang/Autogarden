@@ -4,7 +4,7 @@ from garden.forms import WateringStationForm, DeleteWateringStationForm
 
 from ..base import wait_for
 from .base_page import BasePage
-from .elements import Button, TextInput, ToggleButton, SubmitButton
+from .elements import Button, CancelButton, TextInput, ToggleButton, SubmitButton
 
 
 class MoistureThresholdInput(TextInput):
@@ -27,10 +27,6 @@ class DeleteButton(Button):
     LOCATOR = WateringStationForm.DELETE_BUTTON_ID
 
 
-class CancelDeleteButton(Button):
-    LOCATOR = DeleteWateringStationForm.CANCEL_DELETE_BTN_ID
-
-
 class ConfirmDeleteButton(Button):
     LOCATOR = DeleteWateringStationForm.CONFIRM_DELETE_BTN_ID
 
@@ -45,7 +41,7 @@ class WateringStationUpdatePage(BasePage):
         super().__init__(driver)
         self.submit_button = SubmitButton(self)
         self.delete_button = DeleteButton(self)
-        self.cancel_delete_button = CancelDeleteButton(self)
+        self.cancel_button = CancelButton(self)
         self.confirm_delete_button = ConfirmDeleteButton(self)
         self.modal_id = WateringStationForm.DELETE_WATERING_STATION_MODAL_ID
 

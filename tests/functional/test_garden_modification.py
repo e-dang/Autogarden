@@ -204,7 +204,7 @@ class TestGardenModification(Base):
 
         # the user decides not to delete the watering station and clicks cancel and the modal disappears. They then
         # quickly change their mind and proceed to delete the watering station.
-        page.cancel_delete_button.click()
+        page.cancel_button.click()
         self.wait_for_model_to_disappear(page.modal_id)
         page.delete_button.click()
         self.wait_for_modal_to_be_visible(page.modal_id)

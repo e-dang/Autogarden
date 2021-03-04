@@ -38,7 +38,7 @@ class TestGardenSetup(Base):
         assert list_page.garden_image
 
         # they cancel out of the modal, but then re-enter again
-        list_page.cancel_new_garden_button.click()
+        list_page.cancel_button.click()
         self.wait_for_model_to_disappear(list_page.modal_id)
         list_page.new_garden_button.click()
         self.wait_for_modal_to_be_visible(list_page.modal_id)

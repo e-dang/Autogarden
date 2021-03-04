@@ -23,7 +23,6 @@ class CustomDurationField(forms.DurationField):
 
 class DeleteForm(forms.Form):
     CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
-    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
     FORM_ID = None
     MESSAGE = None
 
@@ -35,7 +34,7 @@ class DeleteForm(forms.Form):
         self.helper.layout = Layout(
             FormActions(
                 HTML(self.MESSAGE),
-                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                Button('cancel', 'Cancel', css_class='btn btn-info',
                        data_dismiss='modal', aria_hidden='true'),
                 Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
             )
@@ -63,7 +62,6 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
     NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
     UPDATE_INTERVAL_ERROR_MSG = 'The update interval must be at least 1 second.'
     NEW_GARDEN_FORM_ID = 'newGardenForm'
-    CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
     NEW_GARDEN_MODAL_ID = 'newGardenModal'
 
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
@@ -86,7 +84,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
             Field('image', id='id_image'),
             *self.cropper_fields,
             Submit('submit', 'Create', css_class='btn btn-success'),
-            Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
+            Button('cancel', 'Cancel', css_class='btn btn-info',
                    data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
         )
 

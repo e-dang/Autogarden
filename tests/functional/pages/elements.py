@@ -76,3 +76,8 @@ class ImageInput:
 class SubmitButton(Button):
     LOCATOR = '//input[@type="submit"]'
     BY = 'find_element_by_xpath'
+
+
+class CancelButton(Button):
+    LOCATOR = '//input[@name="cancel"]'
+    BY = 'find_element_by_xpath'
