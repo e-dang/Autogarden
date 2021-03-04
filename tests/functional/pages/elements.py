@@ -46,16 +46,16 @@ class ToggleButton:
 
 class Button:
     LOCATOR = None
+    BY = 'find_element_by_id'
 
-    def __init__(self, instance, method='find_element_by_id'):
+    def __init__(self, instance):
         self.instance = instance
-        self.method = method
 
     def click(self):
         self._get_element().click()
 
     def _get_element(self):
-        return wait_for(lambda: getattr(self.instance.driver, self.method)(self.LOCATOR))
+        return wait_for(lambda: getattr(self.instance.driver, self.BY)(self.LOCATOR))
 
 
 class ImageInput:
@@ -71,3 +71,8 @@ class ImageInput:
                 f'//div[@class="form-control custom-file"]//label[@for="{self.INPUT_LOCATOR}"]').get_attribute('innerText')
         else:
             return instance.driver.find_element_by_id(self.IMAGE_LOCATOR).get_attribute('src')
+
+
+class SubmitButton(Button):
+    LOCATOR = '//input[@type="submit"]'
+    BY = 'find_element_by_xpath'

@@ -1,7 +1,7 @@
 import re
 
 from .base_page import BasePage
-from .elements import Button, TextInput
+from .elements import SubmitButton, TextInput
 
 
 class EmailField(TextInput):
@@ -22,10 +22,6 @@ class PasswordField(TextInput):
 
 class ConfirmPasswordField(TextInput):
     LOCATOR = 'id_password2'
-
-
-class SubmitButton(Button):
-    LOCATOR = 'submitBtn'
 
 
 class RegisterPage(BasePage):

@@ -1,5 +1,5 @@
 import re
-from tests.functional.pages.elements import Button, TextInput
+from tests.functional.pages.elements import Button, TextInput, SubmitButton
 
 from .base_page import BasePage
 
@@ -16,10 +16,6 @@ class EmailInput(TextInput):
     LOCATOR = 'id_email'
 
 
-class SubmitButton(Button):
-    LOCATOR = '//input[@type="submit"]'
-
-
 class ChangePasswordButton(Button):
     LOCATOR = 'changePasswordBtn'
 
@@ -31,7 +27,7 @@ class SettingsPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.submit_button = SubmitButton(self, 'find_element_by_xpath')
+        self.submit_button = SubmitButton(self)
         self.change_password_button = ChangePasswordButton(self)
 
     def has_correct_url(self):

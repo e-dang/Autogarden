@@ -3,7 +3,7 @@ import re
 from users.forms import LoginForm
 
 from .base_page import BasePage
-from .elements import Button, TextInput
+from .elements import Button, SubmitButton, TextInput
 
 
 class EmailField(TextInput):
@@ -12,10 +12,6 @@ class EmailField(TextInput):
 
 class PasswordField(TextInput):
     LOCATOR = 'id_password'
-
-
-class SubmitButton(Button):
-    LOCATOR = LoginForm.SUBMIT_BTN_ID
 
 
 class RegisterButton(Button):

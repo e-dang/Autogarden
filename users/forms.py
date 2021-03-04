@@ -12,7 +12,6 @@ from .models import User
 
 class UserCreateForm(UserCreationForm):
     FORM_ID = 'registerForm'
-    SUBMIT_BTN_ID = 'submitBtn'
 
     class Meta:
         model = User
@@ -24,14 +23,13 @@ class UserCreateForm(UserCreationForm):
         self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'register'
-        self.helper.add_input(Submit('submit', 'Submit', css_id=self.SUBMIT_BTN_ID))
+        self.helper.add_input(Submit('submit', 'Submit'))
 
 
 class LoginForm(forms.Form):
     FORM_ID = 'loginForm'
     REGISTER_BTN_ID = 'registerBtn'
     RESET_PASSWORD_BTN = 'resetPasswordBtn'
-    SUBMIT_BTN_ID = 'submitBtn'
 
     email = forms.EmailField()
     password = forms.CharField(
@@ -60,7 +58,7 @@ class LoginForm(forms.Form):
             Field('email'),
             Field('password'),
             FormActions(
-                Submit('submit', 'Login', css_id=self.SUBMIT_BTN_ID)
+                Submit('submit', 'Login')
             ),
             HTML(
                 f'<p>Don\'t have an account? <a id="{self.REGISTER_BTN_ID}" href="{{% url \'register\' %}}">Sign Up</a>'),

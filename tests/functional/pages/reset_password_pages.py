@@ -1,7 +1,7 @@
 import re
 
 from .base_page import BasePage
-from .elements import Button, TextInput
+from .elements import Button, SubmitButton, TextInput
 
 
 class PasswordField(TextInput):
@@ -16,12 +16,9 @@ class EmailInput(TextInput):
     LOCATOR = 'id_email'
 
 
-class SubmitButton(Button):
-    LOCATOR = '//input[@type="submit"]'
-
-
 class LoginButton(Button):
     LOCATOR = 'Log in'
+    BY = 'find_element_by_link_text'
 
 
 class ResetPasswordPage(BasePage):
@@ -29,7 +26,7 @@ class ResetPasswordPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.submit_button = SubmitButton(self, 'find_element_by_xpath')
+        self.submit_button = SubmitButton(self)
 
     def has_correct_url(self):
         pattern = r'/reset_password/$'
@@ -49,7 +46,7 @@ class PasswordResetConfirmPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.submit_button = SubmitButton(self, 'find_element_by_xpath')
+        self.submit_button = SubmitButton(self)
 
     def has_correct_url(self):
         pattern = r'/reset/.+/.+/$'
@@ -59,7 +56,7 @@ class PasswordResetConfirmPage(BasePage):
 class PasswordResetCompletePage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.login_button = LoginButton(self, 'find_element_by_link_text')
+        self.login_button = LoginButton(self)
 
     def has_correct_url(self):
         pattern = r'/reset_password_complete/$'

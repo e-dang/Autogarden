@@ -63,7 +63,6 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
     NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
     UPDATE_INTERVAL_ERROR_MSG = 'The update interval must be at least 1 second.'
     NEW_GARDEN_FORM_ID = 'newGardenForm'
-    NEW_GARDEN_SUBMIT_ID = 'submitBtn'
     CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
     NEW_GARDEN_MODAL_ID = 'newGardenModal'
 
@@ -86,7 +85,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
             Field('num_watering_stations', ),
             Field('image', id='id_image'),
             *self.cropper_fields,
-            Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID, css_class='btn btn-success'),
+            Submit('submit', 'Create', css_class='btn btn-success'),
             Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
                    data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
         )
@@ -115,7 +114,6 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
 
 class UpdateGardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'updateGardenForm'
-    SUBMIT_BTN_ID = 'submitBtn'
     DELETE_BTN_ID = 'deleteBtn'
     DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
     FORM_CONTAINER_ID = 'formContainer'
@@ -136,7 +134,7 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
             Field('update_interval'),
             Field('image', id='id_image'),
             *self.cropper_fields,
-            Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID),
+            Submit('submit', 'Update'),
             Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
                    data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
         )

@@ -47,7 +47,7 @@ class TestGardenSetup(Base):
         # appear
         list_page.num_watering_stations = -1
         list_page.update_interval = -1
-        list_page.submit_new_garden_button.click()
+        list_page.submit_button.click()
         self.wait_for_form_error('error_1_id_num_watering_stations')
         self.wait_for_form_error('error_1_id_update_interval')
 
@@ -61,7 +61,7 @@ class TestGardenSetup(Base):
         list_page.num_watering_stations = num_watering_stations
         list_page.update_interval = update_interval
         self.perform_image_crop(list_page, garden_image)
-        list_page.submit_new_garden_button.click()
+        list_page.submit_button.click()
         list_page.wait_for_garden_in_list(garden_name)
         assert_image_files_equal(list_page.get_garden_image(garden_name), garden_image)
 
