@@ -46,8 +46,10 @@ class TestGardenSetup(Base):
         # they enter a negative number for the number of watering stations and hit enter, and they see a error message
         # appear
         list_page.num_watering_stations = -1
+        list_page.update_interval = -1
         list_page.submit_new_garden_button.click()
-        wait_for(lambda: self.driver.find_element_by_id('error_1_id_num_watering_stations'))
+        self.wait_for_form_error('error_1_id_num_watering_stations')
+        self.wait_for_form_error('error_1_id_update_interval')
 
         # now they enter a garden name and valid number of watering stations and see a new garden appear in the list of
         # gardens
