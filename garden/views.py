@@ -43,8 +43,11 @@ class GardenAPIView(APIView):
 
 
 class WateringStationAPIView(APIView):
+    permission_classes = [TokenPermission]
+
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
+        self.check_object_permissions(request, garden)
         garden.update(request)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
@@ -52,6 +55,7 @@ class WateringStationAPIView(APIView):
 
     def post(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
+        self.check_object_permissions(request, garden)
         for i, station in enumerate(garden.watering_stations.all()):
             station.records.create(**request.data[i])
         return Response({}, status=status.HTTP_201_CREATED)

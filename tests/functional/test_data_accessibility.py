@@ -7,6 +7,7 @@ from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import NotAuthenticated
 
 
 class TestDataAccessability(Base):
@@ -93,7 +94,7 @@ class TestDataAccessability(Base):
 
     def assert_403_forbidden(self, response):
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.data['detail'].code == 'not_authenticated'
+        assert response.data['detail'].code == NotAuthenticated.default_code
 
     def create_url(self, path):
         return self.live_server.url + path

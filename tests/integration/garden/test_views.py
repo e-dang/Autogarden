@@ -83,83 +83,85 @@ class TestGardenAPIView:
         assert resp.status_code == status.HTTP_204_NO_CONTENT
 
     @pytest.mark.django_db
-    def test_GET_without_authorization_token_returns_403_response(self, api_client):
-        resp = api_client.get(self.url)
+    @pytest.mark.parametrize('method', ['get', 'patch'], ids=['get', 'patch'])
+    def test_accessing_api_without_authorization_token_returns_403_response(self, api_client, method):
+        resp = getattr(api_client, method)(self.url)
 
         assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.integration
 class TestWateringStationAPIView:
+    @pytest.fixture(autouse=True)
+    def setup(self, auth_api_garden):
+        self.garden = auth_api_garden
+        self.url = reverse('api-watering-stations', kwargs={'pk': self.garden.pk})
+
     def test_view_has_correct_url(self):
-        pk = 0
-        assert reverse('api-watering-stations', kwargs={'pk': pk}) == f'/api/gardens/{pk}/watering-stations/'
+        assert self.url == f'/api/gardens/{self.garden.pk}/watering-stations/'
 
     @pytest.mark.django_db
-    def test_GET_returns_200_response(self, api_client, data_GET_api_watering_stations):
-        _, _, url = data_GET_api_watering_stations
-
-        resp = api_client.get(url)
+    def test_GET_returns_200_response(self, auth_api_client):
+        resp = auth_api_client.get(self.url)
 
         assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_GET_returns_serialized_watering_station_data_belonging_to_garden(self, api_client, data_GET_api_watering_stations):
-        num_watering_stations, garden, url = data_GET_api_watering_stations
+    def test_GET_returns_serialized_watering_station_data_belonging_to_garden(self, auth_api_client):
+        num_watering_stations = self.garden.watering_stations.all().count()
 
-        resp = api_client.get(url)
+        resp = auth_api_client.get(self.url)
 
         assert len(resp.data) == num_watering_stations
-        watering_stations = list(garden.watering_stations.all())
+        watering_stations = list(self.garden.watering_stations.all())
         for i, watering_station in enumerate(resp.data):
             assert watering_station == WateringStationSerializer(watering_stations[i]).data
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize('api_client, garden__is_connected', [
-        (None, False)
-    ],
-        indirect=['api_client'])
-    def test_GET_updates_garden_connection_fields(self, api_client, garden):
-        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+    def test_GET_updates_garden_connection_fields(self, auth_api_client):
+        self.garden.is_connected = False
 
-        resp = api_client.get(url)
+        resp = auth_api_client.get(self.url)
 
-        garden.refresh_from_db()
-        assert garden.is_connected == True
-        assert garden.last_connection_ip == resp.wsgi_request.META.get('REMOTE_ADDR')
-        assert datetime.now(pytz.UTC) - garden.last_connection_time < timedelta(seconds=1)
+        self.garden.refresh_from_db()
+        assert self.garden.is_connected == True
+        assert self.garden.last_connection_ip == resp.wsgi_request.META.get('REMOTE_ADDR')
+        assert datetime.now(pytz.UTC) - self.garden.last_connection_time < timedelta(seconds=1)
 
     @pytest.mark.django_db
-    def test_POST_adds_a_watering_station_record_to_each_watering_station_in_garden(self, api_client, garden_factory):
-        num_watering_stations = 4
-        garden = garden_factory(watering_stations=num_watering_stations)
-        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+    def test_POST_adds_a_watering_station_record_to_each_watering_station_in_garden(self, auth_api_client):
         data = []
+        num_watering_stations = self.garden.watering_stations.all().count()
         for _ in range(num_watering_stations):
             data.append({
                 'moisture_level': random.uniform(0, 100)
             })
 
-        api_client.post(url, data=data, format='json')
+        auth_api_client.post(self.url, data=data, format='json')
 
-        for record, station in zip(data, garden.watering_stations.all()):
+        for record, station in zip(data, self.garden.watering_stations.all()):
             assert station.records.all().count() == 1
             station.records.get(moisture_level=record['moisture_level'])
 
     @pytest.mark.django_db
-    def test_POST_returns_201_status_code(self, api_client, garden_factory):
-        num_watering_stations = 4
-        garden = garden_factory(watering_stations=num_watering_stations)
-        url = reverse('api-watering-stations', kwargs={'pk': garden.pk})
+    def test_POST_returns_201_status_code(self, auth_api_client):
         data = []
+        num_watering_stations = self.garden.watering_stations.all().count()
         for _ in range(num_watering_stations):
             data.append({
                 'moisture_level': random.uniform(0, 100)
             })
 
-        resp = api_client.post(url, data=data, format='json')
+        resp = auth_api_client.post(self.url, data=data, format='json')
 
         assert resp.status_code == status.HTTP_201_CREATED
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['get', 'post'], ids=['get', 'post'])
+    def test_accessing_api_without_authorization_token_returns_403_response(self, api_client, method):
+        resp = getattr(api_client, method)(self.url)
+
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.integration
