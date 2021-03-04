@@ -144,17 +144,25 @@ class WateringStationListView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, pk) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=pk)
-        garden.watering_stations.create()
-        return redirect('garden-detail', pk=pk)
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            garden.watering_stations.create()
+            return redirect('garden-detail', pk=pk)
 
     def patch(self, request: http.HttpRequest, pk: int) -> http.HttpResponse:
-        garden = Garden.objects.get(pk=pk)
-        for station in garden.watering_stations.all():
-            form = BulkUpdateWateringStationForm(instance=station, data=request.POST)
-            if form.is_valid():
-                form.save()
-        return redirect('garden-detail', pk=pk)
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except:
+            raise Http404()
+        else:
+            for station in garden.watering_stations.all():
+                form = BulkUpdateWateringStationForm(instance=station, data=request.POST)
+                if form.is_valid():
+                    form.save()
+            return redirect('garden-detail', pk=pk)
 
 
 class WateringStationDetailView(LoginRequiredMixin, View):

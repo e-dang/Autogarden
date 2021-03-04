@@ -489,9 +489,8 @@ class TestWateringStationListView:
         return reverse('watering-station-list', kwargs={'pk': pk})
 
     @pytest.fixture(autouse=True)
-    def setup(self, garden_factory):
-        self.num_watering_stations = 5
-        self.garden = garden_factory(watering_stations=self.num_watering_stations)
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
         self.url = self.create_url(self.garden.pk)
 
     @pytest.mark.django_db
@@ -517,7 +516,7 @@ class TestWateringStationListView:
 
     @pytest.mark.django_db
     def test_POST_creates_a_new_default_watering_station(self, auth_client):
-        prev_num_watering_stations = self.num_watering_stations
+        prev_num_watering_stations = self.garden.watering_stations.all().count()
 
         auth_client.post(self.url)
 
@@ -530,7 +529,39 @@ class TestWateringStationListView:
         assert_redirect(resp, self.garden.get_absolute_url())
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize('method', ['post', 'get', 'patch'], ids=['post', 'get', 'patch'])
+    @pytest.mark.parametrize('method', ['post', 'patch'], ids=['post', 'patch'])
+    def test_view_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden, method):
+        url = self.create_url(garden.pk)
+
+        resp = getattr(auth_client, method)(url)
+
+        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_doesnt_create_new_garden_is_requesting_user_does_not_own_garden(self, auth_client, garden, valid_watering_station_data):
+        url = self.create_url(garden.pk)
+        prev_num_watering_stations = garden.watering_stations.all().count()
+
+        auth_client.post(url, data=valid_watering_station_data)
+
+        garden.refresh_from_db()
+        assert prev_num_watering_stations == garden.watering_stations.all().count()
+
+    @pytest.mark.django_db
+    def test_PATCH_doesnt_update_garden_watering_stations_if_requesting_user_does_not_own_garden(self, auth_client, garden1):
+        url = self.create_url(garden1.pk)
+        prev_status = True
+        station = garden1.watering_stations.first()
+        station.status = prev_status
+        station.save()
+
+        auth_client.patch(url, data={'status': not prev_status})
+
+        station.refresh_from_db()
+        assert station.status == prev_status
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['post', 'patch'], ids=['post', 'patch'])
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
