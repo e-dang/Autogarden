@@ -5,12 +5,22 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (HTML, Button, Field, Layout,
                                  Submit)
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import Garden, WateringStation, _default_update_interval
 from .utils import (derive_duration_string,
                     set_num_watering_stations)
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
+INVALID_DURATION_ERR_MSG = 'This field must contain a duration greater than 1 second.'
+MIN_VALUE_ERR_MSG = 'This field must be positve.'
+MAX_VALUE_ERR_MSG = 'This field must be less than or equal to 100.'
+
+
+def validate_duration(duration):
+    if duration.total_seconds() < 1:
+        raise ValidationError(INVALID_DURATION_ERR_MSG)
 
 
 class CustomDurationField(forms.DurationField):
@@ -21,8 +31,6 @@ class CustomDurationField(forms.DurationField):
 
 
 class DeleteForm(forms.Form):
-    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
-    CANCEL_DELETE_BTN_ID = 'cancelDeleteBtn'
     FORM_ID = None
     MESSAGE = None
 
@@ -34,9 +42,9 @@ class DeleteForm(forms.Form):
         self.helper.layout = Layout(
             FormActions(
                 HTML(self.MESSAGE),
-                Button('cancel', 'Cancel', css_id=self.CANCEL_DELETE_BTN_ID, css_class='btn btn-info',
+                Button('cancel', 'Cancel', css_class='btn btn-info',
                        data_dismiss='modal', aria_hidden='true'),
-                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
+                Submit('confirm_delete', 'Delete', css_class='btn btn-danger'),
             )
         )
 
@@ -48,23 +56,23 @@ class CropperMixin(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cropper_fields = [HTML(f'''
+        self.cropper_fields = [
+            HTML(f'''
                 <div id="{self.IMAGE_CONTAINER_ID}">
                 </div>
             '''),
-                               Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
-                               Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True), ]
+            Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
+            Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True)
+        ]
 
 
 class NewGardenForm(forms.ModelForm, CropperMixin):
-    NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
-    NEW_GARDEN_FORM_ID = 'newGardenForm'
-    NEW_GARDEN_SUBMIT_ID = 'submitBtn'
-    CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
-    NEW_GARDEN_MODAL_ID = 'newGardenModal'
+    FORM_ID = 'newGardenForm'
+    MODAL_ID = 'newGardenModal'
 
-    num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
-    update_interval = CustomDurationField()
+    num_watering_stations = forms.IntegerField(label='Number of Watering Stations', validators=[
+                                               MinValueValidator(0, MIN_VALUE_ERR_MSG)])
+    update_interval = CustomDurationField(validators=[validate_duration])
 
     class Meta:
         model = Garden
@@ -73,7 +81,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = self.NEW_GARDEN_FORM_ID
+        self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'garden-list'
         self.helper.layout = Layout(
@@ -82,19 +90,12 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
             Field('num_watering_stations', ),
             Field('image', id='id_image'),
             *self.cropper_fields,
-            Submit('submit', 'Create', css_id=self.NEW_GARDEN_SUBMIT_ID, css_class='btn btn-success'),
-            Button('cancel', 'Cancel', css_id=self.CANCEL_NEW_GARDEN_BTN_ID, css_class='btn btn-info',
-                   data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
+            Submit('submit', 'Create', css_class='btn btn-success'),
+            Button('cancel', 'Cancel', css_class='btn btn-info',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
         )
 
         self.fields['update_interval'].initial = _default_update_interval()
-
-    def clean_num_watering_stations(self):
-        data = self.cleaned_data['num_watering_stations']
-        if data < 0:
-            raise forms.ValidationError(self.NUM_WATERING_STATIONS_ERROR_MSG)
-
-        return data
 
     def save(self, owner):
         num_watering_stations = self.cleaned_data.pop('num_watering_stations')
@@ -105,12 +106,10 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
 
 class UpdateGardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'updateGardenForm'
-    SUBMIT_BTN_ID = 'submitBtn'
-    DELETE_BTN_ID = 'deleteBtn'
-    DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
+    MODAL_ID = 'deleteGardenModal'
     FORM_CONTAINER_ID = 'formContainer'
 
-    update_interval = CustomDurationField()
+    update_interval = CustomDurationField(validators=[validate_duration])
 
     class Meta:
         model = Garden
@@ -126,9 +125,9 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
             Field('update_interval'),
             Field('image', id='id_image'),
             *self.cropper_fields,
-            Submit('submit', 'Update', css_id=self.SUBMIT_BTN_ID),
-            Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
-                   data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
+            Submit('submit', 'Update'),
+            Button('delete', 'Delete', css_class='btn btn-danger',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
         )
 
 
@@ -138,11 +137,14 @@ class DeleteGardenForm(DeleteForm):
 
 
 class WateringStationForm(forms.ModelForm):
-    UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
-    DELETE_WATERING_STATION_MODAL_ID = 'deleteWateringStationModal'
-    DELETE_BUTTON_ID = 'deleteButton'
+    MODAL_ID = 'deleteWateringStationModal'
+    MOISTURE_THRESHOLD_ERR_MSG = 'The moisture threshold must be in the range 0 - 100.'
 
-    watering_duration = CustomDurationField()
+    watering_duration = CustomDurationField(validators=[validate_duration])
+    moisture_threshold = forms.IntegerField(validators=[
+        MinValueValidator(0, MIN_VALUE_ERR_MSG),
+        MaxValueValidator(100, MAX_VALUE_ERR_MSG)
+    ])
 
     class Meta:
         model = WateringStation
@@ -157,9 +159,9 @@ class WateringStationForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Update', css_id=self.UPDATE_WATERING_STATION_SUBMIT_ID))
-        self.helper.add_input(Button('delete', 'Delete', css_id=self.DELETE_BUTTON_ID, css_class='btn btn-danger',
-                                     data_toggle='modal', data_target=f'#{self.DELETE_WATERING_STATION_MODAL_ID}'))
+        self.helper.add_input(Submit('submit', 'Update'))
+        self.helper.add_input(Button('delete', 'Delete', css_class='btn btn-danger',
+                                     data_toggle='modal', data_target=f'#{self.MODAL_ID}'))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'

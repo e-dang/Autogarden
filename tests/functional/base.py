@@ -53,6 +53,9 @@ class Base:
         wait_for_true(lambda: not self.driver.find_element_by_id(modal_id).is_displayed())
         time.sleep(self.BOOSTRAP_MODAL_TOGGLE_DELAY)
 
+    def wait_for_form_error(self, element_id):
+        return wait_for(lambda: self.driver.find_element_by_id(element_id))
+
     def perform_image_crop(self, page, image):
         # the user selects an image, then crops it
         page.garden_image = image

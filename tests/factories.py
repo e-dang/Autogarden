@@ -1,13 +1,49 @@
+from datetime import timedelta
+from functools import partial
+from garden.utils import derive_duration_string
+from typing import Any, Dict
+
 import factory
 import pytz
 from django.db.models.signals import post_save
+from factory import Factory
+from factory.base import StubObject
 from garden.models import Garden, Token, WateringStation, WateringStationRecord
 from users.models import User
 
 TEST_PASSWORD = 'test-password123'
 
 
-class UserFactory(factory.django.DjangoModelFactory):
+def generate_dict_factory(factory: Factory):
+    """https://github.com/FactoryBoy/factory_boy/issues/68"""
+
+    def convert_dict_from_stub(stub: StubObject) -> Dict[str, Any]:
+        stub_dict = stub.__dict__
+        for key, value in stub_dict.items():
+            if isinstance(value, StubObject):
+                stub_dict[key] = convert_dict_from_stub(value)
+        return stub_dict
+
+    def dict_factory(factory, **kwargs):
+        stub = factory.stub(**kwargs)
+        stub_dict = convert_dict_from_stub(stub)
+        return stub_dict
+
+    return partial(dict_factory, factory)
+
+
+class JsonFactoryMixin:
+    @classmethod
+    def json(cls, **kwargs):
+        return generate_dict_factory(cls)(**kwargs)
+
+    @classmethod
+    def json_batch(cls, num, **kwargs):
+        factory = generate_dict_factory(cls)
+        return [factory(**kwargs) for _ in range(num)]
+
+
+class UserFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
     email = factory.Faker('ascii_email')
@@ -26,7 +62,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @factory.django.mute_signals(post_save)
-class TokenFactory(factory.django.DjangoModelFactory):
+class TokenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     garden = factory.SubFactory('tests.factories.GardenFactory', profile=None)
     uuid = factory.Faker('uuid4')
 
@@ -35,7 +71,7 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
 
 @factory.django.mute_signals(post_save)
-class GardenFactory(factory.django.DjangoModelFactory):
+class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda x: f'Garden{x}')
     token = factory.RelatedFactory(TokenFactory, factory_related_name='garden')
@@ -44,6 +80,7 @@ class GardenFactory(factory.django.DjangoModelFactory):
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
     num_missed_updates = factory.Faker('random_int', min=0, max=100)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
+    update_interval = factory.Faker('time_delta', end_datetime=timedelta(minutes=1))
 
     class Meta:
         model = Garden
@@ -60,12 +97,19 @@ class GardenFactory(factory.django.DjangoModelFactory):
                 else:
                     WateringStationFactory(garden=self)
 
+    @classmethod
+    def form_fields(cls, **kwargs):
+        keys = ['name', 'update_interval']
+        data = super().json(**kwargs)
+        return {key: data[key] for key in keys}
 
-class WateringStationFactory(factory.django.DjangoModelFactory):
+
+class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     garden = factory.SubFactory(GardenFactory)
     moisture_threshold = factory.Faker('random_int', min=0, max=100)
     plant_type = factory.Sequence(lambda x: f'lettuce{x}')
     status = factory.Sequence(lambda x: x % 2 == 0)
+    watering_duration = factory.Faker('time_delta', end_datetime=timedelta(seconds=20))
 
     class Meta:
         model = WateringStation
@@ -79,8 +123,16 @@ class WateringStationFactory(factory.django.DjangoModelFactory):
             for _ in range(count):
                 WateringStationRecordFactory(garden=self)
 
+    @classmethod
+    def form_fields(cls, **kwargs):
+        keys = ['moisture_threshold', 'watering_duration', 'plant_type', 'status']
+        data = super().json()
+        form_data = {key: data[key] for key in keys}
+        form_data['watering_duration'] = derive_duration_string(form_data['watering_duration'])
+        return form_data
 
-class WateringStationRecordFactory(factory.django.DjangoModelFactory):
+
+class WateringStationRecordFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     garden = factory.SubFactory(WateringStationFactory)
     moisture_level = factory.Faker('random_int', min=0, max=100)
 

@@ -1,9 +1,9 @@
 import re
 
-from garden.forms import DeleteGardenForm, UpdateGardenForm
+from garden.forms import UpdateGardenForm
 
 from .base_page import BasePage
-from .elements import Button, TextInput, ImageInput
+from .elements import Button, CancelButton, ConfirmDeleteButton, DeleteButton, SubmitButton, TextInput, ImageInput
 
 
 class GardenNameInput(TextInput):
@@ -13,22 +13,6 @@ class GardenNameInput(TextInput):
 class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
     IMAGE_LOCATOR = 'gardenImage'
-
-
-class SubmitButton(Button):
-    LOCATOR = UpdateGardenForm.SUBMIT_BTN_ID
-
-
-class DeleteButton(Button):
-    LOCATOR = UpdateGardenForm.DELETE_BTN_ID
-
-
-class ConfirmDeleteButton(Button):
-    LOCATOR = DeleteGardenForm.CONFIRM_DELETE_BTN_ID
-
-
-class CancelDeleteButton(Button):
-    LOCATOR = DeleteGardenForm.CANCEL_DELETE_BTN_ID
 
 
 class UpdateInterval(TextInput):
@@ -53,10 +37,10 @@ class GardenUpdatePage(BasePage):
         self.submit_button = SubmitButton(self)
         self.delete_button = DeleteButton(self)
         self.confirm_delete_button = ConfirmDeleteButton(self)
-        self.cancel_delete_button = CancelDeleteButton(self)
+        self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
-        self.modal_id = UpdateGardenForm.DELETE_GARDEN_MODAL_ID
+        self.modal_id = UpdateGardenForm.MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/update/$'

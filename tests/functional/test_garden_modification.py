@@ -65,16 +65,22 @@ class TestGardenModification(Base):
         self.assert_update_watering_station_form_has_values(table_data, update_ws_page)
         self.assert_update_watering_station_form_has_default_values(update_ws_page)
 
+        # the user tries to enter invalid info, but the form renders errors
+        moisture_threshold = -1
+        watering_duration = -1
+        update_ws_page.update_info(
+            moisture_threshold=moisture_threshold,
+            watering_duration=watering_duration
+        )
+        self.wait_for_form_error('error_1_id_moisture_threshold')
+        self.wait_for_form_error('error_1_id_watering_duration')
+
         # the user then changes these values and submits the form
         ws_status = not table_data['status']
         plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
-        update_ws_page.status = ws_status
-        update_ws_page.plant_type = plant_type
-        update_ws_page.moisture_threshold = moisture_threshold
-        update_ws_page.watering_duration = watering_duration
-        update_ws_page.submit_button.click()
+        update_ws_page.update_info(ws_status, plant_type, moisture_threshold, watering_duration)
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
         update_ws_page.garden_detail_nav_button.click()
@@ -129,7 +135,12 @@ class TestGardenModification(Base):
         self.wait_for_page_to_be_loaded(update_gpage)
 
         # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
-        # and delete the garden. They enter a new name and photo for the garden and submit the form.
+        # and delete the garden. They enter invalid data and try to submit the form, but they see errors.
+        update_gpage.garden_update_interval = -1
+        update_gpage.submit_button.click()
+        self.wait_for_form_error('error_1_id_update_interval')
+
+        # they then enter valid information and submit the form
         new_garden_name = 'My new garden name'
         new_garden_image = 'test_garden_image.png'
         update_interval = '10:00'
@@ -204,7 +215,7 @@ class TestGardenModification(Base):
 
         # the user decides not to delete the watering station and clicks cancel and the modal disappears. They then
         # quickly change their mind and proceed to delete the watering station.
-        page.cancel_delete_button.click()
+        page.cancel_button.click()
         self.wait_for_model_to_disappear(page.modal_id)
         page.delete_button.click()
         self.wait_for_modal_to_be_visible(page.modal_id)

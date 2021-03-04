@@ -4,7 +4,7 @@ from garden.forms import NewGardenForm
 from selenium.common.exceptions import WebDriverException
 
 from ..base import wait
-from .elements import Button, ImageInput, TextInput
+from .elements import Button, ImageInput, SubmitButton, TextInput, CancelButton
 from .base_page import BasePage
 
 
@@ -20,16 +20,8 @@ class NewGardenButton(Button):
     LOCATOR = 'addNewGardenBtn'
 
 
-class SubmitNewGardenButton(Button):
-    LOCATOR = NewGardenForm.NEW_GARDEN_SUBMIT_ID
-
-
 class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
-
-
-class CancelNewGardenButton(Button):
-    LOCATOR = NewGardenForm.CANCEL_NEW_GARDEN_BTN_ID
 
 
 class UpdateInterval(TextInput):
@@ -53,11 +45,11 @@ class GardenListPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
         self.new_garden_button = NewGardenButton(self)
-        self.submit_new_garden_button = SubmitNewGardenButton(self)
-        self.cancel_new_garden_button = CancelNewGardenButton(self)
+        self.submit_button = SubmitButton(self)
+        self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
-        self.modal_id = NewGardenForm.NEW_GARDEN_MODAL_ID
+        self.modal_id = NewGardenForm.MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/$'
@@ -91,7 +83,7 @@ class GardenListPage(BasePage):
         self.num_watering_stations = num_watering_stations
         self.garden_image = garden_image
         self.update_interval = update_interval
-        self.submit_new_garden_button.click()
+        self.submit_button.click()
 
     def _get_garden_list(self):
         return self.driver.find_element_by_id('gardenList')

@@ -1,11 +1,7 @@
 import re
 
 from .base_page import BasePage
-from .elements import Button, TextInput
-
-
-class SubmitButton(Button):
-    LOCATOR = '//input[@type="submit"]'
+from .elements import TextInput, SubmitButton
 
 
 class OldPasswordInput(TextInput):
@@ -27,7 +23,7 @@ class ChangePasswordPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.submit_button = SubmitButton(self, 'find_element_by_xpath')
+        self.submit_button = SubmitButton(self)
 
     def has_correct_url(self):
         pattern = r'/password_change/$'
