@@ -11,13 +11,16 @@ from . import factories
 
 TEST_IMAGE_DIR = settings.BASE_DIR / 'tests' / 'images'
 
+register(factories.TokenFactory)
 register(factories.GardenFactory)
 register(factories.WateringStationFactory)
 register(factories.WateringStationRecordFactory)
 register(factories.UserFactory)
 
-register(factories.UserFactory, 'user1', gardens=2)
-register(factories.UserFactory, 'user2', gardens=3)
+register(factories.UserFactory, 'user1', gardens=1)
+register(factories.UserFactory, 'user2', gardens=2)
+register(factories.GardenFactory, 'garden1', watering_stations=1)
+register(factories.GardenFactory, 'garden2', watering_stations=2)
 
 
 def pytest_addoption(parser):

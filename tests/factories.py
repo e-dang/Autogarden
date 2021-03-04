@@ -1,5 +1,6 @@
 import factory
 import pytz
+from django.db.models.signals import post_save
 from garden.models import Garden, Token, WateringStation, WateringStationRecord
 from users.models import User
 
@@ -24,6 +25,7 @@ class UserFactory(factory.django.DjangoModelFactory):
                 GardenFactory(owner=self)
 
 
+@factory.django.mute_signals(post_save)
 class TokenFactory(factory.django.DjangoModelFactory):
     garden = factory.SubFactory('tests.factories.GardenFactory', profile=None)
     uuid = factory.Faker('uuid4')
@@ -32,6 +34,7 @@ class TokenFactory(factory.django.DjangoModelFactory):
         model = Token
 
 
+@factory.django.mute_signals(post_save)
 class GardenFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda x: f'Garden{x}')

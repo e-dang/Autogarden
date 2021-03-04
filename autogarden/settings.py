@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
-    'garden',
+    'garden.apps.GardenConfig',
     'crispy_forms',
     'compressor'
 ]
