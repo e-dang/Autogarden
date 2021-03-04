@@ -34,54 +34,59 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
 @pytest.mark.integration
 class TestGardenAPIView:
     @pytest.fixture(autouse=True)
-    def setup(self, garden):
-        self.garden = garden
-        self.url = reverse('api-garden', kwargs={'pk': garden.pk})
+    def setup(self, auth_api_garden):
+        self.garden = auth_api_garden
+        self.url = reverse('api-garden', kwargs={'pk': auth_api_garden.pk})
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
         assert self.url == f'/api/gardens/{self.garden.pk}/'
 
     @pytest.mark.django_db
-    def test_GET_returns_200_status_code(self, api_client):
-        resp = api_client.get(self.url)
+    def test_GET_returns_200_status_code(self, auth_api_client):
+        resp = auth_api_client.get(self.url)
 
         assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
-    def test_GET_returns_garden_config_data(self, api_client):
-        resp = api_client.get(self.url)
+    def test_GET_returns_garden_config_data(self, auth_api_client):
+        resp = auth_api_client.get(self.url)
 
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize('api_client, water_level', [
-        (None, Garden.LOW),
-        (None, Garden.OK),
+    @pytest.mark.parametrize('water_level', [
+        Garden.LOW,
+        Garden.OK
     ],
-        indirect=['api_client'],
         ids=['low', 'ok'])
-    def test_PATCH_updates_the_garden_with_request_data(self, api_client, water_level):
+    def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, water_level):
         self.garden.water_level = Garden.OK if water_level == Garden.LOW else Garden.LOW
         self.garden.save()
         data = {
             'water_level': water_level
         }
 
-        api_client.patch(self.url, data=data)
+        auth_api_client.patch(self.url, data=data)
 
         self.garden.refresh_from_db()
         assert self.garden.water_level == data['water_level']
 
     @pytest.mark.django_db
-    def test_PATCH_returns_204_status_code(self, api_client):
+    def test_PATCH_returns_204_status_code(self, auth_api_client):
         data = {
             'water_level': Garden.LOW
         }
 
-        resp = api_client.patch(self.url, data=data)
+        resp = auth_api_client.patch(self.url, data=data)
 
         assert resp.status_code == status.HTTP_204_NO_CONTENT
+
+    @pytest.mark.django_db
+    def test_GET_without_authorization_token_returns_403_response(self, api_client):
+        resp = api_client.get(self.url)
+
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.integration

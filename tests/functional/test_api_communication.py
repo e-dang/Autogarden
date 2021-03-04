@@ -21,7 +21,7 @@ from .pages.watering_station_detail_page import WateringStationDetailPage
 @pytest.mark.functional
 class TestAPICommunication(Base):
     @pytest.fixture(autouse=True)
-    def setup(self, user_factory, garden_factory, live_server, test_password, use_tmp_static_dir):
+    def setup(self, user_factory, garden_factory, live_server, test_password, api_client, use_tmp_static_dir):
         self.email = 'email@demo.com'
         self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 16
@@ -33,14 +33,16 @@ class TestAPICommunication(Base):
                                      last_connection_time=None,
                                      update_interval=_default_update_interval(),
                                      num_missed_updates=_default_num_missed_updates())
+        self.api_client = api_client
+        self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + self.garden.token.uuid)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
         self.create_pre_authenticated_session(self.email, test_password, live_server)
 
     @pytest.mark.django_db
-    def test_microcontroller_interaction_with_server(self, api_client):
+    def test_microcontroller_interaction_with_server(self):
         # the microcontroller sends a GET request to retrieve the watering station configs from the server
         watering_station_url = reverse('api-watering-stations', kwargs={'pk': self.garden.pk})
-        resp = api_client.get(watering_station_url)
+        resp = self.api_client.get(watering_station_url)
         assert resp.status_code == status.HTTP_200_OK
         assert len(resp.data) == self.num_watering_stations
         for ws_config in resp.data:
@@ -50,7 +52,7 @@ class TestAPICommunication(Base):
 
         # immediately after the MC sends a GET request to retrieve the garden update interval duration
         garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
-        resp = api_client.get(garden_url)
+        resp = self.api_client.get(garden_url)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
@@ -60,7 +62,7 @@ class TestAPICommunication(Base):
             data.append({
                 'moisture_level': random.uniform(0, 100)
             })
-        resp = api_client.post(watering_station_url, data=data, format='json')
+        resp = self.api_client.post(watering_station_url, data=data, format='json')
         assert resp.status_code == status.HTTP_201_CREATED
         for record, station in zip(data, self.garden.watering_stations.all()):
             station.records.get(moisture_level=record['moisture_level'])  # should not raise
@@ -69,7 +71,7 @@ class TestAPICommunication(Base):
         garden_data = {
             'water_level': Garden.LOW
         }
-        resp = api_client.patch(garden_url, data=garden_data)
+        resp = self.api_client.patch(garden_url, data=garden_data)
         self.garden.refresh_from_db()
         assert resp.status_code == status.HTTP_204_NO_CONTENT
         assert self.garden.water_level == garden_data['water_level']
@@ -103,7 +105,7 @@ class TestAPICommunication(Base):
         update_ws_page.submit_button.click()
 
         # when the MC sends another GET request to the watering station api, it recieves the new updated configs
-        resp = api_client.get(watering_station_url)
+        resp = self.api_client.get(watering_station_url)
         assert resp.status_code == status.HTTP_200_OK
         for i, ws_config in enumerate(resp.data, start=1):
             if i == selected_watering_station:
@@ -117,6 +119,6 @@ class TestAPICommunication(Base):
 
         # similarly when it sends a GET request to the garden api, it recieves the new updated configs
         garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
-        resp = api_client.get(garden_url)
+        resp = self.api_client.get(garden_url)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_interval'] == update_interval.total_seconds()

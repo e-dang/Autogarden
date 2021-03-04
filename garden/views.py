@@ -1,3 +1,4 @@
+from garden.permissions import TokenPermission
 from typing import Any
 
 from crispy_forms.utils import render_crispy_form
@@ -20,11 +21,15 @@ from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
 from .models import Garden
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
+from .permissions import TokenPermission
 
 
 class GardenAPIView(APIView):
+    permission_classes = [TokenPermission]
+
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
+        self.check_object_permissions(request, garden)
         serializer = GardenGetSerializer(instance=garden)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
