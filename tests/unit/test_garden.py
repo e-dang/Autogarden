@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-from garden import permissions
+from garden.forms import NewGardenForm
 from garden.permissions import TokenPermission
 from pathlib import Path
 from typing import Dict
 from unittest.mock import Mock, create_autospec, patch
+from django.forms import ValidationError
 
 import garden.utils as utils
 import pytest
@@ -345,6 +346,51 @@ class TestWateringStationListView:
         view.dispatch(request)
 
         view.patch.assert_called_once_with(request)
+
+
+@pytest.mark.unit
+class TestNewGardenForm:
+    def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):
+        form = NewGardenForm()
+        form.cleaned_data = {
+            'num_watering_stations': -1
+        }
+
+        with pytest.raises(ValidationError):
+            form.clean_num_watering_stations()
+
+    @pytest.mark.parametrize('num_watering_stations', [0, 1], ids=['0', '1'])
+    def test_clean_num_watering_stations_returns_data_when_number_is_positive(self, num_watering_stations):
+        form = NewGardenForm()
+        form.cleaned_data = {
+            'num_watering_stations': num_watering_stations
+        }
+
+        ret_val = form.clean_num_watering_stations()
+
+        assert ret_val == num_watering_stations
+
+    @pytest.mark.parametrize('seconds', [0, -1], ids=['0', '-1'])
+    def test_clean_update_interval_raises_validation_error_when_seconds_is_less_than_1(self, seconds):
+        form = NewGardenForm()
+        form.cleaned_data = {
+            'update_interval': timedelta(seconds=seconds)
+        }
+
+        with pytest.raises(ValidationError):
+            form.clean_update_interval()
+
+    @pytest.mark.parametrize('seconds', [1, 2], ids=['0', '1'])
+    def test_clean_update_interval_returns_data_when_seconds_is_greater_than_or_equal_to_1(self, seconds):
+        duration = timedelta(seconds=seconds)
+        form = NewGardenForm()
+        form.cleaned_data = {
+            'update_interval': duration
+        }
+
+        ret_val = form.clean_update_interval()
+
+        assert ret_val == duration
 
 
 @pytest.mark.unit

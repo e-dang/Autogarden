@@ -19,7 +19,7 @@ def new_garden_form_fields(garden_factory):
 
 
 @pytest.fixture
-def valid_update_garden_data(garden_factory, use_tmp_static_dir):
+def update_garden_form_fields(garden_factory, use_tmp_static_dir):
     image_path = str(TEST_IMAGE_DIR / 'test_garden_image.png')
     with open(image_path, 'rb') as f:
         data = garden_factory.form_fields()

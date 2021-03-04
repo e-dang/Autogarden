@@ -186,17 +186,17 @@ class TestGardenListView:
         assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_new_garden_for_user_with_specified_num_watering_stations(self, auth_client, auth_user, valid_garden_data):
+    def test_POST_with_valid_data_creates_new_garden_for_user_with_specified_num_watering_stations(self, auth_client, auth_user, new_garden_form_fields):
         prev_num_gardens = auth_user.gardens.all().count()
 
-        auth_client.post(self.url, data=valid_garden_data)
+        auth_client.post(self.url, data=new_garden_form_fields)
 
         assert prev_num_gardens + 1 == auth_user.gardens.all().count()
-        assert auth_user.gardens.last().watering_stations.count() == valid_garden_data['num_watering_stations']
+        assert auth_user.gardens.last().watering_stations.count() == new_garden_form_fields['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, valid_garden_data):
-        resp = auth_client.post(self.url, data=valid_garden_data, follow=False)
+    def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, new_garden_form_fields):
+        resp = auth_client.post(self.url, data=new_garden_form_fields, follow=False)
 
         assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
 
@@ -274,17 +274,17 @@ class TestGardenUpdateView:
         assert_template_is_rendered(resp, 'garden_update.html')
 
     @pytest.mark.django_db
-    def test_POST_updates_garden_instance_fields(self, auth_client, valid_update_garden_data):
-        auth_client.post(self.url, data=valid_update_garden_data)
+    def test_POST_updates_garden_instance_fields(self, auth_client, update_garden_form_fields):
+        auth_client.post(self.url, data=update_garden_form_fields)
 
         self.garden.refresh_from_db()
-        assert self.garden.name == valid_update_garden_data['name']
-        assert derive_duration_string(self.garden.update_interval) == valid_update_garden_data['update_interval']
-        assert_image_files_equal(self.garden.image.url, valid_update_garden_data['image'].name)
+        assert self.garden.name == update_garden_form_fields['name']
+        assert self.garden.update_interval == update_garden_form_fields['update_interval']
+        assert_image_files_equal(self.garden.image.url, update_garden_form_fields['image'].name)
 
     @pytest.mark.django_db
-    def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, auth_client, valid_update_garden_data):
-        resp = auth_client.post(self.url, data=valid_update_garden_data)
+    def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, auth_client, update_garden_form_fields):
+        resp = auth_client.post(self.url, data=update_garden_form_fields)
 
         assert_successful_json_response(resp, self.url)
 
@@ -298,14 +298,15 @@ class TestGardenUpdateView:
         assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
-    def test_POST_doesnt_update_garden_when_accessed_by_user_who_doesnt_own_it(self, auth_client, garden, valid_update_garden_data):
-        url = self.create_url(garden.pk)
+    def test_POST_doesnt_update_garden_when_accessed_by_user_who_doesnt_own_it(self, auth_client, garden1, update_garden_form_fields):
+        url = self.create_url(garden1.pk)
 
-        auth_client.post(url, data=valid_update_garden_data)
+        auth_client.post(url, data=update_garden_form_fields)
 
-        garden.refresh_from_db()
-        for key, item in valid_update_garden_data.items():
-            assert getattr(garden, key) != item
+        garden1.refresh_from_db()
+        assert any(
+            getattr(garden1, key) != item for key, item in update_garden_form_fields.items()
+        )
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -438,21 +439,21 @@ class TestWateringStationUpdateView:
         assert_template_is_rendered(resp, 'watering_station_update.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, auth_client, valid_watering_station_data):
-        resp = auth_client.post(self.url, data=valid_watering_station_data)
+    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, auth_client, watering_station_form_fields):
+        resp = auth_client.post(self.url, data=watering_station_form_fields)
 
-        assert_data_present_in_json_response_html(resp, valid_watering_station_data.values())
+        assert_data_present_in_json_response_html(resp, watering_station_form_fields.values())
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, auth_client, valid_watering_station_data):
-        resp = auth_client.post(self.url, data=valid_watering_station_data)
+    def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, auth_client, watering_station_form_fields):
+        resp = auth_client.post(self.url, data=watering_station_form_fields)
 
         self.watering_station.refresh_from_db()
         assert resp.status_code == status.HTTP_200_OK
-        assert self.watering_station.moisture_threshold == valid_watering_station_data['moisture_threshold']
+        assert self.watering_station.moisture_threshold == watering_station_form_fields['moisture_threshold']
         assert derive_duration_string(
-            self.watering_station.watering_duration) == valid_watering_station_data['watering_duration']
-        assert self.watering_station.plant_type == valid_watering_station_data['plant_type']
+            self.watering_station.watering_duration) == watering_station_form_fields['watering_duration']
+        assert self.watering_station.plant_type == watering_station_form_fields['plant_type']
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -464,16 +465,16 @@ class TestWateringStationUpdateView:
         assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
-    def test_POST_doesnt_update_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station, valid_watering_station_data):
+    def test_POST_doesnt_update_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station, watering_station_form_fields):
         url = self.create_url(watering_station.garden.pk, watering_station.pk)
 
-        auth_client.post(url, data=valid_watering_station_data)
+        auth_client.post(url, data=watering_station_form_fields)
 
         watering_station.refresh_from_db()
-        assert watering_station.moisture_threshold != valid_watering_station_data['moisture_threshold']
+        assert watering_station.moisture_threshold != watering_station_form_fields['moisture_threshold']
         assert derive_duration_string(
-            watering_station.watering_duration) != valid_watering_station_data['watering_duration']
-        assert watering_station.plant_type != valid_watering_station_data['plant_type']
+            watering_station.watering_duration) != watering_station_form_fields['watering_duration']
+        assert watering_station.plant_type != watering_station_form_fields['plant_type']
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -538,11 +539,11 @@ class TestWateringStationListView:
         assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
-    def test_POST_doesnt_create_new_garden_is_requesting_user_does_not_own_garden(self, auth_client, garden, valid_watering_station_data):
+    def test_POST_doesnt_create_new_garden_is_requesting_user_does_not_own_garden(self, auth_client, garden, watering_station_form_fields):
         url = self.create_url(garden.pk)
         prev_num_watering_stations = garden.watering_stations.all().count()
 
-        auth_client.post(url, data=valid_watering_station_data)
+        auth_client.post(url, data=watering_station_form_fields)
 
         garden.refresh_from_db()
         assert prev_num_watering_stations == garden.watering_stations.all().count()

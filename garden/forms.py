@@ -5,6 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (HTML, Button, Field, Layout,
                                  Submit)
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import Garden, WateringStation, _default_update_interval
 from .utils import (derive_duration_string,
@@ -48,16 +49,19 @@ class CropperMixin(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.cropper_fields = [HTML(f'''
+        self.cropper_fields = [
+            HTML(f'''
                 <div id="{self.IMAGE_CONTAINER_ID}">
                 </div>
             '''),
-                               Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
-                               Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True), ]
+            Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
+            Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True)
+        ]
 
 
 class NewGardenForm(forms.ModelForm, CropperMixin):
     NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
+    UPDATE_INTERVAL_ERROR_MSG = 'The update interval must be at least 1 second.'
     NEW_GARDEN_FORM_ID = 'newGardenForm'
     NEW_GARDEN_SUBMIT_ID = 'submitBtn'
     CANCEL_NEW_GARDEN_BTN_ID = 'cancelBtn'
@@ -94,6 +98,12 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
         if data < 0:
             raise forms.ValidationError(self.NUM_WATERING_STATIONS_ERROR_MSG)
 
+        return data
+
+    def clean_update_interval(self):
+        data = self.cleaned_data['update_interval']
+        if data.total_seconds() < 1:
+            raise ValidationError(self.UPDATE_INTERVAL_ERROR_MSG)
         return data
 
     def save(self, owner):
