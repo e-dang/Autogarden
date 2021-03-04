@@ -92,6 +92,12 @@ class TestLogoutView:
         assert not resp.wsgi_request.user.is_authenticated
         assert '_auth_user_id' not in true_auth_client.session
 
+    @pytest.mark.django_db
+    def test_GET_redirects_to_login_view(self, true_auth_client):
+        resp = true_auth_client.get(self.url)
+
+        assert_redirect(resp, reverse('login'))
+
 
 @pytest.mark.integration
 class TestCreateUserView:
