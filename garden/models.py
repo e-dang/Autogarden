@@ -1,3 +1,4 @@
+import uuid
 import os
 from datetime import datetime, timedelta
 
@@ -113,6 +114,11 @@ class Garden(models.Model):
         self.last_connection_ip = request.META.get('REMOTE_ADDR')
         self.last_connection_time = datetime.now(pytz.UTC)
         self.save()
+
+
+class Token(models.Model):
+    garden = models.OneToOneField(Garden, on_delete=models.CASCADE)
+    uuid = models.UUIDField(default=uuid.uuid4)
 
 
 class WateringStation(models.Model):
