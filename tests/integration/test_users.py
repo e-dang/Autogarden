@@ -68,6 +68,13 @@ class TestLoginView:
 
         assert_template_is_rendered(resp, 'login.html')
 
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['get', 'post'], ids=['get', 'post'])
+    def test_requests_from_already_logged_in_user_redirects_to_garden_list_page(self, auth_client, method):
+        resp = getattr(auth_client, method)(self.url)
+
+        assert_redirect(resp, reverse('garden-list'))
+
 
 @pytest.mark.integration
 class TestLogoutView:
