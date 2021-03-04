@@ -77,23 +77,23 @@ class TestDataAccessability(Base):
 
         # the user then tries to use the api to view and modify the other users data, but that doesnt work as well
         resp = api_client.get(self.create_api_url(garden.get_absolute_url()))
-        self.assert_401_unauthorized(resp)
+        self.assert_403_forbidden(resp)
 
         resp = api_client.patch(self.create_api_url(garden.get_absolute_url()))
-        self.assert_401_unauthorized(resp)
+        self.assert_403_forbidden(resp)
 
         resp = api_client.get(self.create_api_url(watering_station.get_absolute_url()))
-        self.assert_401_unauthorized(resp)
+        self.assert_403_forbidden(resp)
 
         resp = api_client.post(self.create_api_url(watering_station.get_absolute_url()))
-        self.assert_401_unauthorized(resp)
+        self.assert_403_forbidden(resp)
 
     def assert_404_error(self):
         assert '404 Error. Page Not Found.' in self.driver.find_element_by_tag_name('body').text
 
-    def assert_401_unauthorized(self, response):
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert 'errors' in response.data
+    def assert_403_forbidden(self, response):
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.data['detail'].code == 'not_authenticated'
 
     def create_url(self, path):
         return self.live_server.url + path
