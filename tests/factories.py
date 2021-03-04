@@ -1,6 +1,6 @@
 import factory
 import pytz
-from garden.models import Garden, WateringStation, WateringStationRecord
+from garden.models import Garden, Token, WateringStation, WateringStationRecord
 from users.models import User
 
 TEST_PASSWORD = 'test-password123'
@@ -24,9 +24,18 @@ class UserFactory(factory.django.DjangoModelFactory):
                 GardenFactory(owner=self)
 
 
+class TokenFactory(factory.django.DjangoModelFactory):
+    garden = factory.SubFactory('tests.factories.GardenFactory', profile=None)
+    uuid = factory.Faker('uuid4')
+
+    class Meta:
+        model = Token
+
+
 class GardenFactory(factory.django.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda x: f'Garden{x}')
+    token = factory.RelatedFactory(TokenFactory, factory_related_name='garden')
     is_connected = factory.Sequence(lambda x: x % 2 == 0)
     last_connection_ip = factory.Faker('ipv4')
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
