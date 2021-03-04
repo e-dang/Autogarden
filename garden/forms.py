@@ -109,7 +109,7 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
     MODAL_ID = 'deleteGardenModal'
     FORM_CONTAINER_ID = 'formContainer'
 
-    update_interval = CustomDurationField()
+    update_interval = CustomDurationField(validators=[validate_duration])
 
     class Meta:
         model = Garden

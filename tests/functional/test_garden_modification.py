@@ -135,7 +135,12 @@ class TestGardenModification(Base):
         self.wait_for_page_to_be_loaded(update_gpage)
 
         # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
-        # and delete the garden. They enter a new name and photo for the garden and submit the form.
+        # and delete the garden. They enter invalid data and try to submit the form, but they see errors.
+        update_gpage.garden_update_interval = -1
+        update_gpage.submit_button.click()
+        self.wait_for_form_error('error_1_id_update_interval')
+
+        # they then enter valid information and submit the form
         new_garden_name = 'My new garden name'
         new_garden_image = 'test_garden_image.png'
         update_interval = '10:00'
