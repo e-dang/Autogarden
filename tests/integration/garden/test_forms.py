@@ -1,9 +1,9 @@
+from datetime import timedelta
+
 import pytest
 
-from django.forms import ValidationError
-
-from garden.forms import (REQUIRED_FIELD_ERR_MSG, NewGardenForm,
-                          WateringStationForm)
+from garden.forms import (INVALID_DURATION_ERR_MSG, MAX_VALUE_ERR_MSG, MIN_VALUE_ERR_MSG, REQUIRED_FIELD_ERR_MSG,
+                          NewGardenForm, WateringStationForm)
 from garden.models import Garden
 
 
@@ -44,18 +44,6 @@ class TestNewGardenForm:
         assert garden in user.gardens.all()
 
     @pytest.mark.django_db
-    def test_clean_num_watering_stations_raises_validation_error_when_number_is_negative(self):
-        data = {
-            'name': 'My Garden',
-            'num_watering_stations': -1
-        }
-        form = NewGardenForm(data=data)
-        form.cleaned_data = data
-
-        with pytest.raises(ValidationError):
-            form.clean_num_watering_stations()
-
-    @pytest.mark.django_db
     def test_is_valid_returns_false_when_num_watering_stations_is_invalid(self, new_garden_form_fields):
         new_garden_form_fields['num_watering_stations'] = -1  # invalidate data
         form = NewGardenForm(data=new_garden_form_fields)
@@ -63,7 +51,7 @@ class TestNewGardenForm:
         ret_val = form.is_valid()
 
         assert ret_val == False
-        assert NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG in form.errors['num_watering_stations']
+        assert MIN_VALUE_ERR_MSG in form.errors['num_watering_stations']
 
     @pytest.mark.django_db
     def test_is_valid_returns_false_when_update_interval_is_invalid(self, new_garden_form_fields):
@@ -73,7 +61,7 @@ class TestNewGardenForm:
         ret_val = form.is_valid()
 
         assert ret_val == False
-        assert NewGardenForm.UPDATE_INTERVAL_ERROR_MSG in form.errors['update_interval']
+        assert INVALID_DURATION_ERR_MSG in form.errors['update_interval']
 
 
 @pytest.mark.integration
@@ -103,3 +91,29 @@ class TestWateringStationForm:
         form = WateringStationForm(data=watering_station_form_fields)
 
         assert form.is_valid()
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('moisture_threshold, err_msg', [
+        (-1, MIN_VALUE_ERR_MSG),
+        (101, MAX_VALUE_ERR_MSG)
+    ],
+        ids=['-1', '101'])
+    def test_is_valid_returns_false_when_moisture_threshold_is_invalid(self, watering_station_form_fields, moisture_threshold, err_msg):
+        watering_station_form_fields['moisture_threshold'] = moisture_threshold  # invalidate data
+        form = WateringStationForm(data=watering_station_form_fields)
+
+        ret_val = form.is_valid()
+
+        assert ret_val == False
+        assert err_msg in form.errors['moisture_threshold']
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('watering_duration', [timedelta(seconds=0), timedelta(seconds=-1)], ids=['0', '-1'])
+    def test_is_valid_returns_false_when_watering_duration_is_invalid(self, watering_station_form_fields, watering_duration):
+        watering_station_form_fields['watering_duration'] = watering_duration  # invalidate data
+        form = WateringStationForm(data=watering_station_form_fields)
+
+        ret_val = form.is_valid()
+
+        assert ret_val == False
+        assert INVALID_DURATION_ERR_MSG in form.errors['watering_duration']

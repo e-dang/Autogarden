@@ -11,7 +11,7 @@ from tests.conftest import assert_image_files_equal
 from tests.integration.conftest import (assert_redirect,
                                         assert_template_is_rendered)
 
-from garden.forms import NewGardenForm
+from garden.forms import MIN_VALUE_ERR_MSG, NewGardenForm
 from garden.models import Garden, WateringStation
 from garden.serializers import WateringStationSerializer
 from garden.utils import derive_duration_string
@@ -203,7 +203,7 @@ class TestGardenListView:
     @pytest.mark.django_db
     def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auth_client, invalid_new_garden_data):
         expected = [
-            NewGardenForm.NUM_WATERING_STATIONS_ERROR_MSG
+            MIN_VALUE_ERR_MSG
         ]
 
         resp = auth_client.post(self.url, data=invalid_new_garden_data)

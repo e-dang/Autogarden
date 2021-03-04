@@ -10,8 +10,17 @@ from django.core.exceptions import ValidationError
 from .models import Garden, WateringStation, _default_update_interval
 from .utils import (derive_duration_string,
                     set_num_watering_stations)
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
+INVALID_DURATION_ERR_MSG = 'This field must contain a duration greater than 1 second.'
+MIN_VALUE_ERR_MSG = 'This field must be positve.'
+MAX_VALUE_ERR_MSG = 'This field must be less than or equal to 100.'
+
+
+def validate_duration(duration):
+    if duration.total_seconds() < 1:
+        raise ValidationError(INVALID_DURATION_ERR_MSG)
 
 
 class CustomDurationField(forms.DurationField):
@@ -60,11 +69,10 @@ class CropperMixin(forms.Form):
 class NewGardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'newGardenForm'
     MODAL_ID = 'newGardenModal'
-    NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
-    UPDATE_INTERVAL_ERROR_MSG = 'The update interval must be at least 1 second.'
 
-    num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
-    update_interval = CustomDurationField()
+    num_watering_stations = forms.IntegerField(label='Number of Watering Stations', validators=[
+                                               MinValueValidator(0, MIN_VALUE_ERR_MSG)])
+    update_interval = CustomDurationField(validators=[validate_duration])
 
     class Meta:
         model = Garden
@@ -88,19 +96,6 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
         )
 
         self.fields['update_interval'].initial = _default_update_interval()
-
-    def clean_num_watering_stations(self):
-        data = self.cleaned_data['num_watering_stations']
-        if data < 0:
-            raise forms.ValidationError(self.NUM_WATERING_STATIONS_ERROR_MSG)
-
-        return data
-
-    def clean_update_interval(self):
-        data = self.cleaned_data['update_interval']
-        if data.total_seconds() < 1:
-            raise ValidationError(self.UPDATE_INTERVAL_ERROR_MSG)
-        return data
 
     def save(self, owner):
         num_watering_stations = self.cleaned_data.pop('num_watering_stations')
@@ -143,8 +138,13 @@ class DeleteGardenForm(DeleteForm):
 
 class WateringStationForm(forms.ModelForm):
     MODAL_ID = 'deleteWateringStationModal'
+    MOISTURE_THRESHOLD_ERR_MSG = 'The moisture threshold must be in the range 0 - 100.'
 
-    watering_duration = CustomDurationField()
+    watering_duration = CustomDurationField(validators=[validate_duration])
+    moisture_threshold = forms.IntegerField(validators=[
+        MinValueValidator(0, MIN_VALUE_ERR_MSG),
+        MaxValueValidator(100, MAX_VALUE_ERR_MSG)
+    ])
 
     class Meta:
         model = WateringStation
