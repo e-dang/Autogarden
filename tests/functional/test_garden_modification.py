@@ -23,7 +23,7 @@ class TestGardenModification(Base):
                                      watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
-        self.create_pre_authenticated_session(self.email, test_password, live_server)
+        self.create_authenticated_session(self.user, live_server)
 
     @pytest.mark.django_db
     def test_user_can_modify_a_garden_and_its_watering_stations(self):

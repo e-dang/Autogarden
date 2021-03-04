@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 from selenium.common.exceptions import WebDriverException
 from tests.management.commands.create_session import \
-    create_pre_authenticated_session
+    create_authenticated_session, create_pre_authenticated_session
 
 TIMEOUT = 10
 
@@ -66,6 +66,15 @@ class Base:
 
     def create_pre_authenticated_session(self, email, password, live_server):
         session_key = create_pre_authenticated_session(email, password)
+        self.driver.get(live_server.url + '/404_no_such_url/')
+        self.driver.add_cookie({
+            'name': settings.SESSION_COOKIE_NAME,
+            'value': session_key,
+            'path': '/'
+        })
+
+    def create_authenticated_session(self, user, live_server):
+        session_key = create_authenticated_session(user)
         self.driver.get(live_server.url + '/404_no_such_url/')
         self.driver.add_cookie({
             'name': settings.SESSION_COOKIE_NAME,

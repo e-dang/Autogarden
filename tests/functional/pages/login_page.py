@@ -39,3 +39,8 @@ class LoginPage(BasePage):
     def has_correct_url(self):
         pattern = r'/login/(\?next=[A-Za-z/-]+)*$'
         return re.search(pattern, self.driver.current_url) is not None
+
+    def login(self, email, password):
+        self.email = email
+        self.password = password
+        self.submit_button.click()

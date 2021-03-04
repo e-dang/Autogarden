@@ -36,7 +36,7 @@ class TestAPICommunication(Base):
         self.api_client = api_client
         self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + self.garden.token.uuid)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
-        self.create_pre_authenticated_session(self.email, test_password, live_server)
+        self.create_authenticated_session(self.user, live_server)
 
     @pytest.mark.django_db
     def test_microcontroller_interaction_with_server(self):
