@@ -4,7 +4,7 @@ from django.urls import reverse
 from garden.models import _default_garden_name, _default_update_interval
 from tests.conftest import assert_image_files_equal
 
-from .base import Base, wait_for
+from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
 

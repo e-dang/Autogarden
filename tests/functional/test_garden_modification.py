@@ -65,16 +65,22 @@ class TestGardenModification(Base):
         self.assert_update_watering_station_form_has_values(table_data, update_ws_page)
         self.assert_update_watering_station_form_has_default_values(update_ws_page)
 
+        # the user tries to enter invalid info, but the form renders errors
+        moisture_threshold = -1
+        watering_duration = -1
+        update_ws_page.update_info(
+            moisture_threshold=moisture_threshold,
+            watering_duration=watering_duration
+        )
+        self.wait_for_form_error('error_1_id_moisture_threshold')
+        self.wait_for_form_error('error_1_id_watering_duration')
+
         # the user then changes these values and submits the form
         ws_status = not table_data['status']
         plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
-        update_ws_page.status = ws_status
-        update_ws_page.plant_type = plant_type
-        update_ws_page.moisture_threshold = moisture_threshold
-        update_ws_page.watering_duration = watering_duration
-        update_ws_page.submit_button.click()
+        update_ws_page.update_info(ws_status, plant_type, moisture_threshold, watering_duration)
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
         update_ws_page.garden_detail_nav_button.click()

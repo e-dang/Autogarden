@@ -44,3 +44,14 @@ class WateringStationUpdatePage(BasePage):
     def go_to_watering_station_page(self, ws_num):
         wait_for(lambda: self.driver.find_element_by_id('navWateringStations')).click()
         wait_for(lambda: self.driver.find_element_by_id(f'navWateringStation{ws_num}')).click()
+
+    def update_info(self, status=None, plant_type=None, moisture_threshold=None, watering_duration=None):
+        if status is not None:
+            self.status = status
+        if plant_type is not None:
+            self.plant_type = plant_type
+        if moisture_threshold is not None:
+            self.moisture_threshold = moisture_threshold
+        if watering_duration is not None:
+            self.watering_duration = watering_duration
+        self.submit_button.click()
