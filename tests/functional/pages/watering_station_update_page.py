@@ -35,7 +35,7 @@ class WateringStationUpdatePage(BasePage):
         self.delete_button = DeleteButton(self)
         self.cancel_button = CancelButton(self)
         self.confirm_delete_button = ConfirmDeleteButton(self)
-        self.modal_id = WateringStationForm.DELETE_WATERING_STATION_MODAL_ID
+        self.modal_id = WateringStationForm.MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/watering-stations/[0-9]+/update/$'

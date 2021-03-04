@@ -49,7 +49,7 @@ class GardenListPage(BasePage):
         self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
-        self.modal_id = NewGardenForm.NEW_GARDEN_MODAL_ID
+        self.modal_id = NewGardenForm.MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/$'

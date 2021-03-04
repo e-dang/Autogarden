@@ -58,10 +58,10 @@ class CropperMixin(forms.Form):
 
 
 class NewGardenForm(forms.ModelForm, CropperMixin):
+    FORM_ID = 'newGardenForm'
+    MODAL_ID = 'newGardenModal'
     NUM_WATERING_STATIONS_ERROR_MSG = 'The number of watering stations must be positive'
     UPDATE_INTERVAL_ERROR_MSG = 'The update interval must be at least 1 second.'
-    NEW_GARDEN_FORM_ID = 'newGardenForm'
-    NEW_GARDEN_MODAL_ID = 'newGardenModal'
 
     num_watering_stations = forms.IntegerField(label="Number of Watering Stations")
     update_interval = CustomDurationField()
@@ -73,7 +73,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = self.NEW_GARDEN_FORM_ID
+        self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'garden-list'
         self.helper.layout = Layout(
@@ -84,7 +84,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
             *self.cropper_fields,
             Submit('submit', 'Create', css_class='btn btn-success'),
             Button('cancel', 'Cancel', css_class='btn btn-info',
-                   data_toggle='modal', data_target=f'#{self.NEW_GARDEN_MODAL_ID}')
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
         )
 
         self.fields['update_interval'].initial = _default_update_interval()
@@ -111,7 +111,7 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
 
 class UpdateGardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'updateGardenForm'
-    DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
+    MODAL_ID = 'deleteGardenModal'
     FORM_CONTAINER_ID = 'formContainer'
 
     update_interval = CustomDurationField()
@@ -132,7 +132,7 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
             *self.cropper_fields,
             Submit('submit', 'Update'),
             Button('delete', 'Delete', css_class='btn btn-danger',
-                   data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
         )
 
 
@@ -142,8 +142,7 @@ class DeleteGardenForm(DeleteForm):
 
 
 class WateringStationForm(forms.ModelForm):
-    UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
-    DELETE_WATERING_STATION_MODAL_ID = 'deleteWateringStationModal'
+    MODAL_ID = 'deleteWateringStationModal'
 
     watering_duration = CustomDurationField()
 
@@ -160,9 +159,9 @@ class WateringStationForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Update', css_id=self.UPDATE_WATERING_STATION_SUBMIT_ID))
+        self.helper.add_input(Submit('submit', 'Update'))
         self.helper.add_input(Button('delete', 'Delete', css_class='btn btn-danger',
-                                     data_toggle='modal', data_target=f'#{self.DELETE_WATERING_STATION_MODAL_ID}'))
+                                     data_toggle='modal', data_target=f'#{self.MODAL_ID}'))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'
