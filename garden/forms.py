@@ -22,7 +22,6 @@ class CustomDurationField(forms.DurationField):
 
 
 class DeleteForm(forms.Form):
-    CONFIRM_DELETE_BTN_ID = 'confirmDeleteBtn'
     FORM_ID = None
     MESSAGE = None
 
@@ -36,7 +35,7 @@ class DeleteForm(forms.Form):
                 HTML(self.MESSAGE),
                 Button('cancel', 'Cancel', css_class='btn btn-info',
                        data_dismiss='modal', aria_hidden='true'),
-                Submit('submit', 'Delete', css_id=self.CONFIRM_DELETE_BTN_ID, css_class='btn btn-danger'),
+                Submit('confirm_delete', 'Delete', css_class='btn btn-danger'),
             )
         )
 
@@ -112,7 +111,6 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
 
 class UpdateGardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'updateGardenForm'
-    DELETE_BTN_ID = 'deleteBtn'
     DELETE_GARDEN_MODAL_ID = 'deleteGardenModal'
     FORM_CONTAINER_ID = 'formContainer'
 
@@ -133,7 +131,7 @@ class UpdateGardenForm(forms.ModelForm, CropperMixin):
             Field('image', id='id_image'),
             *self.cropper_fields,
             Submit('submit', 'Update'),
-            Button('delete', 'Delete', css_id=self.DELETE_BTN_ID, css_class='btn btn-danger',
+            Button('delete', 'Delete', css_class='btn btn-danger',
                    data_toggle='modal', data_target=f'#{self.DELETE_GARDEN_MODAL_ID}')
         )
 
@@ -146,7 +144,6 @@ class DeleteGardenForm(DeleteForm):
 class WateringStationForm(forms.ModelForm):
     UPDATE_WATERING_STATION_SUBMIT_ID = 'submitBtn'
     DELETE_WATERING_STATION_MODAL_ID = 'deleteWateringStationModal'
-    DELETE_BUTTON_ID = 'deleteButton'
 
     watering_duration = CustomDurationField()
 
@@ -164,7 +161,7 @@ class WateringStationForm(forms.ModelForm):
         self.helper.form_id = 'updateWateringStationForm'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Update', css_id=self.UPDATE_WATERING_STATION_SUBMIT_ID))
-        self.helper.add_input(Button('delete', 'Delete', css_id=self.DELETE_BUTTON_ID, css_class='btn btn-danger',
+        self.helper.add_input(Button('delete', 'Delete', css_class='btn btn-danger',
                                      data_toggle='modal', data_target=f'#{self.DELETE_WATERING_STATION_MODAL_ID}'))
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'

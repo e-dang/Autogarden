@@ -1,10 +1,10 @@
 import re
 
-from garden.forms import WateringStationForm, DeleteWateringStationForm
+from garden.forms import WateringStationForm
 
 from ..base import wait_for
 from .base_page import BasePage
-from .elements import Button, CancelButton, TextInput, ToggleButton, SubmitButton
+from .elements import CancelButton, DeleteButton, TextInput, ToggleButton, SubmitButton, ConfirmDeleteButton
 
 
 class MoistureThresholdInput(TextInput):
@@ -21,14 +21,6 @@ class PlantTypeInput(TextInput):
 
 class StatusCheckBox(ToggleButton):
     LOCATOR = 'id_status'
-
-
-class DeleteButton(Button):
-    LOCATOR = WateringStationForm.DELETE_BUTTON_ID
-
-
-class ConfirmDeleteButton(Button):
-    LOCATOR = DeleteWateringStationForm.CONFIRM_DELETE_BTN_ID
 
 
 class WateringStationUpdatePage(BasePage):

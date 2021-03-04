@@ -81,3 +81,13 @@ class SubmitButton(Button):
 class CancelButton(Button):
     LOCATOR = '//input[@name="cancel"]'
     BY = 'find_element_by_xpath'
+
+
+class DeleteButton(Button):
+    LOCATOR = '//input[@name="delete"]'
+    BY = 'find_element_by_xpath'
+
+
+class ConfirmDeleteButton(Button):
+    LOCATOR = '//input[@name="confirm_delete"]'
+    BY = 'find_element_by_xpath'

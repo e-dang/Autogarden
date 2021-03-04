@@ -1,9 +1,9 @@
 import re
 
-from garden.forms import DeleteGardenForm, UpdateGardenForm
+from garden.forms import UpdateGardenForm
 
 from .base_page import BasePage
-from .elements import Button, CancelButton, SubmitButton, TextInput, ImageInput
+from .elements import Button, CancelButton, ConfirmDeleteButton, DeleteButton, SubmitButton, TextInput, ImageInput
 
 
 class GardenNameInput(TextInput):
@@ -13,14 +13,6 @@ class GardenNameInput(TextInput):
 class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
     IMAGE_LOCATOR = 'gardenImage'
-
-
-class DeleteButton(Button):
-    LOCATOR = UpdateGardenForm.DELETE_BTN_ID
-
-
-class ConfirmDeleteButton(Button):
-    LOCATOR = DeleteGardenForm.CONFIRM_DELETE_BTN_ID
 
 
 class UpdateInterval(TextInput):
