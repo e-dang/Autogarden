@@ -38,6 +38,9 @@ jobs:
             make test-cpp
 
   python:
+    env:
+      EMAIL: '${{ secrets.EMAIL }}'
+      EMAIL_PASSWORD: '${{ secrets.EMAIL_PASSWORD }}'
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
