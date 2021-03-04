@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col">
+        <div class="card card-body">
+            {% load crispy_forms_tags %}
+            {% crispy form %}
+            <a id="changePasswordBtn" href="{% url 'password_change_view' %}">Change Password</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

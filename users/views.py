@@ -1,11 +1,14 @@
 from django import http
 from django.contrib.auth import login, logout, views
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView as DefaultLoginView
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
 from users.forms import (CustomPasswordResetForm, CustomSetPasswordForm,
-                         LoginForm, UserCreateForm)
-from django.contrib.auth.views import LoginView as DefaultLoginView
+                         LoginForm, UpdateUserForm, UserCreateForm)
 
 
 class LoginView(DefaultLoginView):
@@ -40,3 +43,16 @@ class PasswordResetView(views.PasswordResetView):
 
 class PasswordResetConfirmView(views.PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
+
+
+class SettingsView(LoginRequiredMixin, View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        form = UpdateUserForm(instance=request.user)
+        return render(request, 'settings.html', context={'form': form})
+
+    def post(self, request: HttpRequest) -> HttpResponse:
+        form = UpdateUserForm(instance=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('settings')
+        return render(request, 'settings.html', context={'form': form})

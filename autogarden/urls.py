@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from users.forms import CustomChangePasswordForm
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -21,7 +22,7 @@ from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, Ga
                           GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
                           WateringStationAPIView)
-from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView
+from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, SettingsView
 from django.contrib.auth import views as auth_views
 
 API_PREFIX = 'api/'
@@ -43,6 +44,11 @@ urlpatterns = [
         template_name='reset_password_confirm.html'), name='password_reset_confirm'),
     path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='reset_password_complete.html'), name='password_reset_complete'),
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_change.html',
+                                                                   form_class=CustomChangePasswordForm), name='password_change_view'),
+    path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'),
+         name='password_change_done'),
+    path('settings/', SettingsView.as_view(), name='settings'),
 
     path('gardens/', GardenListView.as_view(), name='garden-list'),
     path('gardens/<int:pk>/', GardenDetailView.as_view(), name='garden-detail'),
