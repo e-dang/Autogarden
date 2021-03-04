@@ -2,16 +2,17 @@ from typing import Any
 
 import pytest
 from django import http
+from django.test import Client
+from pytest_factoryboy import register
 from pytest_factoryboy.fixture import LazyFixture
 from rest_framework import status
-from pytest_factoryboy import register
 from tests import factories
 
 
 @pytest.fixture
-def auth_client_user(db, client, user1):
+def auth_client_user(db, user1):
     """Cheap authenticated client and user tuple"""
-
+    client = Client()
     client.force_login(user1)
     yield client, user1
 
