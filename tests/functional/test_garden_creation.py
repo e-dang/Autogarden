@@ -2,7 +2,7 @@ from garden.utils import derive_duration_string
 import pytest
 from django.urls import reverse
 from garden.models import _default_garden_name, _default_update_interval
-from tests.conftest import assert_image_files_equal
+from tests.assertions import assert_image_files_equal
 
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage

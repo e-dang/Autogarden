@@ -80,7 +80,3 @@ def create_user(db, django_user_model, test_password):
             kwargs['email'] = 'email@demo.com'
         return django_user_model.objects.create_user(**kwargs)
     yield make_user
-
-
-def assert_image_files_equal(image_path1, image_path2):
-    assert image_path1.split('/')[-1] == image_path2.split('/')[-1]

@@ -4,7 +4,7 @@ from django.urls import reverse
 from users.authentication import EmailBackend
 from users.models import User
 
-from .conftest import assert_redirect, assert_template_is_rendered
+from tests.assertions import assert_redirect, assert_template_is_rendered
 
 
 @pytest.fixture

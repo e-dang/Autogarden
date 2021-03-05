@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict
 from unittest.mock import Mock, create_autospec, patch
 
 import garden.utils as utils
@@ -15,6 +14,7 @@ from garden.serializers import (GardenGetSerializer, GardenPatchSerializer,
 from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
                           WateringStationListView, WateringStationUpdateView)
 from rest_framework.request import Request
+from tests.assertions import assert_render_context_called_with
 
 User = get_user_model()
 
@@ -22,11 +22,6 @@ User = get_user_model()
 @pytest.fixture
 def mock_auth_user():
     return create_autospec(User, is_authenticated=True)
-
-
-def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
-    for key, item in kwarg.items():
-        assert mock_render.call_args.kwargs['context'][key] == item
 
 
 @pytest.mark.unit

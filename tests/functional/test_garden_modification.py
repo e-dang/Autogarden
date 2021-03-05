@@ -3,7 +3,7 @@ from django.urls import reverse
 from garden.models import (WateringStation, _default_moisture_threshold, _default_status,
                            _default_watering_duration)
 from garden.utils import build_duration_string, derive_duration_string
-from tests.conftest import assert_image_files_equal
+from tests.assertions import assert_image_files_equal
 
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage

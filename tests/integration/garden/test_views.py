@@ -1,40 +1,15 @@
 import os
 import random
-from datetime import datetime, timedelta
 
 import pytest
-import pytz
-from django import http
 from rest_framework import status
 from rest_framework.reverse import reverse
-from tests.conftest import assert_image_files_equal
-from tests.integration.conftest import (assert_redirect,
-                                        assert_template_is_rendered)
+from tests import assertions
 
 from garden.forms import MIN_VALUE_ERR_MSG
 from garden.models import Garden, WateringStation
 from garden.serializers import WateringStationSerializer
 from garden.utils import derive_duration_string
-
-
-def assert_successful_json_response(response: http.JsonResponse, url: str) -> None:
-    json = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    assert json['success'] == True
-    assert json['url'] == url
-
-
-def assert_data_present_in_json_response_html(response: http.HttpResponse, values) -> None:
-    json = response.json()
-    assert response.status_code == status.HTTP_200_OK
-    for value in values:
-        assert str(value) in json['html']
-
-
-def assert_garden_connection_fields_are_updated(garden: Garden, response: str) -> None:
-    assert garden.is_connected == True
-    assert garden.last_connection_ip == response.wsgi_request.META.get('REMOTE_ADDR')
-    assert datetime.now(pytz.UTC) - garden.last_connection_time < timedelta(seconds=1)
 
 
 @pytest.mark.integration
@@ -81,7 +56,7 @@ class TestGardenAPIView:
         resp = auth_api_client.patch(self.url, data=garden_patch_serializer_fields)
 
         self.garden.refresh_from_db()
-        assert_garden_connection_fields_are_updated(self.garden, resp)
+        assertions.assert_garden_connection_fields_are_updated(self.garden, resp)
 
     @pytest.mark.django_db
     def test_PATCH_returns_204_status_code(self, auth_api_client):
@@ -183,7 +158,7 @@ class TestGardenListView:
     def test_GET_renders_garden_html_template(self, auth_client):
         resp = auth_client.get(self.url)
 
-        assert_template_is_rendered(resp, 'garden_list.html')
+        assertions.assert_template_is_rendered(resp, 'garden_list.html')
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_creates_new_garden_for_user_with_specified_num_watering_stations(self, auth_client, auth_user, new_garden_form_fields):
@@ -198,7 +173,7 @@ class TestGardenListView:
     def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, new_garden_form_fields):
         resp = auth_client.post(self.url, data=new_garden_form_fields, follow=False)
 
-        assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
+        assertions.assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
 
     @pytest.mark.django_db
     def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auth_client, invalid_new_garden_data):
@@ -208,14 +183,14 @@ class TestGardenListView:
 
         resp = auth_client.post(self.url, data=invalid_new_garden_data)
 
-        assert_data_present_in_json_response_html(resp, expected)
+        assertions.assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -236,7 +211,7 @@ class TestGardenDetailView:
     def test_GET_renders_garden_detail_html_template(self, auth_client):
         resp = auth_client.get(self.url)
 
-        assert_template_is_rendered(resp, 'garden_detail.html')
+        assertions.assert_template_is_rendered(resp, 'garden_detail.html')
 
     @pytest.mark.django_db
     def test_GET_redirects_users_who_dont_own_the_garden_to_404_page_not_found(self, auth_client, garden):
@@ -244,13 +219,13 @@ class TestGardenDetailView:
 
         resp = auth_client.get(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
         resp = client.get(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -271,7 +246,7 @@ class TestGardenUpdateView:
     def test_GET_renders_garden_update_html_template(self, auth_client):
         resp = auth_client.get(self.url)
 
-        assert_template_is_rendered(resp, 'garden_update.html')
+        assertions.assert_template_is_rendered(resp, 'garden_update.html')
 
     @pytest.mark.django_db
     def test_POST_updates_garden_instance_fields(self, auth_client, update_garden_form_fields):
@@ -280,13 +255,13 @@ class TestGardenUpdateView:
         self.garden.refresh_from_db()
         assert self.garden.name == update_garden_form_fields['name']
         assert self.garden.update_interval == update_garden_form_fields['update_interval']
-        assert_image_files_equal(self.garden.image.url, update_garden_form_fields['image'].name)
+        assertions.assert_image_files_equal(self.garden.image.url, update_garden_form_fields['image'].name)
 
     @pytest.mark.django_db
     def test_POST_returns_json_response_with_redirect_url_and_success_eq_true(self, auth_client, update_garden_form_fields):
         resp = auth_client.post(self.url, data=update_garden_form_fields)
 
-        assert_successful_json_response(resp, self.url)
+        assertions.assert_successful_json_response(resp, self.url)
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -295,7 +270,7 @@ class TestGardenUpdateView:
 
         resp = getattr(auth_client, method)(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_POST_doesnt_update_garden_when_accessed_by_user_who_doesnt_own_it(self, auth_client, garden1, update_garden_form_fields):
@@ -313,7 +288,7 @@ class TestGardenUpdateView:
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -335,7 +310,7 @@ class TestGardenDeleteView:
 
         resp = auth_client.get(self.url)
 
-        assert_data_present_in_json_response_html(resp, expected)
+        assertions.assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
     def test_POST_deletes_the_specified_garden(self, auth_client):
@@ -348,7 +323,7 @@ class TestGardenDeleteView:
     def test_POST_redirects_to_garden_list_page(self, auth_client):
         resp = auth_client.post(self.url)
 
-        assert_redirect(resp, reverse('garden-list'))
+        assertions.assert_redirect(resp, reverse('garden-list'))
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.usefixtures('use_tmp_static_dir')
@@ -369,7 +344,7 @@ class TestGardenDeleteView:
 
         resp = getattr(auth_client, method)(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_POST_does_not_delete_the_garden_when_access_by_user_who_doesnt_own_garden(self, auth_client, garden):
@@ -384,7 +359,7 @@ class TestGardenDeleteView:
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -407,7 +382,7 @@ class TestWateringStationDetailView:
     def test_GET_renders_watering_station_detail_html_template(self, auth_client):
         resp = auth_client.get(self.url)
 
-        assert_template_is_rendered(resp, 'watering_station_detail.html')
+        assertions.assert_template_is_rendered(resp, 'watering_station_detail.html')
 
     @pytest.mark.django_db
     def test_GET_redirects_users_who_dont_own_the_watering_station_to_404_page_not_found(self, auth_client, watering_station):
@@ -415,12 +390,12 @@ class TestWateringStationDetailView:
 
         resp = auth_client.get(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
         resp = client.get(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -439,13 +414,13 @@ class TestWateringStationUpdateView:
     def test_GET_renders_watering_station_update_html_template(self, auth_client):
         resp = auth_client.get(self.url)
 
-        assert_template_is_rendered(resp, 'watering_station_update.html')
+        assertions.assert_template_is_rendered(resp, 'watering_station_update.html')
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_returns_json_response_with_url_to_redirect_to_and_success_eq_true(self, auth_client, watering_station_form_fields):
         resp = auth_client.post(self.url, data=watering_station_form_fields)
 
-        assert_successful_json_response(resp, self.url)
+        assertions.assert_successful_json_response(resp, self.url)
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, auth_client, watering_station_form_fields):
@@ -465,7 +440,7 @@ class TestWateringStationUpdateView:
 
         resp = getattr(auth_client, method)(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_POST_doesnt_update_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station, watering_station_form_fields):
@@ -486,7 +461,7 @@ class TestWateringStationUpdateView:
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -518,7 +493,7 @@ class TestWateringStationListView:
 
         resp = auth_client.patch(self.url, data=data)
 
-        assert_redirect(resp, self.garden.get_absolute_url())
+        assertions.assert_redirect(resp, self.garden.get_absolute_url())
 
     @pytest.mark.django_db
     def test_POST_creates_a_new_default_watering_station(self, auth_client):
@@ -532,7 +507,7 @@ class TestWateringStationListView:
     def test_POST_redirects_to_garden_detail(self, auth_client):
         resp = auth_client.post(self.url)
 
-        assert_redirect(resp, self.garden.get_absolute_url())
+        assertions.assert_redirect(resp, self.garden.get_absolute_url())
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'patch'], ids=['post', 'patch'])
@@ -541,7 +516,7 @@ class TestWateringStationListView:
 
         resp = getattr(auth_client, method)(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_POST_doesnt_create_new_garden_is_requesting_user_does_not_own_garden(self, auth_client, garden, watering_station_form_fields):
@@ -571,7 +546,7 @@ class TestWateringStationListView:
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
 
 
 @pytest.mark.integration
@@ -595,7 +570,7 @@ class TestWateringStationDeleteView:
 
         resp = auth_client.get(self.url)
 
-        assert_data_present_in_json_response_html(resp, expected)
+        assertions.assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
     def test_POST_deletes_watering_station_with_given_pk(self, auth_client):
@@ -611,7 +586,7 @@ class TestWateringStationDeleteView:
 
         resp = auth_client.post(self.url)
 
-        assert_redirect(resp, reverse('garden-detail', kwargs={'pk': garden_pk}))
+        assertions.assert_redirect(resp, reverse('garden-detail', kwargs={'pk': garden_pk}))
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
@@ -620,7 +595,7 @@ class TestWateringStationDeleteView:
 
         resp = getattr(auth_client, method)(url)
 
-        assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
 
     @pytest.mark.django_db
     def test_POST_doesnt_delete_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station):
@@ -634,4 +609,4 @@ class TestWateringStationDeleteView:
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
         resp = getattr(client, method)(self.url, follow=False)
 
-        assert_redirect(resp, reverse('login'), self.url)
+        assertions.assert_redirect(resp, reverse('login'), self.url)
