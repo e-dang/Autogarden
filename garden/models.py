@@ -126,6 +126,7 @@ class WateringStation(models.Model):
     INACTIVE_STATUS_STR = 'Inactive'
 
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)
+    image = models.ImageField(null=True, blank=True)
     moisture_threshold = models.IntegerField(default=_default_moisture_threshold)
     watering_duration = models.DurationField(default=_default_watering_duration)
     plant_type = models.CharField(max_length=255, blank=True)
