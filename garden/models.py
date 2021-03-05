@@ -96,13 +96,6 @@ class Garden(models.Model):
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def delete(self, *args, **kwargs):
-        try:
-            os.remove(self.get_abs_path_to_image())
-        except OSError:
-            pass
-        super().delete(*args, **kwargs)
-
     def get_abs_path_to_image(self):
         path = settings.STATIC_ROOT
         for segment in self.image.url.split('/'):

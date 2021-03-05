@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'users',
     'garden.apps.GardenConfig',
     'crispy_forms',
-    'compressor'
+    'compressor',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [

@@ -11,7 +11,7 @@ from tests.conftest import assert_image_files_equal
 from tests.integration.conftest import (assert_redirect,
                                         assert_template_is_rendered)
 
-from garden.forms import MIN_VALUE_ERR_MSG
+from garden.forms import MIN_VALUE_ERR_MSG, UpdateGardenForm
 from garden.models import Garden, WateringStation
 from garden.serializers import WateringStationSerializer
 from garden.utils import derive_duration_string
@@ -330,32 +330,35 @@ class TestGardenDeleteView:
     def test_GET_returns_json_response_with_garden_delete_form_html(self, auth_client):
         expected = [
             'method="post"',
-            f'action="{self.garden.get_delete_url()}"'
+            f'action="{self.url}"'
         ]
 
-        resp = auth_client.get(self.garden.get_delete_url())
+        resp = auth_client.get(self.url)
 
         assert_data_present_in_json_response_html(resp, expected)
 
     @pytest.mark.django_db
     def test_POST_deletes_the_specified_garden(self, auth_client):
-        auth_client.post(self.garden.get_delete_url())
+        auth_client.post(self.url)
 
         with pytest.raises(Garden.DoesNotExist):
             self.garden.refresh_from_db()
 
     @pytest.mark.django_db
     def test_POST_redirects_to_garden_list_page(self, auth_client):
-        resp = auth_client.post(self.garden.get_delete_url())
+        resp = auth_client.post(self.url)
 
         assert_redirect(resp, reverse('garden-list'))
 
-    @pytest.mark.django_db
+    @pytest.mark.django_db(transaction=True)
     @pytest.mark.usefixtures('use_tmp_static_dir')
-    def test_POST_deletes_image_file_in_static_dir(self, auth_client):
+    def test_POST_deletes_image_file_in_static_dir(self, auth_client, update_garden_form_fields):
+        self.garden.image = update_garden_form_fields['image']
+        self.garden.save()
+        self.garden.refresh_from_db()
         path = self.garden.get_abs_path_to_image()
 
-        auth_client.post(self.garden.get_delete_url())
+        auth_client.post(self.url)
 
         assert not os.path.exists(path)
 
