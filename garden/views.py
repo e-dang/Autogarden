@@ -36,9 +36,9 @@ class GardenAPIView(APIView):
     def patch(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
         self.check_object_permissions(request, garden)
-        serializer = GardenPatchSerializer(data=request.data, instance=garden, partial=True)
+        serializer = GardenPatchSerializer(data=request.data, instance=garden)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(request)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -48,7 +48,6 @@ class WateringStationAPIView(APIView):
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
         self.check_object_permissions(request, garden)
-        garden.update(request)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

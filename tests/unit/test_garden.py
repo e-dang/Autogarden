@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta
-from garden.forms import NewGardenForm, WateringStationForm
-from garden.permissions import TokenPermission
 from pathlib import Path
 from typing import Dict
 from unittest.mock import Mock, create_autospec, patch
-from django.forms import ValidationError
 
 import garden.utils as utils
 import pytest
@@ -12,9 +9,12 @@ import pytz
 from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 from garden import models
-from garden.serializers import GardenGetSerializer, WateringStationSerializer
+from garden.permissions import TokenPermission
+from garden.serializers import (GardenGetSerializer, GardenPatchSerializer,
+                                WateringStationSerializer)
 from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
                           WateringStationListView, WateringStationUpdateView)
+from rest_framework.request import Request
 
 User = get_user_model()
 
@@ -30,7 +30,7 @@ def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
 
 
 @pytest.mark.unit
-class TestGardenSerializer:
+class TestGardenGetSerializer:
     @pytest.mark.parametrize('garden_factory, field', [
         (None, 'update_interval'),
     ],
@@ -49,6 +49,19 @@ class TestGardenSerializer:
         ret_val = GardenGetSerializer().get_update_interval(mock_garden)
 
         assert ret_val == mock_garden.update_interval.total_seconds.return_value
+
+
+@pytest.mark.unit
+class TestGardenPatchSerializer:
+    @patch('garden.serializers.serializers.ModelSerializer.save')
+    def test_save_calls_update_on_garden_with_request(self, mock_super):
+        mock_garden = create_autospec(models.Garden)
+        request = Request(HttpRequest())
+        serializer = GardenPatchSerializer(instance=mock_garden)
+
+        serializer.save(request)
+
+        mock_garden.update.assert_called_once_with(request)
 
 
 @pytest.mark.unit
@@ -140,6 +153,24 @@ class TestGardenModel:
         path = garden.get_abs_path_to_image()
 
         assert str(path) == str_path + f'images/{models._default_garden_image()}'
+
+    @pytest.mark.parametrize('value, message', [
+        (-81, models.Garden.CONN_BAD_MSG),
+        (-80, models.Garden.CONN_POOR_MSG),
+        (-71, models.Garden.CONN_POOR_MSG),
+        (-70, models.Garden.CONN_OK_MSG),
+        (-68, models.Garden.CONN_OK_MSG),
+        (-67, models.Garden.CONN_GOOD_MSG),
+        (-31, models.Garden.CONN_GOOD_MSG),
+        (-30, models.Garden.CONN_EXCELLENT_MSG),
+    ],
+        ids=['bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
+    def test_get_connection_strength_display_returns_correct_message(self, garden_factory, value, message):
+        garden = garden_factory.build(connection_strength=value)
+
+        ret_val = garden.get_connection_strength_display()
+
+        assert ret_val == message
 
 
 @pytest.mark.unit

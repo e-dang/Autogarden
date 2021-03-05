@@ -11,7 +11,7 @@ from tests.conftest import assert_image_files_equal
 from tests.integration.conftest import (assert_redirect,
                                         assert_template_is_rendered)
 
-from garden.forms import MIN_VALUE_ERR_MSG, UpdateGardenForm
+from garden.forms import MIN_VALUE_ERR_MSG
 from garden.models import Garden, WateringStation
 from garden.serializers import WateringStationSerializer
 from garden.utils import derive_duration_string
@@ -29,6 +29,12 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
+
+
+def assert_garden_connection_fields_are_updated(garden: Garden, response: str) -> None:
+    assert garden.is_connected == True
+    assert garden.last_connection_ip == response.wsgi_request.META.get('REMOTE_ADDR')
+    assert datetime.now(pytz.UTC) - garden.last_connection_time < timedelta(seconds=1)
 
 
 @pytest.mark.integration
@@ -55,22 +61,27 @@ class TestGardenAPIView:
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize('water_level', [
-        Garden.LOW,
-        Garden.OK
-    ],
-        ids=['low', 'ok'])
-    def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, water_level):
-        self.garden.water_level = Garden.OK if water_level == Garden.LOW else Garden.LOW
+    def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, garden_patch_serializer_fields):
+        self.garden.water_level = Garden.OK if garden_patch_serializer_fields['water_level'] == Garden.LOW else Garden.LOW
         self.garden.save()
-        data = {
-            'water_level': water_level
-        }
 
-        auth_api_client.patch(self.url, data=data)
+        auth_api_client.patch(self.url, data=garden_patch_serializer_fields)
 
         self.garden.refresh_from_db()
-        assert self.garden.water_level == data['water_level']
+        field_equality = [
+            getattr(self.garden, field) == value for field, value in garden_patch_serializer_fields.items()
+        ]
+        assert all(field_equality)
+
+    @pytest.mark.django_db
+    def test_PATCH_updates_garden_connection_fields(self, auth_api_client, garden_patch_serializer_fields):
+        self.garden.is_connected = False
+        self.garden.save()
+
+        resp = auth_api_client.patch(self.url, data=garden_patch_serializer_fields)
+
+        self.garden.refresh_from_db()
+        assert_garden_connection_fields_are_updated(self.garden, resp)
 
     @pytest.mark.django_db
     def test_PATCH_returns_204_status_code(self, auth_api_client):
@@ -116,17 +127,6 @@ class TestWateringStationAPIView:
         watering_stations = list(self.garden.watering_stations.all())
         for i, watering_station in enumerate(resp.data):
             assert watering_station == WateringStationSerializer(watering_stations[i]).data
-
-    @pytest.mark.django_db
-    def test_GET_updates_garden_connection_fields(self, auth_api_client):
-        self.garden.is_connected = False
-
-        resp = auth_api_client.get(self.url)
-
-        self.garden.refresh_from_db()
-        assert self.garden.is_connected == True
-        assert self.garden.last_connection_ip == resp.wsgi_request.META.get('REMOTE_ADDR')
-        assert datetime.now(pytz.UTC) - self.garden.last_connection_time < timedelta(seconds=1)
 
     @pytest.mark.django_db
     def test_POST_adds_a_watering_station_record_to_each_watering_station_in_garden(self, auth_api_client):

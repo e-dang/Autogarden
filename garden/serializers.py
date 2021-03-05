@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.request import Request
 
 from .models import Garden, WateringStation
 
@@ -17,7 +18,15 @@ class GardenGetSerializer(serializers.ModelSerializer):
 class GardenPatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Garden
-        fields = ['water_level']
+        fields = ['water_level', 'connection_strength']
+        extra_kwargs = {
+            'water_level': {'required': True},
+            'connection_strength': {'required': True}
+        }
+
+    def save(self, request: Request, **kwargs):
+        self.instance.update(request)
+        return super().save(**kwargs)
 
 
 class WateringStationSerializer(serializers.ModelSerializer):

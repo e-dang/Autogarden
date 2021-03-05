@@ -55,6 +55,19 @@ class Garden(models.Model):
         (LOW, 'Low'),
     ]
 
+    # Values from https://www.speedcheck.org/wiki/rssi/#:~:text=RSSI%20or%20this%20signal%20value,%2D70%20(minus%2070).
+    CONN_POOR = -80
+    CONN_OK = -70
+    CONN_GOOD = -67
+    CONN_EXCELLENT = -30
+
+    CONN_NOT_AVAILABLE_MSG = 'N/A'
+    CONN_BAD_MSG = 'Bad'
+    CONN_POOR_MSG = 'Poor'
+    CONN_OK_MSG = 'Ok'
+    CONN_GOOD_MSG = 'Good'
+    CONN_EXCELLENT_MSG = 'Excellent'
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default=_default_garden_name)
     image = models.ImageField(default=_default_garden_image)
@@ -63,6 +76,7 @@ class Garden(models.Model):
     last_connection_time = models.DateTimeField(null=True)
     update_interval = models.DurationField(default=_default_update_interval)
     num_missed_updates = models.PositiveIntegerField(default=_default_num_missed_updates)
+    connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
     def get_absolute_url(self):
@@ -107,6 +121,20 @@ class Garden(models.Model):
         self.last_connection_ip = request.META.get('REMOTE_ADDR')
         self.last_connection_time = datetime.now(pytz.UTC)
         self.save()
+
+    def get_connection_strength_display(self):
+        if self.connection_strength is None:
+            return self.CONN_NOT_AVAILABLE_MSG
+        elif self.connection_strength >= self.CONN_EXCELLENT:
+            return self.CONN_EXCELLENT_MSG
+        elif self.connection_strength >= self.CONN_GOOD:
+            return self.CONN_GOOD_MSG
+        elif self.connection_strength >= self.CONN_OK:
+            return self.CONN_OK_MSG
+        elif self.connection_strength >= self.CONN_POOR:
+            return self.CONN_POOR_MSG
+        else:
+            return self.CONN_BAD_MSG
 
 
 class Token(models.Model):

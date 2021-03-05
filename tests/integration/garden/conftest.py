@@ -28,6 +28,11 @@ def update_garden_form_fields(garden_factory, use_tmp_static_dir):
 
 
 @pytest.fixture
+def garden_patch_serializer_fields(garden_factory):
+    return garden_factory.patch_serializer_fields()
+
+
+@pytest.fixture
 def auth_api_client_garden(db, garden_factory):
     api_client = APIClient()
     garden = garden_factory(watering_stations=3)

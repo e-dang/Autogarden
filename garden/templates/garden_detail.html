@@ -79,6 +79,16 @@
                     </div>
                 </div>
             </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Connection Strength</div>
+                    <div class="card-body">
+                        <p id="connectionStrength" class="card-text text-center">
+                            {{garden.get_connection_strength_display}}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -143,18 +153,4 @@
     </div>
 </div>
 
-{% endblock %}
-
-{% block javascript %}
-
-<script>
-    const timer = setInterval(() => {
-        const text = $('#nextExpectedUpdate').text();
-        if (isNaN(text)) {
-            clearInterval(timer);
-        } else {
-            $('#nextExpectedUpdate').text(parseInt(text) - 1);
-        }
-    }, 1000);
-</script>
 {% endblock %}

@@ -1,5 +1,6 @@
 from datetime import timedelta
 from functools import partial
+from garden.serializers import GardenPatchSerializer
 from garden.utils import derive_duration_string
 from typing import Any, Dict
 
@@ -87,6 +88,7 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
     num_missed_updates = factory.Faker('random_int', min=0, max=100)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
+    connection_strength = factory.Faker('random_int', min=-100, max=0)
     update_interval = factory.LazyFunction(lambda: random_valid_duration(1, 60))
 
     class Meta:
@@ -105,10 +107,19 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
                     WateringStationFactory(garden=self)
 
     @classmethod
-    def form_fields(cls, **kwargs):
-        keys = ['name', 'update_interval']
+    def json_subset(cls, keys, **kwargs):
         data = super().json(**kwargs)
         return {key: data[key] for key in keys}
+
+    @classmethod
+    def form_fields(cls, **kwargs):
+        keys = ['name', 'update_interval']
+        return cls.json_subset(keys, **kwargs)
+
+    @classmethod
+    def patch_serializer_fields(cls, **kwargs):
+        keys = GardenPatchSerializer.Meta.fields
+        return cls.json_subset(keys, **kwargs)
 
 
 class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
