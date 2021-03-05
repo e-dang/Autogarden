@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 from unittest.mock import Mock
 
 import pytz
@@ -37,6 +37,10 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
+
+
+def assert_data_contains_fields(data: Dict, expected_fields: Iterable[str]) -> None:
+    assert set(data) == set(expected_fields)
 
 
 def assert_garden_connection_fields_are_updated(garden: Garden, response: str) -> None:

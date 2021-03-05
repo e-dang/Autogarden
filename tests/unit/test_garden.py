@@ -14,7 +14,7 @@ from garden.serializers import (GardenGetSerializer, GardenPatchSerializer,
 from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
                           WateringStationListView, WateringStationUpdateView)
 from rest_framework.request import Request
-from tests.assertions import assert_render_context_called_with
+from tests.assertions import assert_data_contains_fields, assert_render_context_called_with
 
 User = get_user_model()
 
@@ -26,17 +26,13 @@ def mock_auth_user():
 
 @pytest.mark.unit
 class TestGardenGetSerializer:
-    @pytest.mark.parametrize('garden_factory, field', [
-        (None, 'update_interval'),
-    ],
-        indirect=['garden_factory'],
-        ids=['uuid'])
-    def test_field_is_serialized(self, garden_factory, field):
+    def test_serialized_data_contains_expected_fields(self, garden_factory):
+        expected_fields = ['update_interval']
         garden = garden_factory.build()
 
         serializer = GardenGetSerializer(garden)
 
-        assert field in serializer.data
+        assert_data_contains_fields(serializer.data, expected_fields)
 
     def test_get_update_interval_returns_return_value_of_total_seconds_method_call(self):
         mock_garden = Mock()

@@ -8,7 +8,7 @@ from tests import assertions
 
 from garden.forms import MIN_VALUE_ERR_MSG
 from garden.models import Garden, WateringStation
-from garden.serializers import WateringStationSerializer
+from garden.serializers import GardenGetSerializer, WateringStationSerializer
 from garden.utils import derive_duration_string
 
 
@@ -28,6 +28,12 @@ class TestGardenAPIView:
         resp = auth_api_client.get(self.url)
 
         assert resp.status_code == status.HTTP_200_OK
+
+    @pytest.mark.django_db
+    def test_GET_returns_data_with_correct_fields(self, auth_api_client):
+        resp = auth_api_client.get(self.url)
+
+        assertions.assert_data_contains_fields(resp.data, GardenGetSerializer.Meta.fields)
 
     @pytest.mark.django_db
     def test_GET_returns_garden_config_data(self, auth_api_client):
