@@ -1,6 +1,7 @@
 Django==3.1.6
 django-crispy-forms==1.11.1
 django-compressor==2.4
+django-cleanup==5.1.0
 djangorestframework==3.12.2
 pytest==6.2.2
 pytest-django==4.1.0

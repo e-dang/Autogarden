@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'users',
     'garden.apps.GardenConfig',
     'crispy_forms',
-    'compressor'
+    'compressor',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +85,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,
+        }
     }
 }
 

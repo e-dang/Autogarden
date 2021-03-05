@@ -14,6 +14,13 @@ from users.models import User
 TEST_PASSWORD = 'test-password123'
 
 
+def random_valid_duration(min_seconds, max_seconds):
+    seconds_diff = max_seconds - min_seconds
+    rand_time_delta = factory.Faker('time_delta', end_datetime=timedelta(
+        seconds=seconds_diff)).evaluate('', '', {'locale': None})
+    return rand_time_delta + timedelta(seconds=min_seconds)
+
+
 def generate_dict_factory(factory: Factory):
     """https://github.com/FactoryBoy/factory_boy/issues/68"""
 
@@ -80,7 +87,7 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
     num_missed_updates = factory.Faker('random_int', min=0, max=100)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
-    update_interval = factory.Faker('time_delta', end_datetime=timedelta(minutes=1))
+    update_interval = factory.LazyFunction(lambda: random_valid_duration(1, 60))
 
     class Meta:
         model = Garden
@@ -109,7 +116,7 @@ class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin
     moisture_threshold = factory.Faker('random_int', min=0, max=100)
     plant_type = factory.Sequence(lambda x: f'lettuce{x}')
     status = factory.Sequence(lambda x: x % 2 == 0)
-    watering_duration = factory.Faker('time_delta', end_datetime=timedelta(seconds=20))
+    watering_duration = factory.LazyFunction(lambda: random_valid_duration(1, 20))
 
     class Meta:
         model = WateringStation

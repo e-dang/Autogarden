@@ -86,7 +86,7 @@ class TestWateringStationForm:
     ],
         indirect=['watering_station_form_fields'],
         ids=['plant_type', 'status'])
-    def test_plant_type_field_is_not_required(self, watering_station_form_fields, missing_field):
+    def test_field_is_not_required(self, watering_station_form_fields, missing_field):
         watering_station_form_fields.pop(missing_field)
         form = WateringStationForm(data=watering_station_form_fields)
 

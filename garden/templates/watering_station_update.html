@@ -5,10 +5,22 @@
 {% endblock %}
 
 {% block main_content %}
-
 <div class="row">
-    <div class="col-md-5">
+    <div class="col">
         <div class="card card-body">
+            <div class="row">
+            </div>
+            <div class="row">
+                {% if form.instance.image %}
+                <img id="wateringStationImage" src="{{form.instance.image.url}}" alt="">
+                {% else %}
+                <img id="wateringStationImage" src="" alt="">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div id={{form.FORM_CONTAINER_ID}} class="card card-body">
             {% load crispy_forms_tags %}
             {% crispy form %}
         </div>
@@ -29,23 +41,17 @@
 
 
 {% block javascript %}
-<script src="/static/javascript/utils.js"></script>
 <script>
-    const form = $('#updateWateringStationForm');
-    form.on('submit', (event) => {
-        event.preventDefault();
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(),
-            success: (data) => {
-                form.html(data.html);
-            },
-        });
-    })
-
-    getModalDataAjax("{% url 'watering-station-delete' form.instance.garden.pk form.instance.pk %}");
-
-
+    var configs = {
+        imgInputSelector: '#{{form.image.auto_id}}',
+        cropBtnSelector: '#{{form.CROP_BTN_ID}}',
+        resetBtnSelector: '#{{form.RESET_BTN_ID}}',
+        imgContainerSelector: '#{{form.IMAGE_CONTAINER_ID}}',
+        formSelector: '#{{form.FORM_ID}}',
+        deleteUrl: '{{ form.instance.get_delete_url }}',
+        formContainerSelector: '#{{form.FORM_CONTAINER_ID}}'
+    };
 </script>
+<script src="/static/javascript/utils.js"></script>
+<script src="/static/javascript/garden_update.js"></script>
 {% endblock %}

@@ -136,9 +136,10 @@ class DeleteGardenForm(DeleteForm):
     MESSAGE = '<p>Are you sure you want to delete this garden?</p>'
 
 
-class WateringStationForm(forms.ModelForm):
+class WateringStationForm(forms.ModelForm, CropperMixin):
     MODAL_ID = 'deleteWateringStationModal'
-    MOISTURE_THRESHOLD_ERR_MSG = 'The moisture threshold must be in the range 0 - 100.'
+    FORM_ID = 'wateringStationForm'
+    FORM_CONTAINER_ID = 'formContainer'
 
     watering_duration = CustomDurationField(validators=[validate_duration])
     moisture_threshold = forms.IntegerField(validators=[
@@ -148,7 +149,7 @@ class WateringStationForm(forms.ModelForm):
 
     class Meta:
         model = WateringStation
-        fields = ['moisture_threshold', 'watering_duration', 'plant_type', 'status']
+        fields = ['moisture_threshold', 'watering_duration', 'plant_type', 'status', 'image']
         error_messages = {
             'moisture_threshold': {'required': REQUIRED_FIELD_ERR_MSG},
             'watering_duration': {'required': REQUIRED_FIELD_ERR_MSG}
@@ -157,11 +158,19 @@ class WateringStationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_id = 'updateWateringStationForm'
+        self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Update'))
-        self.helper.add_input(Button('delete', 'Delete', css_class='btn btn-danger',
-                                     data_toggle='modal', data_target=f'#{self.MODAL_ID}'))
+        self.helper.layout = Layout(
+            Field('plant_type'),
+            Field('status'),
+            Field('moisture_threshold'),
+            Field('watering_duration'),
+            Field('image', id='id_image'),
+            *self.cropper_fields,
+            Submit('submit', 'Update'),
+            Button('delete', 'Delete', css_class='btn btn-danger',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
+        )
 
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'

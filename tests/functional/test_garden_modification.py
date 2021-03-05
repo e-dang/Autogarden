@@ -80,7 +80,9 @@ class TestGardenModification(Base):
         plant_type = 'lettuce'
         moisture_threshold = '80'
         watering_duration = build_duration_string(minutes=10, seconds=2)
-        update_ws_page.update_info(ws_status, plant_type, moisture_threshold, watering_duration)
+        image = 'test_lettuce_image.png'
+        update_ws_page.update_info(ws_status, plant_type, moisture_threshold,
+                                   watering_duration, image, self.perform_image_crop)
 
         # they then go back to the garden detail view and sees that the changes have been persisted in the table
         update_ws_page.garden_detail_nav_button.click()
