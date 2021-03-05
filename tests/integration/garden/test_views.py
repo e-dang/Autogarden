@@ -11,7 +11,7 @@ from tests.conftest import assert_image_files_equal
 from tests.integration.conftest import (assert_redirect,
                                         assert_template_is_rendered)
 
-from garden.forms import MIN_VALUE_ERR_MSG, NewGardenForm
+from garden.forms import MIN_VALUE_ERR_MSG
 from garden.models import Garden, WateringStation
 from garden.serializers import WateringStationSerializer
 from garden.utils import derive_duration_string
@@ -439,10 +439,10 @@ class TestWateringStationUpdateView:
         assert_template_is_rendered(resp, 'watering_station_update.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_returns_json_response_with_update_watering_station_form_html(self, auth_client, watering_station_form_fields):
+    def test_POST_with_valid_data_returns_json_response_with_url_to_redirect_to_and_success_eq_true(self, auth_client, watering_station_form_fields):
         resp = auth_client.post(self.url, data=watering_station_form_fields)
 
-        assert_data_present_in_json_response_html(resp, watering_station_form_fields.values())
+        assert_successful_json_response(resp, self.url)
 
     @pytest.mark.django_db
     def test_POST_with_valid_data_updates_the_watering_station_with_given_data(self, auth_client, watering_station_form_fields):
@@ -471,10 +471,12 @@ class TestWateringStationUpdateView:
         auth_client.post(url, data=watering_station_form_fields)
 
         watering_station.refresh_from_db()
-        assert watering_station.moisture_threshold != watering_station_form_fields['moisture_threshold']
-        assert derive_duration_string(
-            watering_station.watering_duration) != watering_station_form_fields['watering_duration']
-        assert watering_station.plant_type != watering_station_form_fields['plant_type']
+        assert any([
+            watering_station.moisture_threshold != watering_station_form_fields['moisture_threshold'],
+            derive_duration_string(
+                watering_station.watering_duration) != watering_station_form_fields['watering_duration'],
+            watering_station.plant_type != watering_station_form_fields['plant_type']
+        ])
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['post', 'get'], ids=['post', 'get'])
