@@ -31,6 +31,14 @@ class TestGardenGetSerializer:
 
 @pytest.mark.unit
 class TestGardenPatchSerializer:
+    def test_serialized_data_contains_expected_fields(self, garden_factory):
+        expected_fields = ['water_level', 'connection_strength']
+        garden = garden_factory.build()
+
+        serializer = GardenPatchSerializer(garden)
+
+        assert_data_contains_fields(serializer.data, expected_fields)
+
     @patch('garden.serializers.serializers.ModelSerializer.save')
     def test_save_calls_update_on_garden_with_request(self, mock_super):
         mock_garden = create_autospec(models.Garden)
@@ -44,19 +52,13 @@ class TestGardenPatchSerializer:
 
 @pytest.mark.unit
 class TestWateringStationSerializer:
-    @pytest.mark.parametrize('watering_station_factory, field', [
-        (None, 'moisture_threshold'),
-        (None, 'watering_duration'),
-        (None, 'status')
-    ],
-        indirect=['watering_station_factory'],
-        ids=['moisture_threshold', 'watering_duration', 'status'])
-    def test_field_is_serialized(self, watering_station_factory, field):
+    def test_serialized_data_contains_expected_fields(self, watering_station_factory):
+        expected_fields = ['moisture_threshold', 'watering_duration', 'status']
         watering_station = watering_station_factory.build()
 
         serializer = WateringStationSerializer(watering_station)
 
-        assert field in serializer.data
+        assert_data_contains_fields(serializer.data, expected_fields)
 
     def test_get_watering_duration_returns_return_value_of_total_seconds_method_call(self):
         mock_watering_station = Mock()

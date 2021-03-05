@@ -1,5 +1,5 @@
 import pytest
-from tests.assertions import assert_data_contains_fields
+from tests.assertions import assert_serializer_required_field_error
 
 from garden.serializers import GardenPatchSerializer
 
@@ -7,10 +7,10 @@ from garden.serializers import GardenPatchSerializer
 @pytest.mark.integration
 class TestGardenPatchSerializer:
     @pytest.mark.django_db
-    def test_serialized_data_contains_expected_fields(self, garden_patch_serializer_fields):
-        expected_fields = ['water_level', 'connection_strength']
+    def test_is_valid_returns_false_when_required_field_is_missing(self, garden_missing_patch_serializer_data):
+        data, field = garden_missing_patch_serializer_data
 
-        serializer = GardenPatchSerializer(data=garden_patch_serializer_fields)
+        serializer = GardenPatchSerializer(data=data)
 
-        assert serializer.is_valid() == True
-        assert_data_contains_fields(serializer.data, expected_fields)
+        assert serializer.is_valid() == False
+        assert_serializer_required_field_error(serializer.errors[field])

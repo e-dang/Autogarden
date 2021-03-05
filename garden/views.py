@@ -39,7 +39,8 @@ class GardenAPIView(APIView):
         serializer = GardenPatchSerializer(data=request.data, instance=garden)
         if serializer.is_valid():
             serializer.save(request)
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WateringStationAPIView(APIView):

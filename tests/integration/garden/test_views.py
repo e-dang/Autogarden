@@ -43,37 +43,48 @@ class TestGardenAPIView:
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
     @pytest.mark.django_db
-    def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, garden_patch_serializer_fields):
-        self.garden.water_level = Garden.OK if garden_patch_serializer_fields['water_level'] == Garden.LOW else Garden.LOW
+    def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, garden_patch_serializer_data):
+        self.garden.water_level = Garden.OK if garden_patch_serializer_data['water_level'] == Garden.LOW else Garden.LOW
         self.garden.save()
 
-        auth_api_client.patch(self.url, data=garden_patch_serializer_fields)
+        auth_api_client.patch(self.url, data=garden_patch_serializer_data)
 
         self.garden.refresh_from_db()
         field_equality = [
-            getattr(self.garden, field) == value for field, value in garden_patch_serializer_fields.items()
+            getattr(self.garden, field) == value for field, value in garden_patch_serializer_data.items()
         ]
         assert all(field_equality)
 
     @pytest.mark.django_db
-    def test_PATCH_updates_garden_connection_fields(self, auth_api_client, garden_patch_serializer_fields):
+    def test_PATCH_updates_garden_connection_fields(self, auth_api_client, garden_patch_serializer_data):
         self.garden.is_connected = False
         self.garden.save()
 
-        resp = auth_api_client.patch(self.url, data=garden_patch_serializer_fields)
+        resp = auth_api_client.patch(self.url, data=garden_patch_serializer_data)
 
         self.garden.refresh_from_db()
         assertions.assert_garden_connection_fields_are_updated(self.garden, resp)
 
     @pytest.mark.django_db
-    def test_PATCH_returns_204_status_code(self, auth_api_client):
-        data = {
-            'water_level': Garden.LOW
-        }
+    def test_PATCH_returns_204_status_code(self, auth_api_client, garden_patch_serializer_data):
+        resp = auth_api_client.patch(self.url, data=garden_patch_serializer_data)
+
+        assert resp.status_code == status.HTTP_204_NO_CONTENT
+
+    @pytest.mark.django_db
+    def test_PATCH_with_invalid_data_returns_400_status_code(self, auth_api_client, garden_invalid_patch_serializer_data):
+        resp = auth_api_client.patch(self.url, data=garden_invalid_patch_serializer_data)
+
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    @pytest.mark.django_db
+    def test_PATCH_with_missing_field_returns_400_status_code(self, auth_api_client, garden_missing_patch_serializer_data):
+        data, field = garden_missing_patch_serializer_data
 
         resp = auth_api_client.patch(self.url, data=data)
 
-        assert resp.status_code == status.HTTP_204_NO_CONTENT
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assertions.assert_serializer_required_field_error(resp.data[field])
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('method', ['get', 'patch'], ids=['get', 'patch'])

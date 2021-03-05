@@ -1,5 +1,7 @@
+import pytest
+from rest_framework.exceptions import ErrorDetail
 from datetime import datetime, timedelta
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List
 from unittest.mock import Mock
 
 import pytz
@@ -37,6 +39,14 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
     assert response.status_code == status.HTTP_200_OK
     for value in values:
         assert str(value) in json['html']
+
+
+def assert_serializer_required_field_error(errors: List[ErrorDetail]) -> None:
+    for err in errors:
+        if err.code == 'required':
+            return
+
+    pytest.fail('Required error not found in list of errors')
 
 
 def assert_data_contains_fields(data: Dict, expected_fields: Iterable[str]) -> None:
