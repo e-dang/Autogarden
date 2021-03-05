@@ -6,15 +6,8 @@ from users.models import User
 
 
 @pytest.fixture
-def valid_user_info(test_password):
-    return {
-        'email': 'email@demo.com',
-        'first_name': 'John',
-        'last_name': 'Doe',
-        'password1': test_password,
-        'password2': test_password
-
-    }
+def signup_info(user_factory, test_password):
+    return user_factory.signup_info(password=test_password)
 
 
 @pytest.mark.integration
@@ -112,24 +105,24 @@ class TestCreateUserView:
         assert_template_is_rendered(resp, 'register.html')
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_creates_a_new_user_with_provided_credentials(self, client, valid_user_info):
-        client.post(self.url, data=valid_user_info)
+    def test_POST_with_valid_data_creates_a_new_user_with_provided_credentials(self, client, signup_info):
+        client.post(self.url, data=signup_info)
 
         assert User.objects.get(
-            email=valid_user_info['email'],
-            first_name=valid_user_info['first_name'],
-            last_name=valid_user_info['last_name']
+            email=signup_info['email'],
+            first_name=signup_info['first_name'],
+            last_name=signup_info['last_name']
         )
 
     @pytest.mark.django_db
-    def test_POST_with_valid_data_logs_in_the_created_user(self, client, valid_user_info):
-        client.post(self.url, data=valid_user_info)
+    def test_POST_with_valid_data_logs_in_the_created_user(self, client, signup_info):
+        client.post(self.url, data=signup_info)
 
-        assert client.session['_auth_user_id'] == str(User.objects.get(email=valid_user_info['email']).pk)
+        assert client.session['_auth_user_id'] == str(User.objects.get(email=signup_info['email']).pk)
 
     @pytest.mark.django_db
-    def test_POST_redirects_to_garden_list_view(self, client, valid_user_info):
-        resp = client.post(self.url, data=valid_user_info)
+    def test_POST_redirects_to_garden_list_view(self, client, signup_info):
+        resp = client.post(self.url, data=signup_info)
 
         assert_redirect(resp, reverse('garden-list'))
 

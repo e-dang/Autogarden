@@ -46,6 +46,11 @@ class JsonFactoryMixin:
         return generate_dict_factory(cls)(**kwargs)
 
     @classmethod
+    def json_subset(cls, keys, **kwargs):
+        data = cls.json(**kwargs)
+        return {key: data[key] for key in keys}
+
+    @classmethod
     def json_batch(cls, num, **kwargs):
         factory = generate_dict_factory(cls)
         return [factory(**kwargs) for _ in range(num)]
@@ -67,6 +72,15 @@ class UserFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
         if count:
             for _ in range(count):
                 GardenFactory(owner=self)
+
+    @classmethod
+    def signup_info(cls, **kwargs):
+        keys = ['email', 'first_name', 'last_name', 'password']
+        data = super().json_subset(keys, **kwargs)
+        data['password1'] = data['password']
+        data['password2'] = data['password']
+        data.pop('password')
+        return data
 
 
 @factory.django.mute_signals(post_save)
@@ -107,19 +121,14 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
                     WateringStationFactory(garden=self)
 
     @classmethod
-    def json_subset(cls, keys, **kwargs):
-        data = super().json(**kwargs)
-        return {key: data[key] for key in keys}
-
-    @classmethod
     def form_fields(cls, **kwargs):
         keys = ['name', 'update_interval']
-        return cls.json_subset(keys, **kwargs)
+        return super().json_subset(keys, **kwargs)
 
     @classmethod
     def patch_serializer_fields(cls, **kwargs):
         keys = GardenPatchSerializer.Meta.fields
-        return cls.json_subset(keys, **kwargs)
+        return super().json_subset(keys, **kwargs)
 
 
 class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
