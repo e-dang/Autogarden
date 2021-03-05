@@ -148,6 +148,13 @@
 {% block javascript %}
 
 <script>
-
+    const timer = setInterval(() => {
+        const text = $('#nextExpectedUpdate').text();
+        if (isNaN(text)) {
+            clearInterval(timer);
+        } else {
+            $('#nextExpectedUpdate').text(parseInt(text) - 1);
+        }
+    }, 1000);
 </script>
 {% endblock %}
