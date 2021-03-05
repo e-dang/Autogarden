@@ -39,6 +39,7 @@ class TestGardenAPIView:
     def test_GET_returns_garden_config_data(self, auth_api_client):
         resp = auth_api_client.get(self.url)
 
+        assert len(resp.data) == 1  # reminder to update field equality assertions if adding another serializer field
         assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
 
     @pytest.mark.django_db
