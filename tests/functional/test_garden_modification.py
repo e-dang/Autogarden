@@ -33,7 +33,7 @@ class TestGardenModification(Base):
         self.wait_for_page_to_be_loaded(garden_page)
 
         # the user sees information about the garden
-        self.assert_garden_info_is_correct(garden_page)
+        assert garden_page.is_displaying_info_for_garden(self.garden)
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
@@ -190,17 +190,6 @@ class TestGardenModification(Base):
     def assert_update_watering_station_form_has_values(self, data, update_ws_page):
         for key, value in data.items():
             assert getattr(update_ws_page, key) == value
-
-    def assert_garden_info_is_correct(self, garden_page):
-        assert garden_page.get_garden_status() == self.garden.status
-        assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
-        assert garden_page.get_last_connected_at() == self.garden.get_formatted_last_connection_time()
-        self.assert_next_expected_update_is_correct(garden_page)
-        assert garden_page.get_num_missed_updates() == str(self.garden.num_missed_updates)
-        assert garden_page.get_water_level() == str(self.garden.get_water_level_display())
-
-    def assert_next_expected_update_is_correct(self, garden_page):
-        assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
 
     def assert_watering_station_table_contains_correct_headers(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()

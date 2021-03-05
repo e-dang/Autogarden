@@ -85,10 +85,24 @@ class GardenDetailPage(BasePage):
         return self._get_inner_text('waterLevel')
 
     def get_garden_name(self):
-        return wait_for(lambda: self.driver.find_element_by_id('gardenName')).get_attribute('innerText')
+        return self._get_inner_text('gardenName')
 
     def get_garden_image_src(self):
         return wait_for(lambda: self.driver.find_element_by_id('gardenImage')).get_attribute('src')
+
+    def get_connection_strength(self):
+        return self._get_inner_text('connectionStrength')
+
+    def is_displaying_info_for_garden(self, garden):
+        return all([
+            self.get_garden_status() == garden.status,
+            self.get_last_connected_from() == str(garden.last_connection_ip),
+            self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
+            garden.calc_time_till_next_update() - int(self.get_next_expected_update()) < 2,
+            self.get_num_missed_updates() == str(garden.num_missed_updates),
+            self.get_connection_strength() == garden.get_connection_strength_display(),
+            self.get_water_level() == str(garden.get_water_level_display()),
+        ])
 
     def _get_field_index(self, field_name):
         if self.field_mapping is None:
