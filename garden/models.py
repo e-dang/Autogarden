@@ -1,5 +1,4 @@
 import uuid
-import os
 from datetime import datetime, timedelta
 
 import pytz
@@ -29,10 +28,6 @@ def _default_is_connected():
 
 def _default_update_interval():
     return timedelta(minutes=5)
-
-
-def _default_num_missed_updates():
-    return 0
 
 
 def _default_status():
@@ -75,7 +70,6 @@ class Garden(models.Model):
     last_connection_ip = models.GenericIPAddressField(null=True)
     last_connection_time = models.DateTimeField(null=True)
     update_interval = models.DurationField(default=_default_update_interval)
-    num_missed_updates = models.PositiveIntegerField(default=_default_num_missed_updates)
     connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 

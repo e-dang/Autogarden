@@ -100,7 +100,6 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     is_connected = factory.Sequence(lambda x: x % 2 == 0)
     last_connection_ip = factory.Faker('ipv4')
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
-    num_missed_updates = factory.Faker('random_int', min=0, max=100)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
     connection_strength = factory.Faker('random_int', min=-100, max=0)
     update_interval = factory.LazyFunction(lambda: random_valid_duration(1, 60))

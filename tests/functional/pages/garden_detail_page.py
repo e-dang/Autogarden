@@ -78,9 +78,6 @@ class GardenDetailPage(BasePage):
     def get_next_expected_update(self):
         return self._get_inner_text('nextExpectedUpdate')
 
-    def get_num_missed_updates(self):
-        return self._get_inner_text('numMissedUpdates')
-
     def get_water_level(self):
         return self._get_inner_text('waterLevel')
 
@@ -99,7 +96,6 @@ class GardenDetailPage(BasePage):
             self.get_last_connected_from() == str(garden.last_connection_ip),
             self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
             garden.calc_time_till_next_update() - int(self.get_next_expected_update()) < 2,
-            self.get_num_missed_updates() == str(garden.num_missed_updates),
             self.get_connection_strength() == garden.get_connection_strength_display(),
             self.get_water_level() == str(garden.get_water_level_display()),
         ])

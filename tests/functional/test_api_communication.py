@@ -5,7 +5,7 @@ import pytest
 import pytz
 from garden.models import (CONNECTED_STR, Garden, _default_is_connected,
                            _default_moisture_threshold,
-                           _default_num_missed_updates, _default_status,
+                           _default_status,
                            _default_update_interval,
                            _default_watering_duration)
 from garden.utils import derive_duration_string
@@ -33,7 +33,7 @@ class TestAPICommunication(Base):
                                      last_connection_ip=None,
                                      last_connection_time=None,
                                      update_interval=_default_update_interval(),
-                                     num_missed_updates=_default_num_missed_updates())
+                                     )
         self.api_client = api_client
         self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + self.garden.token.uuid)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})

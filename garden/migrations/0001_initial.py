@@ -25,9 +25,9 @@ class Migration(migrations.Migration):
                 ('last_connection_ip', models.GenericIPAddressField(null=True)),
                 ('last_connection_time', models.DateTimeField(null=True)),
                 ('update_interval', models.DurationField(default=garden.models._default_update_interval)),
-                ('num_missed_updates', models.PositiveIntegerField(default=garden.models._default_num_missed_updates)),
                 ('water_level', models.CharField(choices=[('ok', 'Ok'), ('lo', 'Low')], max_length=2, null=True)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gardens', to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                            related_name='gardens', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -38,7 +38,8 @@ class Migration(migrations.Migration):
                 ('watering_duration', models.DurationField(default=garden.models._default_watering_duration)),
                 ('plant_type', models.CharField(blank=True, max_length=255)),
                 ('status', models.BooleanField(default=garden.models._default_status)),
-                ('garden', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='watering_stations', to='garden.garden')),
+                ('garden', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                             related_name='watering_stations', to='garden.garden')),
             ],
             options={
                 'ordering': ['id'],
@@ -50,7 +51,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('moisture_level', models.FloatField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('watering_station', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='records', to='garden.wateringstation')),
+                ('watering_station', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                                       related_name='records', to='garden.wateringstation')),
             ],
             options={
                 'ordering': ['created'],
