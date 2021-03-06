@@ -1,4 +1,7 @@
 import re
+from tests.assertions.assertions import assert_image_files_equal
+
+import pytest
 
 from garden.forms import UpdateGardenForm
 
@@ -28,9 +31,9 @@ class ResetButton(Button):
 
 
 class GardenUpdatePage(BasePage):
-    garden_name = GardenNameInput()
-    garden_image = GardenImageInput()
-    garden_update_interval = UpdateInterval()
+    name = GardenNameInput()
+    image = GardenImageInput()
+    update_interval = UpdateInterval()
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -45,3 +48,22 @@ class GardenUpdatePage(BasePage):
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/update/$'
         return re.search(pattern, self.driver.current_url) is not None
+
+    def update_garden(self, submit=True, **kwargs):
+        for field, value in kwargs.items():
+            if not hasattr(self, field):
+                pytest.fail(f'GardenUpdatePage cannot set the value for {field} because that field doesnt exist')
+            setattr(self, field, value)
+
+        if submit:
+            self.submit_button.click()
+
+    def assert_form_has_values(self, **kwargs):
+        for field, value in kwargs.items():
+            if not hasattr(self, field):
+                pytest.fail(f'GardenUpdatePage cannot check value for {field} because that field doesnt exist')
+
+            if field == 'image':
+                assert_image_files_equal(self.image, value)
+            else:
+                assert getattr(self, field) == value
