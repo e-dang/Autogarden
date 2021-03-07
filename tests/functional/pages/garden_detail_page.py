@@ -99,7 +99,6 @@ class GardenDetailPage(BasePage):
             self.get_last_connected_from() == str(garden.last_connection_ip),
             self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
             self.get_update_interval() == garden.update_interval_display(),
-            garden.calc_time_till_next_update() - int(self.get_next_expected_update()) < 2,
             self.get_connection_strength() == garden.get_connection_strength_display(),
             self.get_water_level() == str(garden.get_water_level_display()),
         ])

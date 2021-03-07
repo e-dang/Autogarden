@@ -124,6 +124,18 @@ class Garden(models.Model):
         else:
             return self.CONN_BAD_MSG
 
+    def update_interval_display(self):
+        total = self.update_interval.total_seconds()
+        minutes, seconds = divmod(total, 60)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        string = ''
+        if minutes != 0:
+            string += f'{minutes} Min '
+        if seconds != 0:
+            string += f'{seconds} Sec'
+        return string.strip()
+
 
 class Token(models.Model):
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)

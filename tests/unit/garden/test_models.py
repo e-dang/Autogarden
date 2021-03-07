@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -87,16 +86,6 @@ class TestGardenModel:
 
         assert ret_val == str(None)
 
-    # @patch('garden.models.settings')
-    # def test_get_abs_path_to_image_returns_full_path_to_image_file(self, mock_settings, garden_factory):
-    #     garden = garden_factory.build()
-    #     str_path = '/test/root/'
-    #     mock_settings.STATIC_ROOT = Path(str_path)
-
-    #     path = garden.get_abs_path_to_image()
-
-    #     assert str(path) == str_path + f'images/{models._default_garden_image()}'
-
     @pytest.mark.parametrize('value, message', [
         (-81, models.Garden.CONN_BAD_MSG),
         (-80, models.Garden.CONN_POOR_MSG),
@@ -114,6 +103,19 @@ class TestGardenModel:
         ret_val = garden.get_connection_strength_display()
 
         assert ret_val == message
+
+    @pytest.mark.parametrize('update_interval, expected', [
+        (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
+        (timedelta(minutes=0, seconds=45), '45 Sec'),
+        (timedelta(minutes=10), '10 Min')
+    ],
+        ids=['1:30', '0:45', '10:00'])
+    def test_update_interval_display_returns_correct_string(self, garden_factory, update_interval, expected):
+        garden = garden_factory.build(update_interval=update_interval)
+
+        ret_val = garden.update_interval_display()
+
+        assert ret_val == expected
 
 
 @pytest.mark.unit
