@@ -1,5 +1,6 @@
 import os
 import random
+from django.conf import settings
 
 import pytest
 from rest_framework import status
@@ -349,7 +350,9 @@ class TestGardenDeleteView:
         self.garden.image = update_garden_form_fields['image']
         self.garden.save()
         self.garden.refresh_from_db()
-        path = self.garden.get_abs_path_to_image()
+        path = settings.STATIC_ROOT
+        for segment in self.garden.image.url.split('/'):
+            path /= segment
 
         auth_client.post(self.url)
 

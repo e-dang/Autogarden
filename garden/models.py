@@ -104,12 +104,6 @@ class Garden(models.Model):
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def get_abs_path_to_image(self):
-        path = settings.STATIC_ROOT
-        for segment in self.image.url.split('/'):
-            path /= segment
-        return path
-
     def update(self, request: Request):
         self.is_connected = True
         self.last_connection_ip = request.META.get('REMOTE_ADDR')
