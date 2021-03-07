@@ -101,7 +101,17 @@
                 </div>
             </div>
         </form>
-        <form class="form-inline float-right mr-2" method="post" action="{{garden.get_watering_stations_url}}">
+        <form class="form-inline float-right mx-2" method="post" action="{{garden.get_watering_stations_url}}">
+            {% csrf_token %}
+            <div class="control-group">
+                <div class="controls">
+                    <input type="hidden" name="_method" value="patch" />
+                    <input type="hidden" name="status" value="true" />
+                    <input id="activateAllBtn" type="submit" class="btn btn-outline-primary" value="Activate All">
+                </div>
+            </div>
+        </form>
+        <form class="form-inline float-right" method="post" action="{{garden.get_watering_stations_url}}">
             {% csrf_token %}
             <div class="control-group">
                 <div class="controls">

@@ -171,6 +171,12 @@ class TestGardenModification(Base):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert not self.ws_status_to_bool(status)
 
+        # the user then clicks the activate all button and all watering statios in the table are activated
+        garden_page.activate_button.click()
+        for i in range(1, self.num_watering_stations + 1):
+            status = garden_page.get_watering_station_field_value(i, 'Status')
+            assert self.ws_status_to_bool(status)
+
         # the user then goes to watering_station page and deletes the watering station
         garden_page.watering_station = selected_watering_station + 1
         self.wait_for_page_to_be_loaded(detail_ws_page)
