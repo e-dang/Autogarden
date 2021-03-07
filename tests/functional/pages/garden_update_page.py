@@ -3,7 +3,7 @@ from tests.assertions.assertions import assert_image_files_equal
 
 import pytest
 
-from garden.forms import UpdateGardenForm
+from garden.forms import GardenForm
 
 from .base_page import BasePage
 from .elements import Button, CancelButton, ConfirmDeleteButton, DeleteButton, SubmitButton, TextInput, ImageInput
@@ -23,11 +23,11 @@ class UpdateFrequency(TextInput):
 
 
 class CropButton(Button):
-    LOCATOR = UpdateGardenForm.CROP_BTN_ID
+    LOCATOR = GardenForm.CROP_BTN_ID
 
 
 class ResetButton(Button):
-    LOCATOR = UpdateGardenForm.RESET_BTN_ID
+    LOCATOR = GardenForm.RESET_BTN_ID
 
 
 class GardenUpdatePage(BasePage):
@@ -43,7 +43,7 @@ class GardenUpdatePage(BasePage):
         self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
-        self.modal_id = UpdateGardenForm.MODAL_ID
+        self.modal_id = GardenForm.MODAL_ID
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/update/$'

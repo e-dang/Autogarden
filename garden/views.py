@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
                           DeleteWateringStationForm, NewGardenForm,
-                          UpdateGardenForm, WateringStationForm)
+                          GardenForm, WateringStationForm)
 
 from .models import Garden
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
@@ -97,7 +97,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            form = UpdateGardenForm(instance=garden)
+            form = GardenForm(instance=garden)
             return render(request, 'garden_update.html', context={'form': form})
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
@@ -106,7 +106,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            form = UpdateGardenForm(request.POST, request.FILES, instance=garden)
+            form = GardenForm(request.POST, request.FILES, instance=garden)
             if form.is_valid():
                 form.save()
                 return JsonResponse({'success': True, 'url': garden.get_update_url()})
