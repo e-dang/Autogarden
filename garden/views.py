@@ -87,6 +87,7 @@ class GardenDetailView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
+            garden.refresh_connection_status()
             return render(request, 'garden_detail.html', context={'garden': garden})
 
 

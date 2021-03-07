@@ -104,11 +104,21 @@ class Garden(models.Model):
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def update(self, request: Request):
+    def update_connection_status(self, request: Request):
         self.is_connected = True
         self.last_connection_ip = request.META.get('REMOTE_ADDR')
         self.last_connection_time = datetime.now(pytz.UTC)
         self.save()
+
+    def refresh_connection_status(self):
+        if self.last_connection_time is None:
+            return
+
+        time_next_update = self.last_connection_time + self.update_frequency - datetime.now(pytz.UTC)
+        if time_next_update.total_seconds() < 0:
+            self.is_connected = False
+            self.connection_strength = None
+            self.save()
 
     def get_connection_strength_display(self):
         if self.connection_strength is None:

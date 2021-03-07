@@ -25,7 +25,7 @@ class GardenPatchSerializer(serializers.ModelSerializer):
         }
 
     def save(self, request: Request, **kwargs):
-        self.instance.update(request)
+        self.instance.update_connection_status(request)
         return super().save(**kwargs)
 
 

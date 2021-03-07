@@ -83,6 +83,7 @@ class TestGardenModification(Base):
         self.wait_for_page_to_be_loaded(garden_page)
 
         # the user sees information about the garden
+        self.garden.refresh_from_db()
         assert garden_page.is_displaying_info_for_garden(self.garden)
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table

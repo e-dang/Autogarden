@@ -47,7 +47,7 @@ class TestGardenPatchSerializer:
 
         serializer.save(request)
 
-        mock_garden.update.assert_called_once_with(request)
+        mock_garden.update_connection_status.assert_called_once_with(request)
 
 
 @pytest.mark.unit
