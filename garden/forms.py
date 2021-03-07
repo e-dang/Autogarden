@@ -7,7 +7,7 @@ from crispy_forms.layout import (HTML, Button, Field, Layout,
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Garden, WateringStation, _default_update_interval
+from .models import Garden, WateringStation, _default_update_frequency
 from .utils import (derive_duration_string,
                     set_num_watering_stations)
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -66,27 +66,48 @@ class CropperMixin(forms.Form):
         ]
 
 
-class NewGardenForm(forms.ModelForm, CropperMixin):
-    FORM_ID = 'newGardenForm'
-    MODAL_ID = 'newGardenModal'
+class GardenForm(forms.ModelForm, CropperMixin):
+    FORM_ID = 'gardenForm'
+    MODAL_ID = 'deleteGardenModal'
+    FORM_CONTAINER_ID = 'formContainer'
 
-    num_watering_stations = forms.IntegerField(label='Number of Watering Stations', validators=[
-                                               MinValueValidator(0, MIN_VALUE_ERR_MSG)])
-    update_interval = CustomDurationField(validators=[validate_duration])
+    update_frequency = CustomDurationField(validators=[validate_duration])
 
     class Meta:
         model = Garden
-        fields = ['name', 'image', 'update_interval']
+        fields = ['name', 'image', 'update_frequency']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            Field('name'),
+            Field('update_frequency'),
+            Field('image', id='id_image'),
+            *self.cropper_fields,
+            Submit('submit', 'Update'),
+            Button('delete', 'Delete', css_class='btn btn-danger',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
+        )
+
+        self.fields['update_frequency'].label = 'Update Frequency'
+
+
+class NewGardenForm(GardenForm):
+    FORM_ID = 'newGardenForm'
+    MODAL_ID = 'newGardenModal'
+
+    num_watering_stations = forms.IntegerField(label='Number of Watering Stations', validators=[
+                                               MinValueValidator(0, MIN_VALUE_ERR_MSG)])
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.helper.form_action = 'garden-list'
         self.helper.layout = Layout(
             Field('name'),
-            Field('update_interval'),
+            Field('update_frequency'),
             Field('num_watering_stations', ),
             Field('image', id='id_image'),
             *self.cropper_fields,
@@ -95,40 +116,13 @@ class NewGardenForm(forms.ModelForm, CropperMixin):
                    data_toggle='modal', data_target=f'#{self.MODAL_ID}')
         )
 
-        self.fields['update_interval'].initial = _default_update_interval()
+        self.fields['update_frequency'].initial = _default_update_frequency()
 
     def save(self, owner):
         num_watering_stations = self.cleaned_data.pop('num_watering_stations')
         garden = owner.gardens.create(**self.cleaned_data)
         set_num_watering_stations(garden, num_watering_stations)
         return garden
-
-
-class UpdateGardenForm(forms.ModelForm, CropperMixin):
-    FORM_ID = 'updateGardenForm'
-    MODAL_ID = 'deleteGardenModal'
-    FORM_CONTAINER_ID = 'formContainer'
-
-    update_interval = CustomDurationField(validators=[validate_duration])
-
-    class Meta:
-        model = Garden
-        fields = ['name', 'image', 'update_interval']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = self.FORM_ID
-        self.helper.form_method = 'post'
-        self.helper.layout = Layout(
-            Field('name'),
-            Field('update_interval'),
-            Field('image', id='id_image'),
-            *self.cropper_fields,
-            Submit('submit', 'Update'),
-            Button('delete', 'Delete', css_class='btn btn-danger',
-                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
-        )
 
 
 class DeleteGardenForm(DeleteForm):

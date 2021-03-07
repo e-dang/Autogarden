@@ -1,8 +1,8 @@
 from garden.utils import derive_duration_string
 import pytest
 from django.urls import reverse
-from garden.models import _default_garden_name, _default_update_interval
-from tests.conftest import assert_image_files_equal
+from garden.models import _default_garden_name, _default_update_frequency
+from tests.assertions import assert_image_files_equal
 
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
@@ -34,7 +34,7 @@ class TestGardenSetup(Base):
         self.wait_for_modal_to_be_visible(list_page.modal_id)
         assert list_page.new_garden_name == _default_garden_name()
         assert list_page.num_watering_stations == ''
-        assert list_page.update_interval == str(derive_duration_string(_default_update_interval()))
+        assert list_page.update_frequency == str(derive_duration_string(_default_update_frequency()))
         assert list_page.garden_image
 
         # they cancel out of the modal, but then re-enter again
@@ -46,20 +46,20 @@ class TestGardenSetup(Base):
         # they enter a negative number for the number of watering stations and hit enter, and they see a error message
         # appear
         list_page.num_watering_stations = -1
-        list_page.update_interval = -1
+        list_page.update_frequency = -1
         list_page.submit_button.click()
         self.wait_for_form_error('error_1_id_num_watering_stations')
-        self.wait_for_form_error('error_1_id_update_interval')
+        self.wait_for_form_error('error_1_id_update_frequency')
 
         # now they enter a garden name and valid number of watering stations and see a new garden appear in the list of
         # gardens
         garden_name = 'My New Garden'
         num_watering_stations = 3
         garden_image = 'test_garden_image.png'
-        update_interval = '0:10:00'
+        update_frequency = '0:10:00'
         list_page.new_garden_name = garden_name
         list_page.num_watering_stations = num_watering_stations
-        list_page.update_interval = update_interval
+        list_page.update_frequency = update_frequency
         self.perform_image_crop(list_page, garden_image)
         list_page.submit_button.click()
         list_page.wait_for_garden_in_list(garden_name)

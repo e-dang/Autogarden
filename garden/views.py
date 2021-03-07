@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
                           DeleteWateringStationForm, NewGardenForm,
-                          UpdateGardenForm, WateringStationForm)
+                          GardenForm, WateringStationForm)
 
 from .models import Garden
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
@@ -36,10 +36,11 @@ class GardenAPIView(APIView):
     def patch(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
         self.check_object_permissions(request, garden)
-        serializer = GardenPatchSerializer(data=request.data, instance=garden, partial=True)
+        serializer = GardenPatchSerializer(data=request.data, instance=garden)
         if serializer.is_valid():
-            serializer.save()
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
+            serializer.save(request)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WateringStationAPIView(APIView):
@@ -48,7 +49,6 @@ class WateringStationAPIView(APIView):
     def get(self, request: Request, pk: int) -> Response:
         garden = Garden.objects.get(pk=pk)
         self.check_object_permissions(request, garden)
-        garden.update(request)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -87,6 +87,7 @@ class GardenDetailView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
+            garden.refresh_connection_status()
             return render(request, 'garden_detail.html', context={'garden': garden})
 
 
@@ -97,7 +98,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            form = UpdateGardenForm(instance=garden)
+            form = GardenForm(instance=garden)
             return render(request, 'garden_update.html', context={'form': form})
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
@@ -106,7 +107,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            form = UpdateGardenForm(request.POST, request.FILES, instance=garden)
+            form = GardenForm(request.POST, request.FILES, instance=garden)
             if form.is_valid():
                 form.save()
                 return JsonResponse({'success': True, 'url': garden.get_update_url()})

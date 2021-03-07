@@ -24,8 +24,8 @@ class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
 
 
-class UpdateInterval(TextInput):
-    LOCATOR = 'id_update_interval'
+class UpdateFrequency(TextInput):
+    LOCATOR = 'id_update_frequency'
 
 
 class CropButton(Button):
@@ -40,7 +40,7 @@ class GardenListPage(BasePage):
     new_garden_name = NewGardenNameInput()
     num_watering_stations = NumWateringStationsInput()
     garden_image = GardenImageInput()
-    update_interval = UpdateInterval()
+    update_frequency = UpdateFrequency()
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -77,12 +77,12 @@ class GardenListPage(BasePage):
     def click_garden(self, name):
         self.wait_for_garden_in_list(name).click()
 
-    def add_garden(self, garden_name, num_watering_stations, garden_image, update_interval):
+    def add_garden(self, garden_name, num_watering_stations, garden_image, update_frequency):
         self.new_garden_button.click()
         self.new_garden_name = garden_name
         self.num_watering_stations = num_watering_stations
         self.garden_image = garden_image
-        self.update_interval = update_interval
+        self.update_frequency = update_frequency
         self.submit_button.click()
 
     def _get_garden_list(self):

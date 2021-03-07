@@ -1,5 +1,4 @@
 import uuid
-import os
 from datetime import datetime, timedelta
 
 import pytz
@@ -27,12 +26,8 @@ def _default_is_connected():
     return False
 
 
-def _default_update_interval():
+def _default_update_frequency():
     return timedelta(minutes=5)
-
-
-def _default_num_missed_updates():
-    return 0
 
 
 def _default_status():
@@ -55,14 +50,27 @@ class Garden(models.Model):
         (LOW, 'Low'),
     ]
 
+    # Values from https://www.speedcheck.org/wiki/rssi/#:~:text=RSSI%20or%20this%20signal%20value,%2D70%20(minus%2070).
+    CONN_POOR = -80
+    CONN_OK = -70
+    CONN_GOOD = -67
+    CONN_EXCELLENT = -30
+
+    CONN_NOT_AVAILABLE_MSG = 'N/A'
+    CONN_BAD_MSG = 'Bad'
+    CONN_POOR_MSG = 'Poor'
+    CONN_OK_MSG = 'Ok'
+    CONN_GOOD_MSG = 'Good'
+    CONN_EXCELLENT_MSG = 'Excellent'
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default=_default_garden_name)
     image = models.ImageField(default=_default_garden_image)
     is_connected = models.BooleanField(default=_default_is_connected)
     last_connection_ip = models.GenericIPAddressField(null=True)
     last_connection_time = models.DateTimeField(null=True)
-    update_interval = models.DurationField(default=_default_update_interval)
-    num_missed_updates = models.PositiveIntegerField(default=_default_num_missed_updates)
+    update_frequency = models.DurationField(default=_default_update_frequency)
+    connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
     def get_absolute_url(self):
@@ -85,10 +93,10 @@ class Garden(models.Model):
         if self.last_connection_time is None:
             return None
         factor = 1
-        next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
+        next_update = self.last_connection_time + factor * self.update_frequency - datetime.now(pytz.UTC)
         while next_update.total_seconds() < 0:
             factor += 1
-            next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
+            next_update = self.last_connection_time + factor * self.update_frequency - datetime.now(pytz.UTC)
         return int(next_update.total_seconds())
 
     def get_formatted_last_connection_time(self):
@@ -96,17 +104,47 @@ class Garden(models.Model):
             return str(None)
         return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def get_abs_path_to_image(self):
-        path = settings.STATIC_ROOT
-        for segment in self.image.url.split('/'):
-            path /= segment
-        return path
-
-    def update(self, request: Request):
+    def update_connection_status(self, request: Request):
         self.is_connected = True
         self.last_connection_ip = request.META.get('REMOTE_ADDR')
         self.last_connection_time = datetime.now(pytz.UTC)
         self.save()
+
+    def refresh_connection_status(self):
+        if self.last_connection_time is None:
+            return
+
+        time_next_update = self.last_connection_time + self.update_frequency - datetime.now(pytz.UTC)
+        if time_next_update.total_seconds() < 0:
+            self.is_connected = False
+            self.connection_strength = None
+            self.save()
+
+    def get_connection_strength_display(self):
+        if self.connection_strength is None:
+            return self.CONN_NOT_AVAILABLE_MSG
+        elif self.connection_strength >= self.CONN_EXCELLENT:
+            return self.CONN_EXCELLENT_MSG
+        elif self.connection_strength >= self.CONN_GOOD:
+            return self.CONN_GOOD_MSG
+        elif self.connection_strength >= self.CONN_OK:
+            return self.CONN_OK_MSG
+        elif self.connection_strength >= self.CONN_POOR:
+            return self.CONN_POOR_MSG
+        else:
+            return self.CONN_BAD_MSG
+
+    def update_frequency_display(self):
+        total = self.update_frequency.total_seconds()
+        minutes, seconds = divmod(total, 60)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        string = ''
+        if minutes != 0:
+            string += f'{minutes} Min '
+        if seconds != 0:
+            string += f'{seconds} Sec'
+        return string.strip()
 
 
 class Token(models.Model):

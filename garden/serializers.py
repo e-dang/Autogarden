@@ -1,23 +1,32 @@
 from rest_framework import serializers
+from rest_framework.request import Request
 
 from .models import Garden, WateringStation
 
 
 class GardenGetSerializer(serializers.ModelSerializer):
-    update_interval = serializers.SerializerMethodField()
+    update_frequency = serializers.SerializerMethodField()
 
     class Meta:
         model = Garden
-        fields = ['update_interval']
+        fields = ['update_frequency']
 
-    def get_update_interval(self, obj):
-        return obj.update_interval.total_seconds()
+    def get_update_frequency(self, obj):
+        return obj.update_frequency.total_seconds()
 
 
 class GardenPatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Garden
-        fields = ['water_level']
+        fields = ['water_level', 'connection_strength']
+        extra_kwargs = {
+            'water_level': {'required': True},
+            'connection_strength': {'required': True}
+        }
+
+    def save(self, request: Request, **kwargs):
+        self.instance.update_connection_status(request)
+        return super().save(**kwargs)
 
 
 class WateringStationSerializer(serializers.ModelSerializer):

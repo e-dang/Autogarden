@@ -29,8 +29,8 @@ class TestDataAccessability(Base):
         garden_name = 'My New Garden'
         num_watering_stations = 3
         garden_image = 'test_garden_image.png'
-        update_interval = '0:10:00'
-        list_gpage.add_garden(garden_name, num_watering_stations, garden_image, update_interval)
+        update_frequency = '0:10:00'
+        list_gpage.add_garden(garden_name, num_watering_stations, garden_image, update_frequency)
         list_gpage.wait_for_garden_in_list(garden_name)
 
         # they go to the newly created garden detail page and notice that it has a unique url

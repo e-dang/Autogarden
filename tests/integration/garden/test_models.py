@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
+
 import pytest
+import pytz
 
 from garden.models import Garden, Token, WateringStation
 
@@ -74,6 +77,39 @@ class TestGardenModel:
 
         with pytest.raises(Garden.DoesNotExist):
             garden.refresh_from_db()
+
+    @pytest.mark.django_db
+    def test_refresh_connection_status_updates_is_connected_if_update_hasnt_happened_within_the_update_frequency(self, garden):
+        garden.is_connected = True
+        garden.last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=10)
+        garden.update_frequency = timedelta(minutes=5)
+        garden.save()
+
+        garden.refresh_connection_status()
+
+        assert garden.is_connected == False
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('is_connected', [True, False], ids=['true', 'false'])
+    def test_refresh_connection_status_doesnt_do_anything_if_last_connection_time_is_none(self, garden, is_connected):
+        garden.is_connected = is_connected
+        garden.last_connection_time = None
+        garden.save()
+
+        garden.refresh_connection_status()
+
+        assert garden.is_connected == is_connected
+
+    @pytest.mark.django_db
+    def test_refresh_connection_status_sets_connection_strength_to_none_if_update_hasnt_happened_within_the_update_frequency(self, garden):
+        garden.connection_strength = -1
+        garden.last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=10)
+        garden.update_frequency = timedelta(minutes=5)
+        garden.save()
+
+        garden.refresh_connection_status()
+
+        assert garden.connection_strength is None
 
 
 @pytest.mark.integration

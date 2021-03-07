@@ -3,7 +3,7 @@ from django.urls import reverse
 from garden.models import (WateringStation, _default_moisture_threshold, _default_status,
                            _default_watering_duration)
 from garden.utils import build_duration_string, derive_duration_string
-from tests.conftest import assert_image_files_equal
+from tests.assertions import assert_image_files_equal
 
 from .base import Base
 from .pages.garden_detail_page import GardenDetailPage
@@ -26,14 +26,65 @@ class TestGardenModification(Base):
         self.create_authenticated_session(self.user, live_server)
 
     @pytest.mark.django_db
-    def test_user_can_modify_a_garden_and_its_watering_stations(self):
+    def test_a_user_can_modify_their_garden(self):
+        self.driver.get(self.url)
+        garden_page = GardenDetailPage(self.driver)
+        self.wait_for_page_to_be_loaded(garden_page)
+
+        # the user clicks the edit button and is taken to update garden page
+        garden_page.edit_button.click()
+        update_gpage = GardenUpdatePage(self.driver)
+        self.wait_for_page_to_be_loaded(update_gpage)
+
+        # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
+        # and delete the garden. They enter invalid data and try to submit the form, but they see errors.
+        update_gpage.update_garden(update_frequency=-1)
+        self.wait_for_form_error('error_1_id_update_frequency')
+
+        # they then enter valid information and submit the form
+        new_garden_name = 'My new garden name'
+        new_garden_image = 'test_garden_image.png'
+        new_update_frequency = '10:00'
+        update_gpage.update_garden(
+            submit=False,
+            name=new_garden_name,
+            update_frequency=new_update_frequency,
+            image=new_garden_image
+        )
+        self.perform_image_crop(update_gpage, new_garden_image)
+        update_gpage.submit_button.click()
+
+        # goes back to the garden detail page where they see the new name and image
+        update_gpage.garden_detail_nav_button.click()
+        self.wait_for_page_to_be_loaded(garden_page)
+        assert garden_page.get_garden_name() == new_garden_name
+        assert_image_files_equal(garden_page.get_garden_image_src(), new_garden_image)
+
+        # the user the clicks edit again and is taken back to the update garden page, where they see their new data
+        # prefilled in the form
+        garden_page.edit_button.click()
+        self.wait_for_page_to_be_loaded(update_gpage)
+        update_gpage.assert_form_has_values(
+            name=new_garden_name, update_frequency=new_update_frequency, image=new_garden_image)
+
+        # the user then deletes the garden
+        self.perform_delete_modal_checks(update_gpage)
+
+        # they are then redirected back to the garden list page where they see no gardens
+        list_gpage = GardenListPage(self.driver)
+        self.wait_for_page_to_be_loaded(list_gpage)
+        assert list_gpage.get_number_of_gardens() == 0
+
+    @pytest.mark.django_db
+    def test_user_can_modify_their_gardens_watering_stations(self):
         # a user goes to a garden detail page
         self.driver.get(self.url)
         garden_page = GardenDetailPage(self.driver)
         self.wait_for_page_to_be_loaded(garden_page)
 
         # the user sees information about the garden
-        self.assert_garden_info_is_correct(garden_page)
+        self.garden.refresh_from_db()
+        assert garden_page.is_displaying_info_for_garden(self.garden)
 
         # they see a table, where each row corresponds to a watering station in the garden and the header of the table
         # displays the field names of the watering_stations
@@ -120,6 +171,12 @@ class TestGardenModification(Base):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert not self.ws_status_to_bool(status)
 
+        # the user then clicks the activate all button and all watering statios in the table are activated
+        garden_page.activate_button.click()
+        for i in range(1, self.num_watering_stations + 1):
+            status = garden_page.get_watering_station_field_value(i, 'Status')
+            assert self.ws_status_to_bool(status)
+
         # the user then goes to watering_station page and deletes the watering station
         garden_page.watering_station = selected_watering_station + 1
         self.wait_for_page_to_be_loaded(detail_ws_page)
@@ -130,48 +187,6 @@ class TestGardenModification(Base):
         # They are then redirected back to the garden detail page, where they see 1 less watering station
         self.wait_for_page_to_be_loaded(garden_page)
         assert garden_page.get_number_watering_stations() == self.num_watering_stations
-
-        # the user then clicks the edit button and is taken to update garden page
-        garden_page.edit_button.click()
-        update_gpage = GardenUpdatePage(self.driver)
-        self.wait_for_page_to_be_loaded(update_gpage)
-
-        # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
-        # and delete the garden. They enter invalid data and try to submit the form, but they see errors.
-        update_gpage.garden_update_interval = -1
-        update_gpage.submit_button.click()
-        self.wait_for_form_error('error_1_id_update_interval')
-
-        # they then enter valid information and submit the form
-        new_garden_name = 'My new garden name'
-        new_garden_image = 'test_garden_image.png'
-        update_interval = '10:00'
-        update_gpage.garden_name = new_garden_name
-        update_gpage.garden_update_interval = update_interval
-        self.perform_image_crop(update_gpage, new_garden_image)
-        update_gpage.submit_button.click()
-
-        # goes back to the garden detail page where they see the new name and image
-        update_gpage.garden_detail_nav_button.click()
-        self.wait_for_page_to_be_loaded(garden_page)
-        assert garden_page.get_garden_name() == new_garden_name
-        assert_image_files_equal(garden_page.get_garden_image_src(), new_garden_image)
-
-        # the user the clicks edit again and is taken back to the update garden page, where they see their new data
-        # prefilled in the form
-        garden_page.edit_button.click()
-        self.wait_for_page_to_be_loaded(update_gpage)
-        assert update_gpage.garden_name == new_garden_name
-        assert update_gpage.garden_update_interval == update_interval
-        assert_image_files_equal(update_gpage.garden_image, new_garden_image)
-
-        # the user then deletes the garden
-        self.perform_delete_modal_checks(update_gpage)
-
-        # they are then redirected back to the garden list page where they see no gardens
-        list_gpage = GardenListPage(self.driver)
-        self.wait_for_page_to_be_loaded(list_gpage)
-        assert list_gpage.get_number_of_gardens() == 0
 
     def assert_watering_station_has_default_values(self, detail_ws_page):
         data = self._get_default_watering_station_data()
@@ -190,17 +205,6 @@ class TestGardenModification(Base):
     def assert_update_watering_station_form_has_values(self, data, update_ws_page):
         for key, value in data.items():
             assert getattr(update_ws_page, key) == value
-
-    def assert_garden_info_is_correct(self, garden_page):
-        assert garden_page.get_garden_status() == self.garden.status
-        assert garden_page.get_last_connected_from() == str(self.garden.last_connection_ip)
-        assert garden_page.get_last_connected_at() == self.garden.get_formatted_last_connection_time()
-        self.assert_next_expected_update_is_correct(garden_page)
-        assert garden_page.get_num_missed_updates() == str(self.garden.num_missed_updates)
-        assert garden_page.get_water_level() == str(self.garden.get_water_level_display())
-
-    def assert_next_expected_update_is_correct(self, garden_page):
-        assert self.garden.calc_time_till_next_update() - int(garden_page.get_next_expected_update()) < 2
 
     def assert_watering_station_table_contains_correct_headers(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()

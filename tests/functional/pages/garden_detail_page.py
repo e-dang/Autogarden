@@ -23,6 +23,10 @@ class EditButton(Button):
     LOCATOR = 'editButton'
 
 
+class ActivateButton(Button):
+    LOCATOR = 'activateAllBtn'
+
+
 class GardenDetailPage(BasePage):
     watering_station = WateringStationButtons()
 
@@ -33,6 +37,7 @@ class GardenDetailPage(BasePage):
         self.field_mapping = None
         self.add_watering_station_button = AddWateringStationButton(self)
         self.deactivate_button = DeactivateButton(self)
+        self.activate_button = ActivateButton(self)
         self.edit_button = EditButton(self)
 
     def has_correct_url(self):
@@ -78,17 +83,30 @@ class GardenDetailPage(BasePage):
     def get_next_expected_update(self):
         return self._get_inner_text('nextExpectedUpdate')
 
-    def get_num_missed_updates(self):
-        return self._get_inner_text('numMissedUpdates')
-
     def get_water_level(self):
         return self._get_inner_text('waterLevel')
 
     def get_garden_name(self):
-        return wait_for(lambda: self.driver.find_element_by_id('gardenName')).get_attribute('innerText')
+        return self._get_inner_text('gardenName')
 
     def get_garden_image_src(self):
         return wait_for(lambda: self.driver.find_element_by_id('gardenImage')).get_attribute('src')
+
+    def get_connection_strength(self):
+        return self._get_inner_text('connectionStrength')
+
+    def get_update_frequency(self):
+        return self._get_inner_text('updateFrequency')
+
+    def is_displaying_info_for_garden(self, garden):
+        return all([
+            self.get_garden_status() == garden.status,
+            self.get_last_connected_from() == str(garden.last_connection_ip),
+            self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
+            self.get_update_frequency() == garden.update_frequency_display(),
+            self.get_connection_strength() == garden.get_connection_strength_display(),
+            self.get_water_level() == str(garden.get_water_level_display()),
+        ])
 
     def _get_field_index(self, field_name):
         if self.field_mapping is None:

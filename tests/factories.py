@@ -1,5 +1,6 @@
 from datetime import timedelta
 from functools import partial
+from garden.serializers import GardenPatchSerializer
 from garden.utils import derive_duration_string
 from typing import Any, Dict
 
@@ -45,6 +46,11 @@ class JsonFactoryMixin:
         return generate_dict_factory(cls)(**kwargs)
 
     @classmethod
+    def json_subset(cls, keys, **kwargs):
+        data = cls.json(**kwargs)
+        return {key: data[key] for key in keys}
+
+    @classmethod
     def json_batch(cls, num, **kwargs):
         factory = generate_dict_factory(cls)
         return [factory(**kwargs) for _ in range(num)]
@@ -67,6 +73,15 @@ class UserFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
             for _ in range(count):
                 GardenFactory(owner=self)
 
+    @classmethod
+    def signup_info(cls, **kwargs):
+        keys = ['email', 'first_name', 'last_name', 'password']
+        data = super().json_subset(keys, **kwargs)
+        data['password1'] = data['password']
+        data['password2'] = data['password']
+        data.pop('password')
+        return data
+
 
 @factory.django.mute_signals(post_save)
 class TokenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
@@ -85,9 +100,9 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     is_connected = factory.Sequence(lambda x: x % 2 == 0)
     last_connection_ip = factory.Faker('ipv4')
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
-    num_missed_updates = factory.Faker('random_int', min=0, max=100)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
-    update_interval = factory.LazyFunction(lambda: random_valid_duration(1, 60))
+    connection_strength = factory.Faker('random_int', min=-100, max=0)
+    update_frequency = factory.LazyFunction(lambda: random_valid_duration(1, 60))
 
     class Meta:
         model = Garden
@@ -106,9 +121,13 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
 
     @classmethod
     def form_fields(cls, **kwargs):
-        keys = ['name', 'update_interval']
-        data = super().json(**kwargs)
-        return {key: data[key] for key in keys}
+        keys = ['name', 'update_frequency']
+        return super().json_subset(keys, **kwargs)
+
+    @classmethod
+    def patch_serializer_fields(cls, **kwargs):
+        keys = GardenPatchSerializer.Meta.fields
+        return super().json_subset(keys, **kwargs)
 
 
 class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
