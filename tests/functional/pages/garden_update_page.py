@@ -18,8 +18,8 @@ class GardenImageInput(ImageInput):
     IMAGE_LOCATOR = 'gardenImage'
 
 
-class UpdateInterval(TextInput):
-    LOCATOR = 'id_update_interval'
+class UpdateFrequency(TextInput):
+    LOCATOR = 'id_update_frequency'
 
 
 class CropButton(Button):
@@ -33,7 +33,7 @@ class ResetButton(Button):
 class GardenUpdatePage(BasePage):
     name = GardenNameInput()
     image = GardenImageInput()
-    update_interval = UpdateInterval()
+    update_frequency = UpdateFrequency()
 
     def __init__(self, driver):
         super().__init__(driver)

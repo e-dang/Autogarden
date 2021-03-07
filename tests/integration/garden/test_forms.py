@@ -12,10 +12,10 @@ class TestNewGardenForm:
     @pytest.mark.parametrize('new_garden_form_fields, missing_field', [
         (None, 'name'),
         (None, 'num_watering_stations'),
-        (None, 'update_interval')
+        (None, 'update_frequency')
     ],
         indirect=['new_garden_form_fields'],
-        ids=['name', 'num_watering_stations', 'update_interval'])
+        ids=['name', 'num_watering_stations', 'update_frequency'])
     def test_fields_are_required(self, new_garden_form_fields, missing_field):
         new_garden_form_fields.pop(missing_field)
         form = NewGardenForm(data=new_garden_form_fields)
@@ -54,14 +54,14 @@ class TestNewGardenForm:
         assert MIN_VALUE_ERR_MSG in form.errors['num_watering_stations']
 
     @pytest.mark.django_db
-    def test_is_valid_returns_false_when_update_interval_is_invalid(self, new_garden_form_fields):
-        new_garden_form_fields['update_interval'] = -1  # invalidate data
+    def test_is_valid_returns_false_when_update_frequency_is_invalid(self, new_garden_form_fields):
+        new_garden_form_fields['update_frequency'] = -1  # invalidate data
         form = NewGardenForm(data=new_garden_form_fields)
 
         ret_val = form.is_valid()
 
         assert ret_val == False
-        assert INVALID_DURATION_ERR_MSG in form.errors['update_interval']
+        assert INVALID_DURATION_ERR_MSG in form.errors['update_frequency']
 
 
 @pytest.mark.integration

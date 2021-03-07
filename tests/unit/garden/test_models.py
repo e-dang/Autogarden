@@ -12,10 +12,10 @@ class TestGardenModel:
     @pytest.mark.parametrize('field, get_default', [
         ('name', models._default_garden_name),
         ('is_connected', models._default_is_connected),
-        ('update_interval', models._default_update_interval),
+        ('update_frequency', models._default_update_frequency),
         ('image', models._default_garden_image)
     ],
-        ids=['name', 'is_connected', 'update_interval', 'image'])
+        ids=['name', 'is_connected', 'update_frequency', 'image'])
     def test_field_is_given_a_default_value(self, field, get_default):
         garden = models.Garden()
 
@@ -37,17 +37,17 @@ class TestGardenModel:
     def test_calc_time_till_next_update_returns_expected_time_to_within_a_second(self, garden_factory):
         minutes = 10
         last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=minutes - 2)
-        update_interval = timedelta(minutes=minutes)
-        expected = last_connection_time + update_interval - datetime.now(pytz.UTC)
-        garden = garden_factory.build(last_connection_time=last_connection_time, update_interval=update_interval)
+        update_frequency = timedelta(minutes=minutes)
+        expected = last_connection_time + update_frequency - datetime.now(pytz.UTC)
+        garden = garden_factory.build(last_connection_time=last_connection_time, update_frequency=update_frequency)
 
         ret_val = garden.calc_time_till_next_update()
 
         assert int(expected.total_seconds()) == ret_val
 
     def test_calc_time_till_next_update_returns_none_if_prev_connection_has_never_been_established(self, garden_factory):
-        update_interval = timedelta(minutes=5)
-        garden = garden_factory.build(last_connection_time=None, update_interval=update_interval)
+        update_frequency = timedelta(minutes=5)
+        garden = garden_factory.build(last_connection_time=None, update_frequency=update_frequency)
 
         ret_val = garden.calc_time_till_next_update()
 
@@ -55,11 +55,11 @@ class TestGardenModel:
 
     def test_calc_time_till_next_update_returns_time_based_on_prev_expected_update_even_if_update_was_missed(self, garden_factory):
         num_updates_missed = 2
-        update_interval_minutes = 5
-        last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=update_interval_minutes * num_updates_missed)
-        update_interval = timedelta(minutes=update_interval_minutes)
-        expected = last_connection_time + (num_updates_missed + 1) * update_interval - datetime.now(pytz.UTC)
-        garden = garden_factory.build(last_connection_time=last_connection_time, update_interval=update_interval)
+        update_frequency_minutes = 5
+        last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=update_frequency_minutes * num_updates_missed)
+        update_frequency = timedelta(minutes=update_frequency_minutes)
+        expected = last_connection_time + (num_updates_missed + 1) * update_frequency - datetime.now(pytz.UTC)
+        garden = garden_factory.build(last_connection_time=last_connection_time, update_frequency=update_frequency)
 
         ret_val = garden.calc_time_till_next_update()
 
@@ -104,16 +104,16 @@ class TestGardenModel:
 
         assert ret_val == message
 
-    @pytest.mark.parametrize('update_interval, expected', [
+    @pytest.mark.parametrize('update_frequency, expected', [
         (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
         (timedelta(minutes=0, seconds=45), '45 Sec'),
         (timedelta(minutes=10), '10 Min')
     ],
         ids=['1:30', '0:45', '10:00'])
-    def test_update_interval_display_returns_correct_string(self, garden_factory, update_interval, expected):
-        garden = garden_factory.build(update_interval=update_interval)
+    def test_update_frequency_display_returns_correct_string(self, garden_factory, update_frequency, expected):
+        garden = garden_factory.build(update_frequency=update_frequency)
 
-        ret_val = garden.update_interval_display()
+        ret_val = garden.update_frequency_display()
 
         assert ret_val == expected
 

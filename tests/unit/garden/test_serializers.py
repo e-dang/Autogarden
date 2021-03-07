@@ -14,19 +14,19 @@ from garden.serializers import (GardenGetSerializer, GardenPatchSerializer,
 @pytest.mark.unit
 class TestGardenGetSerializer:
     def test_serialized_data_contains_expected_fields(self, garden_factory):
-        expected_fields = ['update_interval']
+        expected_fields = ['update_frequency']
         garden = garden_factory.build()
 
         serializer = GardenGetSerializer(garden)
 
         assert_data_contains_fields(serializer.data, expected_fields)
 
-    def test_get_update_interval_returns_return_value_of_total_seconds_method_call(self):
+    def test_get_update_frequency_returns_return_value_of_total_seconds_method_call(self):
         mock_garden = Mock()
 
-        ret_val = GardenGetSerializer().get_update_interval(mock_garden)
+        ret_val = GardenGetSerializer().get_update_frequency(mock_garden)
 
-        assert ret_val == mock_garden.update_interval.total_seconds.return_value
+        assert ret_val == mock_garden.update_frequency.total_seconds.return_value
 
 
 @pytest.mark.unit

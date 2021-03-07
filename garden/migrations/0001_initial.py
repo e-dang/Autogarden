@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('is_connected', models.BooleanField(default=garden.models._default_is_connected)),
                 ('last_connection_ip', models.GenericIPAddressField(null=True)),
                 ('last_connection_time', models.DateTimeField(null=True)),
-                ('update_interval', models.DurationField(default=garden.models._default_update_interval)),
+                ('update_frequency', models.DurationField(default=garden.models._default_update_frequency)),
                 ('water_level', models.CharField(choices=[('ok', 'Ok'), ('lo', 'Low')], max_length=2, null=True)),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
                                             related_name='gardens', to=settings.AUTH_USER_MODEL)),

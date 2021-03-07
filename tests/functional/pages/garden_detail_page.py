@@ -90,15 +90,15 @@ class GardenDetailPage(BasePage):
     def get_connection_strength(self):
         return self._get_inner_text('connectionStrength')
 
-    def get_update_interval(self):
-        return self._get_inner_text('updateInterval')
+    def get_update_frequency(self):
+        return self._get_inner_text('updateFrequency')
 
     def is_displaying_info_for_garden(self, garden):
         return all([
             self.get_garden_status() == garden.status,
             self.get_last_connected_from() == str(garden.last_connection_ip),
             self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
-            self.get_update_interval() == garden.update_interval_display(),
+            self.get_update_frequency() == garden.update_frequency_display(),
             self.get_connection_strength() == garden.get_connection_strength_display(),
             self.get_water_level() == str(garden.get_water_level_display()),
         ])

@@ -41,7 +41,7 @@ class TestGardenAPIView:
         resp = auth_api_client.get(self.url)
 
         assert len(resp.data) == 1  # reminder to update field equality assertions if adding another serializer field
-        assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
+        assert resp.data['update_frequency'] == self.garden.update_frequency.total_seconds()
 
     @pytest.mark.django_db
     def test_PATCH_updates_the_garden_with_request_data(self, auth_api_client, garden_patch_serializer_data):
@@ -273,7 +273,7 @@ class TestGardenUpdateView:
 
         self.garden.refresh_from_db()
         assert self.garden.name == update_garden_form_fields['name']
-        assert self.garden.update_interval == update_garden_form_fields['update_interval']
+        assert self.garden.update_frequency == update_garden_form_fields['update_frequency']
         assertions.assert_image_files_equal(self.garden.image.url, update_garden_form_fields['image'].name)
 
     @pytest.mark.django_db

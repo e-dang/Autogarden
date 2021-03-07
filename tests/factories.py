@@ -102,7 +102,7 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
     last_connection_time = factory.Faker('date_time_between', start_date='-20m', end_date='now', tzinfo=pytz.UTC)
     water_level = factory.Iterator(Garden.WATER_LEVEL_CHOICES, getter=lambda c: c[0])
     connection_strength = factory.Faker('random_int', min=-100, max=0)
-    update_interval = factory.LazyFunction(lambda: random_valid_duration(1, 60))
+    update_frequency = factory.LazyFunction(lambda: random_valid_duration(1, 60))
 
     class Meta:
         model = Garden
@@ -121,7 +121,7 @@ class GardenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
 
     @classmethod
     def form_fields(cls, **kwargs):
-        keys = ['name', 'update_interval']
+        keys = ['name', 'update_frequency']
         return super().json_subset(keys, **kwargs)
 
     @classmethod

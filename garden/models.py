@@ -26,7 +26,7 @@ def _default_is_connected():
     return False
 
 
-def _default_update_interval():
+def _default_update_frequency():
     return timedelta(minutes=5)
 
 
@@ -69,7 +69,7 @@ class Garden(models.Model):
     is_connected = models.BooleanField(default=_default_is_connected)
     last_connection_ip = models.GenericIPAddressField(null=True)
     last_connection_time = models.DateTimeField(null=True)
-    update_interval = models.DurationField(default=_default_update_interval)
+    update_frequency = models.DurationField(default=_default_update_frequency)
     connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
@@ -93,10 +93,10 @@ class Garden(models.Model):
         if self.last_connection_time is None:
             return None
         factor = 1
-        next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
+        next_update = self.last_connection_time + factor * self.update_frequency - datetime.now(pytz.UTC)
         while next_update.total_seconds() < 0:
             factor += 1
-            next_update = self.last_connection_time + factor * self.update_interval - datetime.now(pytz.UTC)
+            next_update = self.last_connection_time + factor * self.update_frequency - datetime.now(pytz.UTC)
         return int(next_update.total_seconds())
 
     def get_formatted_last_connection_time(self):
@@ -124,8 +124,8 @@ class Garden(models.Model):
         else:
             return self.CONN_BAD_MSG
 
-    def update_interval_display(self):
-        total = self.update_interval.total_seconds()
+    def update_frequency_display(self):
+        total = self.update_frequency.total_seconds()
         minutes, seconds = divmod(total, 60)
         minutes = int(minutes)
         seconds = int(seconds)

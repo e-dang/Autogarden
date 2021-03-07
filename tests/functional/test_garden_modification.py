@@ -38,17 +38,17 @@ class TestGardenModification(Base):
 
         # the user sees a form that lets them change the name of the garden, upload a different picture for the garden,
         # and delete the garden. They enter invalid data and try to submit the form, but they see errors.
-        update_gpage.update_garden(update_interval=-1)
-        self.wait_for_form_error('error_1_id_update_interval')
+        update_gpage.update_garden(update_frequency=-1)
+        self.wait_for_form_error('error_1_id_update_frequency')
 
         # they then enter valid information and submit the form
         new_garden_name = 'My new garden name'
         new_garden_image = 'test_garden_image.png'
-        new_update_interval = '10:00'
+        new_update_frequency = '10:00'
         update_gpage.update_garden(
             submit=False,
             name=new_garden_name,
-            update_interval=new_update_interval,
+            update_frequency=new_update_frequency,
             image=new_garden_image
         )
         self.perform_image_crop(update_gpage, new_garden_image)
@@ -65,7 +65,7 @@ class TestGardenModification(Base):
         garden_page.edit_button.click()
         self.wait_for_page_to_be_loaded(update_gpage)
         update_gpage.assert_form_has_values(
-            name=new_garden_name, update_interval=new_update_interval, image=new_garden_image)
+            name=new_garden_name, update_frequency=new_update_frequency, image=new_garden_image)
 
         # the user then deletes the garden
         self.perform_delete_modal_checks(update_gpage)

@@ -5,14 +5,14 @@ from .models import Garden, WateringStation
 
 
 class GardenGetSerializer(serializers.ModelSerializer):
-    update_interval = serializers.SerializerMethodField()
+    update_frequency = serializers.SerializerMethodField()
 
     class Meta:
         model = Garden
-        fields = ['update_interval']
+        fields = ['update_frequency']
 
-    def get_update_interval(self, obj):
-        return obj.update_interval.total_seconds()
+    def get_update_frequency(self, obj):
+        return obj.update_frequency.total_seconds()
 
 
 class GardenPatchSerializer(serializers.ModelSerializer):

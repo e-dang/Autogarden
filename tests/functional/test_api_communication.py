@@ -5,7 +5,7 @@ import pytest
 from garden.models import (Garden, _default_is_connected,
                            _default_moisture_threshold,
                            _default_status,
-                           _default_update_interval,
+                           _default_update_frequency,
                            _default_watering_duration)
 from garden.utils import derive_duration_string
 from rest_framework import status
@@ -32,7 +32,7 @@ class TestAPICommunication(Base):
                                      is_connected=_default_is_connected(),
                                      last_connection_ip=None,
                                      last_connection_time=None,
-                                     update_interval=_default_update_interval(),
+                                     update_frequency=_default_update_frequency(),
                                      )
         self.api_client = api_client
         self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + self.garden.token.uuid)
@@ -61,7 +61,7 @@ class TestAPICommunication(Base):
         resp = self.api_client.get(garden_url)
 
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.data['update_interval'] == self.garden.update_interval.total_seconds()
+        assert resp.data['update_frequency'] == self.garden.update_frequency.total_seconds()
 
         return resp.data
 
@@ -120,9 +120,9 @@ class TestAPICommunication(Base):
         detail_gpage.edit_button.click()
         update_gpage = GardenUpdatePage(self.driver)
         self.wait_for_page_to_be_loaded(update_gpage)
-        update_interval = timedelta(minutes=7, seconds=20)
-        update_gpage.update_garden(update_interval=derive_duration_string(update_interval))
-        # update_gpage.garden_update_interval = derive_duration_string(update_interval)
+        update_frequency = timedelta(minutes=7, seconds=20)
+        update_gpage.update_garden(update_frequency=derive_duration_string(update_frequency))
+        # update_gpage.garden_update_frequency = derive_duration_string(update_frequency)
         # update_gpage.submit_button.click()
         update_gpage.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(detail_gpage)
@@ -160,4 +160,4 @@ class TestAPICommunication(Base):
         garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
         resp = self.api_client.get(garden_url)
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.data['update_interval'] == update_interval.total_seconds()
+        assert resp.data['update_frequency'] == update_frequency.total_seconds()
