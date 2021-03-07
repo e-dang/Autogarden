@@ -152,6 +152,14 @@ class TestWateringStationModel:
         assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/delete/'
 
     @pytest.mark.django_db
+    def test_get_records_url_returns_the_correct_url(self, watering_station):
+        garden = watering_station.garden
+
+        url = watering_station.get_records_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/records/'
+
+    @pytest.mark.django_db
     def test_watering_station_gets_deleted_when_garden_gets_delete(self, watering_station):
         garden = watering_station.garden
 
