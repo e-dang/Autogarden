@@ -44,4 +44,12 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-3">
+    <canvas id="soilMoistureChart" data-url={{watering_station.get_records_url}}></canvas>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="/static/javascript/soil_moisture.js"></script>
 {% endblock %}

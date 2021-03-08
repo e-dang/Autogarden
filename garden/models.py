@@ -175,6 +175,9 @@ class WateringStation(models.Model):
     def get_delete_url(self):
         return reverse('watering-station-delete', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
 
+    def get_records_url(self):
+        return reverse('watering-station-record-list', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
+
     def get_formatted_duration(self):
         return derive_duration_string(self.watering_duration)
 

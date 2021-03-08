@@ -1,8 +1,11 @@
 import os
 import random
-from django.conf import settings
+from datetime import datetime, timedelta
+from random import randint
 
 import pytest
+import pytz
+from django.conf import settings
 from rest_framework import status
 from rest_framework.reverse import reverse
 from tests import assertions
@@ -631,3 +634,60 @@ class TestWateringStationDeleteView:
         resp = getattr(client, method)(self.url, follow=False)
 
         assertions.assert_redirect(resp, reverse('login'), self.url)
+
+
+@pytest.mark.integration
+class TestWateringStationRecordListView:
+    def create_url(self, garden_pk, ws_pk):
+        return reverse('watering-station-record-list', kwargs={'garden_pk': garden_pk, 'ws_pk': ws_pk})
+
+    @pytest.fixture(autouse=True)
+    def setup(self, auth_user_ws):
+        self.garden = auth_user_ws.garden
+        self.watering_station = auth_user_ws
+        self.url = self.create_url(self.garden.pk, self.watering_station.pk)
+
+    @pytest.mark.django_db
+    def test_GET_returns_json_response_with_watering_station_records_from_the_last_12_hours(self, auth_client):
+        num_records = 14
+        update_frequency = timedelta(hours=1)
+        self.watering_station.update_frequency = update_frequency
+        time_created = datetime.now(pytz.UTC) - update_frequency * num_records
+        expected_records = []
+        for _ in range(num_records):
+            record = self.watering_station.records.create(moisture_level=float(randint(0, 100)))
+            record.created = time_created
+            record.save()
+            if datetime.now(pytz.UTC) - time_created < timedelta(hours=12):
+                expected_records.append(record)
+            time_created += update_frequency
+
+        resp = auth_client.get(self.url)
+        json = resp.json()
+
+        assert len(json['labels']) == len(expected_records)
+        assert len(json['data']) == len(expected_records)
+        assert set(json['data']) == set(record.moisture_level for record in expected_records)
+
+    @pytest.mark.django_db
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
+        resp = client.get(self.url)
+
+        assertions.assert_redirect(resp, reverse('login'), self.url)
+
+    @pytest.mark.django_db
+    def test_GET_returns_404_page_when_accessed_by_user_who_doesnt_own_the_watering_station(self, auth_client, watering_station):
+        url = self.create_url(watering_station.garden.pk, watering_station.pk)
+
+        resp = auth_client.get(url)
+
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_GET_returns_404_page_when_accessing_a_resource_that_doesnt_exist(self, auth_client):
+        num_watering_stations = self.garden.watering_stations.all().count()
+        url = self.create_url(self.garden.pk, num_watering_stations + 1)
+
+        resp = auth_client.get(url)
+
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
