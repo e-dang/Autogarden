@@ -182,6 +182,9 @@ class Token(models.Model):
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid.uuid4)
 
+    def __str__(self):
+        return str(self.uuid)
+
 
 class WateringStation(models.Model):
     ACTIVE_STATUS_STR = 'Active'

@@ -2,6 +2,20 @@
     display: none;
 }
 
-img {
+img.cropper-photo {
     max-width: 100%;
+}
+
+img.header-photo {
+    border-radius: 100%;
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.table th {
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
 }

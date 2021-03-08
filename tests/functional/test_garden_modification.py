@@ -93,7 +93,7 @@ class TestGardenModification(Base):
         # the user also notices that the row display some information about the watering station
         selected_watering_station = 1
         assert str(selected_watering_station) == garden_page.get_watering_station_field_value(
-            selected_watering_station, 'Watering Station Number')
+            selected_watering_station, '#')
         table_data = garden_page.get_water_station_data_from_table(selected_watering_station)
         table_data['status'] = self.ws_status_to_bool(table_data['status'])
 
@@ -208,7 +208,7 @@ class TestGardenModification(Base):
 
     def assert_watering_station_table_contains_correct_headers(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()
-        assert garden_page.field_is_in_watering_station_table('Watering Station Number')
+        assert garden_page.field_is_in_watering_station_table('#')
         assert garden_page.field_is_in_watering_station_table('Status')
         assert garden_page.field_is_in_watering_station_table('Plant Type')
         assert garden_page.field_is_in_watering_station_table('Moisture Threshold')

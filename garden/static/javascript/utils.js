@@ -43,14 +43,14 @@ function addCropImageHandler(configs) {
 
         const imgData = event.target.files[0];
         const url = URL.createObjectURL(imgData);
-        imgContainer.html(`<img id="image" src="${url}" alt="">`);
+        imgContainer.html(`<img id="image" class="cropper-photo" src="${url}" alt="">`);
 
         let img;
         let cropper;
         const resetCropper = () => {
             img = $('#image');
             img.cropper({
-                aspectRatio: 16 / 9,
+                aspectRatio: 1,
                 scalable: false,
                 zoomable: false,
                 cropBoxResizable: false,
@@ -86,7 +86,7 @@ function addCropImageHandler(configs) {
             cropBtn.attr('hidden', false);
             resetBtn.attr('hidden', true);
             cropper.reset();
-            imgContainer.html(`<img id="image" src="${url}" alt="">`);
+            imgContainer.html(`<img id="image" class="cropper-photo" src="${url}" alt="">`);
             resetCropper();
         });
     });
