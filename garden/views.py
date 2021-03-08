@@ -1,6 +1,7 @@
-from garden.permissions import TokenPermission
+from datetime import datetime, timedelta
 from typing import Any
 
+import pytz
 from crispy_forms.utils import render_crispy_form
 from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,13 +16,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
-                          DeleteWateringStationForm, NewGardenForm,
-                          GardenForm, WateringStationForm)
+                          DeleteWateringStationForm, GardenForm, NewGardenForm,
+                          WateringStationForm)
+from garden.permissions import TokenPermission
 
-from .models import Garden
+from .models import Garden, WateringStation
+from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
-from .permissions import TokenPermission
 
 
 class GardenAPIView(APIView):
@@ -226,3 +228,23 @@ class WateringStationDeleteView(LoginRequiredMixin, View):
             station = garden.watering_stations.get(garden=garden_pk, pk=ws_pk)
             station.delete()
             return redirect('garden-detail', pk=garden_pk)
+
+
+class WateringStationRecordListView(LoginRequiredMixin, View):
+    def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+            watering_station = garden.watering_stations.get(pk=ws_pk)
+        except (Garden.DoesNotExist, WateringStation.DoesNotExist):
+            raise Http404()
+        else:
+            labels = []
+            data = []
+            cut_off_time = datetime.now(pytz.UTC) - timedelta(hours=12)
+            for record in watering_station.records.filter(created__gte=cut_off_time).order_by('created'):
+                labels.append(record.created)
+                data.append(record.moisture_level)
+            return JsonResponse({
+                'labels': labels,
+                'data': data
+            })
