@@ -38,10 +38,6 @@ def _default_garden_image():
     return 'default_garden.png'
 
 
-CONNECTED_STR = 'Connected'
-DISCONNECTED_STR = 'Disconnected'
-
-
 class Garden(models.Model):
     OK = 'ok'
     LOW = 'lo'
@@ -49,6 +45,14 @@ class Garden(models.Model):
         (OK, 'Ok'),
         (LOW, 'Low'),
     ]
+
+    WL_OK_BADGE = 'badge-success'
+    WL_LOW_BADGE = 'badge-danger'
+
+    CONNECTED_STR = 'Connected'
+    DISCONNECTED_STR = 'Disconnected'
+    CONNECTED_BADGE = 'badge-success'
+    DISCONNECTED_BADGE = 'badge-danger'
 
     # Values from https://www.speedcheck.org/wiki/rssi/#:~:text=RSSI%20or%20this%20signal%20value,%2D70%20(minus%2070).
     CONN_POOR = -80
@@ -62,6 +66,13 @@ class Garden(models.Model):
     CONN_OK_MSG = 'Ok'
     CONN_GOOD_MSG = 'Good'
     CONN_EXCELLENT_MSG = 'Excellent'
+
+    CONN_NOT_AVAILABLE_BADGE = 'badge-danger'
+    CONN_BAD_BADGE = 'badge-danger'
+    CONN_POOR_BADGE = 'badge-warning'
+    CONN_OK_BADGE = 'badge-warning'
+    CONN_GOOD_BADGE = 'badge-success'
+    CONN_EXCELLENT_BADGE = 'badge-success'
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default=_default_garden_name)
@@ -87,7 +98,7 @@ class Garden(models.Model):
 
     @property
     def status(self):
-        return CONNECTED_STR if self.is_connected else DISCONNECTED_STR
+        return self.CONNECTED_STR if self.is_connected else self.DISCONNECTED_STR
 
     def calc_time_till_next_update(self):
         if self.last_connection_time is None:
@@ -145,6 +156,26 @@ class Garden(models.Model):
         if seconds != 0:
             string += f'{seconds} Sec'
         return string.strip()
+
+    def get_connection_strength_badge_class(self):
+        if self.connection_strength is None:
+            return self.CONN_NOT_AVAILABLE_BADGE
+        elif self.connection_strength >= self.CONN_EXCELLENT:
+            return self.CONN_EXCELLENT_BADGE
+        elif self.connection_strength >= self.CONN_GOOD:
+            return self.CONN_GOOD_BADGE
+        elif self.connection_strength >= self.CONN_OK:
+            return self.CONN_OK_BADGE
+        elif self.connection_strength >= self.CONN_POOR:
+            return self.CONN_POOR_BADGE
+        else:
+            return self.CONN_BAD_BADGE
+
+    def get_water_level_badge_class(self):
+        return self.WL_LOW_BADGE if self.water_level == self.LOW else self.WL_OK_BADGE
+
+    def get_is_connected_badge_class(self):
+        return self.CONNECTED_BADGE if self.is_connected else self.DISCONNECTED_BADGE
 
 
 class Token(models.Model):

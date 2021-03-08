@@ -23,16 +23,38 @@
                 <div class="card h-100">
                     <div class="card-header text-center h-50">Status</div>
                     <div class="card-body">
-                        {% if garden.is_connected %}
-                        <p class="card-text text-center"><span id="connectionStatus"
-                                class="badge badge-pill badge-success">{{garden.status}}</span></p>
-                        {% else %}
-                        <p class="card-text text-center"><span id="connectionStatus"
-                                class="badge badge-pill badge-danger">{{garden.status}}</span></p>
-                        {% endif %}
+                        <p class="card-text text-center">
+                            <span id="connectionStatus"
+                                class="badge badge-pill {{garden.get_is_connected_badge_class}}">{{garden.status}}</span>
+                        </p>
                     </div>
                 </div>
             </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Connection Strength</div>
+                    <div class="card-body">
+                        <p class="card-text text-center">
+                            <span id="connectionStrength"
+                                class="badge badge-pill {{garden.get_connection_strength_badge_class}}">{{garden.get_connection_strength_display}}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header text-center h-50">Water Level</div>
+                    <div class="card-body">
+                        <p class="card-text text-center"><span id="waterLevel"
+                                class="badge badge-pill {{garden.get_water_level_badge_class}}">
+                                {{garden.get_water_level_display}}
+                            </span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
             <div class="col">
                 <div class="card h-100">
                     <div class="card-header text-center h-50">Last Connected From</div>
@@ -47,27 +69,6 @@
                     <div class="card-body">
                         <p id="lastConnectedAt" class="card-text text-center">
                             {{garden.get_formatted_last_connection_time}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Connection Strength</div>
-                    <div class="card-body">
-                        <p id="connectionStrength" class="card-text text-center">
-                            {{garden.get_connection_strength_display}}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Water Level</div>
-                    <div class="card-body">
-                        <p id="waterLevel" class="card-text text-center">{{garden.get_water_level_display}}</p>
                     </div>
                 </div>
             </div>

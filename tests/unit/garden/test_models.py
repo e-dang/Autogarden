@@ -22,8 +22,8 @@ class TestGardenModel:
         assert getattr(garden, field) == get_default()
 
     @pytest.mark.parametrize('garden_factory, is_connected, expected', [
-        (None, True, models.CONNECTED_STR),
-        (None, False, models.DISCONNECTED_STR),
+        (None, True, models.Garden.CONNECTED_STR),
+        (None, False, models.Garden.DISCONNECTED_STR),
     ],
         indirect=['garden_factory'],
         ids=['connected', 'disconnected'])
@@ -87,6 +87,7 @@ class TestGardenModel:
         assert ret_val == str(None)
 
     @pytest.mark.parametrize('value, message', [
+        (None, models.Garden.CONN_NOT_AVAILABLE_MSG),
         (-81, models.Garden.CONN_BAD_MSG),
         (-80, models.Garden.CONN_POOR_MSG),
         (-71, models.Garden.CONN_POOR_MSG),
@@ -96,7 +97,7 @@ class TestGardenModel:
         (-31, models.Garden.CONN_GOOD_MSG),
         (-30, models.Garden.CONN_EXCELLENT_MSG),
     ],
-        ids=['bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
+        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
     def test_get_connection_strength_display_returns_correct_message(self, garden_factory, value, message):
         garden = garden_factory.build(connection_strength=value)
 
@@ -116,6 +117,49 @@ class TestGardenModel:
         ret_val = garden.update_frequency_display()
 
         assert ret_val == expected
+
+    @pytest.mark.parametrize('value, klass', [
+        (None, models.Garden.CONN_NOT_AVAILABLE_BADGE),
+        (-81, models.Garden.CONN_BAD_BADGE),
+        (-80, models.Garden.CONN_POOR_BADGE),
+        (-71, models.Garden.CONN_POOR_BADGE),
+        (-70, models.Garden.CONN_OK_BADGE),
+        (-68, models.Garden.CONN_OK_BADGE),
+        (-67, models.Garden.CONN_GOOD_BADGE),
+        (-31, models.Garden.CONN_GOOD_BADGE),
+        (-30, models.Garden.CONN_EXCELLENT_BADGE),
+    ],
+        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
+    def test_get_connection_strength_badge_class_returns_correct_class(self, garden_factory, value, klass):
+        garden = garden_factory.build(connection_strength=value)
+
+        ret_val = garden.get_connection_strength_badge_class()
+
+        assert ret_val == klass
+
+    @pytest.mark.parametrize('value, klass', [
+        (models.Garden.LOW, models.Garden.WL_LOW_BADGE),
+        (models.Garden.OK, models.Garden.WL_OK_BADGE)
+    ],
+        ids=['low', 'ok'])
+    def test_get_water_level_badge_class_returns_correct_badge(self, garden_factory, value, klass):
+        garden = garden_factory.build(water_level=value)
+
+        ret_val = garden.get_water_level_badge_class()
+
+        assert ret_val == klass
+
+    @pytest.mark.parametrize('value, klass', [
+        (True, models.Garden.CONNECTED_BADGE),
+        (False, models.Garden.DISCONNECTED_BADGE)
+    ],
+        ids=['connected', 'disconnected'])
+    def test_get_is_connected_badge_class_returns_correct_class(self, garden_factory, value, klass):
+        garden = garden_factory.build(is_connected=value)
+
+        ret_val = garden.get_is_connected_badge_class()
+
+        assert ret_val == klass
 
 
 @pytest.mark.unit
