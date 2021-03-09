@@ -6,11 +6,11 @@
 
 {% block main_content %}
 
-<div class="row mt-3 justify-content-center">
-    <div class="col-sm-auto col-lg-4 px-lg-4">
+<div class="row mt-4 justify-content-center">
+    <div class="col-sm-auto col-lg-4">
         {% include 'components/image_box.html' with instance=garden %}
     </div>
-    <div class="col-sm-12 col-lg-8 mt-sm-3 mt-lg-0">
+    <div class="col-sm-12 col-lg-8 mt-sm-4 mt-lg-0">
         <div class="row">
             <div class="col">
                 {% include 'components/info_card.html' with id='apiKey' title='API key' body=garden.token.uuid %}
@@ -27,7 +27,6 @@
                 {% include 'components/info_card.html' with title='Water Level' body=garden.get_water_level_element|safe %}
             </div>
         </div>
-
         <div class="row mt-4">
             <div class="col">
                 {% include 'components/info_card.html' with id="lastConnectionFrom" title='Last Connected From' body=garden.last_connection_ip %}
@@ -44,7 +43,7 @@
 
 <hr />
 
-<div class="row">
+<div class="row justify-content-center">
     <div class="col">
         <div class="card card-body">
             <div class="row justify-content-between">
@@ -127,4 +126,11 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block javascript %}
+<script src="/static/javascript/jquery.fittext.js"></script>
+<script>
+$('#name').fitText(0.8, {maxFontSize: 23})
+</script>
 {% endblock %}

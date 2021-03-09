@@ -59,7 +59,7 @@ class GardenDetailPage(BasePage):
     def is_table_row_displaying_data_for_watering_station(self, row, watering_station):
         formatter = WateringStationFormatter(watering_station)
         return all([
-            self.get_watering_station_field_value(row, '#') == str(formatter.idx + 1),
+            self.get_watering_station_field_value(row, '#') == formatter.idx,
             self.get_watering_station_field_value(row, 'Plant Type') == formatter.plant_type,
             self.get_watering_station_field_value(row, 'Status') == formatter.status,
             self.get_watering_station_field_value(row, 'Moisture Threshold') == str(formatter.moisture_threshold),

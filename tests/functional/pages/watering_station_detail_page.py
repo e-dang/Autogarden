@@ -2,11 +2,7 @@ from garden.formatters import WateringStationFormatter
 import re
 
 from .base_page import BasePage
-from .elements import Button
-
-
-class EditButton(Button):
-    LOCATOR = 'editButton'
+from .elements import EditButton
 
 
 class WateringStationDetailPage(BasePage):
@@ -32,12 +28,12 @@ class WateringStationDetailPage(BasePage):
         return self._get_inner_text('wateringDuration')
 
     def get_idx(self):
-        return self._get_inner_text('wsIdx')
+        return self._get_inner_text('name').split('#')[-1]
 
     def is_displaying_data_for_watering_station(self, watering_station):
         formatter = WateringStationFormatter(watering_station)
         return all([
-            self.get_idx() == str(formatter.idx + 1),
+            self.get_idx() == formatter.idx,
             self.get_plant_type() == formatter.plant_type,
             self.get_status() == formatter.status,
             self.get_moisture_threshold() == str(formatter.moisture_threshold),

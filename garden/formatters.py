@@ -142,6 +142,8 @@ class WateringStationFormatter(ModelFormatter):
     ACTIVE_STATUS_BADGE = 'badge-success'
     INACTIVE_STATUS_BADGE = 'badge-danger'
 
+    PLANT_TYPE_NOT_AVAILABLE = 'N/A'
+
     def get_watering_duration_display(self) -> str:
         return format_duration(self.instance.watering_duration.total_seconds())
 
@@ -153,7 +155,16 @@ class WateringStationFormatter(ModelFormatter):
 
     def get_status_element(self) -> str:
         return self._create_badge(
-            '',
+            'status',
             self.get_status_badge_class(),
             self.get_status_display()
         )
+
+    def get_idx_display(self) -> str:
+        return str(self.instance.idx + 1)
+
+    def get_name_display(self) -> str:
+        return f'Watering Station #{self.get_idx_display()}'
+
+    def get_plant_type_display(self) -> str:
+        return self.instance.plant_type or self.PLANT_TYPE_NOT_AVAILABLE
