@@ -1,4 +1,4 @@
-from garden.formatters import GardenFormatter
+from garden.formatters import GardenFormatter, WateringStationFormatter
 import re
 
 from selenium.common.exceptions import NoSuchElementException
@@ -71,6 +71,16 @@ class GardenDetailPage(BasePage):
             'moisture_threshold': moisture_threshold,
             'watering_duration': watering_duration
         }
+
+    def is_table_row_displaying_data_for_watering_station(self, row, watering_station):
+        formatter = WateringStationFormatter(watering_station)
+        return all([
+            self.get_watering_station_field_value(row, '#') == str(formatter.get_idx() + 1),
+            self.get_watering_station_field_value(row, 'Plant Type') == formatter.plant_type,
+            self.get_watering_station_field_value(row, 'Status') == formatter.status,
+            self.get_watering_station_field_value(row, 'Moisture Threshold') == str(formatter.moisture_threshold),
+            self.get_watering_station_field_value(row, 'Watering Duration') == formatter.watering_duration
+        ])
 
     def get_garden_status(self):
         return self._get_inner_text('connectionStatus')

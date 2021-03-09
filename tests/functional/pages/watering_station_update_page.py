@@ -1,9 +1,7 @@
 import re
-from datetime import timedelta
 
-import pytest
-from garden.formatters import format_duration
 from garden.forms import CropperMixin, WateringStationForm
+from garden.utils import derive_duration_string
 
 from ..base import wait_for
 from .base_page import BasePage
@@ -79,16 +77,10 @@ class WateringStationUpdatePage(BasePage):
             crop_image(self, image)
         self.submit_button.click()
 
-    def assert_form_has_values(self, **kwargs):
-        for field, value in kwargs.items():
-            if not hasattr(self, field):
-                pytest.fail(f'WateringStationUpdatePage connot check value for {field} because that field doesnt exist')
-
-            if field == 'watering_duration':
-                assert self._format_duration(self.watering_duration) == value
-            else:
-                assert getattr(self, field) == value
-
-    def _format_duration(self, str_duration):
-        minutes, seconds = str_duration.split(':')
-        return format_duration(timedelta(minutes=int(minutes), seconds=int(seconds)).total_seconds())
+    def form_has_values_from_watering_station(self, watering_station):
+        return all([
+            self.status == watering_station.status,
+            self.plant_type == watering_station.plant_type,
+            self.watering_duration == derive_duration_string(watering_station.watering_duration),
+            self.moisture_threshold == str(watering_station.moisture_threshold)
+        ])

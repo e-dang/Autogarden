@@ -1,3 +1,4 @@
+from garden.formatters import WateringStationFormatter
 import re
 
 from .base_page import BasePage
@@ -30,5 +31,15 @@ class WateringStationDetailPage(BasePage):
     def get_watering_duration(self):
         return self._get_inner_text('wateringDuration')
 
-    def get_ws_idx(self):
+    def get_idx(self):
         return self._get_inner_text('wsIdx')
+
+    def is_displaying_data_for_watering_station(self, watering_station):
+        formatter = WateringStationFormatter(watering_station)
+        return all([
+            self.get_idx() == str(formatter.get_idx() + 1),
+            self.get_plant_type() == formatter.plant_type,
+            self.get_status() == formatter.status,
+            self.get_moisture_threshold() == str(formatter.moisture_threshold),
+            self.get_watering_duration() == formatter.watering_duration
+        ])
