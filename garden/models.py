@@ -46,34 +46,6 @@ class Garden(models.Model):
         (LOW, 'Low'),
     ]
 
-    WL_OK_BADGE = 'badge-success'
-    WL_LOW_BADGE = 'badge-danger'
-
-    CONNECTED_STR = 'Connected'
-    DISCONNECTED_STR = 'Disconnected'
-    CONNECTED_BADGE = 'badge-success'
-    DISCONNECTED_BADGE = 'badge-danger'
-
-    # Values from https://www.speedcheck.org/wiki/rssi/#:~:text=RSSI%20or%20this%20signal%20value,%2D70%20(minus%2070).
-    CONN_POOR = -80
-    CONN_OK = -70
-    CONN_GOOD = -67
-    CONN_EXCELLENT = -30
-
-    CONN_NOT_AVAILABLE_MSG = 'N/A'
-    CONN_BAD_MSG = 'Bad'
-    CONN_POOR_MSG = 'Poor'
-    CONN_OK_MSG = 'Ok'
-    CONN_GOOD_MSG = 'Good'
-    CONN_EXCELLENT_MSG = 'Excellent'
-
-    CONN_NOT_AVAILABLE_BADGE = 'badge-danger'
-    CONN_BAD_BADGE = 'badge-danger'
-    CONN_POOR_BADGE = 'badge-warning'
-    CONN_OK_BADGE = 'badge-warning'
-    CONN_GOOD_BADGE = 'badge-success'
-    CONN_EXCELLENT_BADGE = 'badge-success'
-
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default=_default_garden_name)
     image = models.ImageField(default=_default_garden_image)
@@ -96,10 +68,6 @@ class Garden(models.Model):
     def get_delete_url(self):
         return reverse('garden-delete', kwargs={'pk': self.pk})
 
-    @property
-    def status(self):
-        return self.CONNECTED_STR if self.is_connected else self.DISCONNECTED_STR
-
     def calc_time_till_next_update(self):
         if self.last_connection_time is None:
             return None
@@ -109,11 +77,6 @@ class Garden(models.Model):
             factor += 1
             next_update = self.last_connection_time + factor * self.update_frequency - datetime.now(pytz.UTC)
         return int(next_update.total_seconds())
-
-    def get_formatted_last_connection_time(self):
-        if self.last_connection_time is None:
-            return str(None)
-        return self.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
     def update_connection_status(self, request: Request):
         self.is_connected = True
@@ -130,52 +93,6 @@ class Garden(models.Model):
             self.is_connected = False
             self.connection_strength = None
             self.save()
-
-    def get_connection_strength_display(self):
-        if self.connection_strength is None:
-            return self.CONN_NOT_AVAILABLE_MSG
-        elif self.connection_strength >= self.CONN_EXCELLENT:
-            return self.CONN_EXCELLENT_MSG
-        elif self.connection_strength >= self.CONN_GOOD:
-            return self.CONN_GOOD_MSG
-        elif self.connection_strength >= self.CONN_OK:
-            return self.CONN_OK_MSG
-        elif self.connection_strength >= self.CONN_POOR:
-            return self.CONN_POOR_MSG
-        else:
-            return self.CONN_BAD_MSG
-
-    def update_frequency_display(self):
-        total = self.update_frequency.total_seconds()
-        minutes, seconds = divmod(total, 60)
-        minutes = int(minutes)
-        seconds = int(seconds)
-        string = ''
-        if minutes != 0:
-            string += f'{minutes} Min '
-        if seconds != 0:
-            string += f'{seconds} Sec'
-        return string.strip()
-
-    def get_connection_strength_badge_class(self):
-        if self.connection_strength is None:
-            return self.CONN_NOT_AVAILABLE_BADGE
-        elif self.connection_strength >= self.CONN_EXCELLENT:
-            return self.CONN_EXCELLENT_BADGE
-        elif self.connection_strength >= self.CONN_GOOD:
-            return self.CONN_GOOD_BADGE
-        elif self.connection_strength >= self.CONN_OK:
-            return self.CONN_OK_BADGE
-        elif self.connection_strength >= self.CONN_POOR:
-            return self.CONN_POOR_BADGE
-        else:
-            return self.CONN_BAD_BADGE
-
-    def get_water_level_badge_class(self):
-        return self.WL_LOW_BADGE if self.water_level == self.LOW else self.WL_OK_BADGE
-
-    def get_is_connected_badge_class(self):
-        return self.CONNECTED_BADGE if self.is_connected else self.DISCONNECTED_BADGE
 
 
 class Token(models.Model):

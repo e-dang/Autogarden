@@ -16,13 +16,12 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <img id="gardenImage" class="header-photo" src="{{garden.image.url}}" alt="">
+                    <img id="gardenImage" class="header-photo" src="{{garden.image.url}}" alt="" />
                 </div>
             </div>
             <div class="row justify-content-center mt-4">
                 <div class="col">
-                    <a id="editButton" class="btn btn-sm btn-outline-info w-100"
-                        href="{% url 'garden-update' garden.pk %}">Edit</a>
+                    <a id="editButton" class="btn btn-sm btn-outline-info w-100" href="{% url 'garden-update' garden.pk %}">Edit</a>
                 </div>
             </div>
         </div>
@@ -30,85 +29,36 @@
     <div class="col-sm-12 col-lg-8 mt-sm-3 mt-lg-0">
         <div class="row">
             <div class="col">
-                <div class="card">
-                    <div class="card-header text-center">API Key</div>
-                    <div class="card-body">
-                        <p class="card-text text-center">{{garden.token}}</p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with title='API key' body=garden.token.uuid %}
             </div>
         </div>
         <div class="row mt-4">
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Status</div>
-                    <div class="card-body">
-                        <p class="card-text text-center">
-                            <span class="lead"><span id="connectionStatus"
-                                    class="badge badge-pill {{garden.get_connection_strength_badge_class}}">{{garden.status}}</span></span>
-                        </p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with title='Status' body=garden.get_is_connected_element|safe %}
             </div>
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Connection Strength</div>
-                    <div class="card-body">
-                        <p class="card-text text-center">
-                            <span class="lead"><span id="connectionStrength"
-                                    class="badge badge-pill {{garden.get_connection_strength_badge_class}}">{{garden.get_connection_strength_display}}</span></span>
-                        </p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with title='Connection Strength' body=garden.get_connection_strength_element|safe %}
             </div>
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Water Level</div>
-                    <div class="card-body">
-                        <p class="card-text text-center">
-                            <span class="lead"><span id="waterLevel"
-                                    class="badge badge-pill {{garden.get_water_level_badge_class}}">
-                                    {{garden.get_water_level_display}}
-                                </span></span>
-                        </p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with title='Water Level' body=garden.get_water_level_element|safe %}
             </div>
         </div>
 
         <div class="row mt-4">
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Last Connected From</div>
-                    <div class="card-body">
-                        <p id="lastConnectionFrom" class="card-text text-center">{{garden.last_connection_ip}}</p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with id="lastConnectionFrom" title='Last Connected From' body=garden.last_connection_ip %}
             </div>
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Last Connected At</div>
-                    <div class="card-body">
-                        <p id="lastConnectedAt" class="card-text text-center">
-                            {{garden.get_formatted_last_connection_time}}</p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with id="lastConnectedAt" title='Last Connected At' body=garden.last_connection_time %}
             </div>
             <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Update Frequency</div>
-                    <div class="card-body">
-                        <p id="updateFrequency" class="card-text text-center">
-                            {{garden.update_frequency_display}}
-                        </p>
-                    </div>
-                </div>
+                {% include 'components/info_card.html' with id="updateFrequency" title='Update Frequency' body=garden.update_frequency %}
             </div>
         </div>
     </div>
 </div>
 
-<hr>
+<hr />
 
 <div class="row">
     <div class="col">
@@ -119,26 +69,37 @@
                 </div>
                 <div class="col-auto mb-sm-3 mb-md-0">
                     <div class="btn-toolbar">
-
-                        <form class="form " method="post" action="{{garden.get_watering_stations_url}}">
+                        <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
                             {% csrf_token %}
                             <input type="hidden" name="_method" value="patch" />
-                            <input id="deactivateAllBtn" type="submit" class="btn btn-outline-danger"
-                                value="Deactivate All">
+                            <input
+                                id="deactivateAllBtn"
+                                type="submit"
+                                class="btn btn-outline-danger"
+                                value="Deactivate All"
+                            />
                         </form>
 
-                        <form class="form  mx-2" method="post" action="{{garden.get_watering_stations_url}}">
+                        <form class="form mx-2" method="post" action="{{garden.get_watering_stations_url}}">
                             {% csrf_token %}
                             <input type="hidden" name="_method" value="patch" />
                             <input type="hidden" name="status" value="true" />
-                            <input id="activateAllBtn" type="submit" class="btn btn-outline-primary"
-                                value="Activate All">
+                            <input
+                                id="activateAllBtn"
+                                type="submit"
+                                class="btn btn-outline-primary"
+                                value="Activate All"
+                            />
                         </form>
 
-                        <form class="form " method="post" action="{{garden.get_watering_stations_url}}">
+                        <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
                             {% csrf_token %}
-                            <input id="addWateringStationBtn" type="submit" class="btn btn-outline-success"
-                                value="+ Add Watering Station">
+                            <input
+                                id="addWateringStationBtn"
+                                type="submit"
+                                class="btn btn-outline-success"
+                                value="+ Add Watering Station"
+                            />
                         </form>
                     </div>
                 </div>
@@ -161,8 +122,11 @@
                                 {% for watering_station in garden.watering_stations.all %}
                                 <tr>
                                     <td scope="row text-capitalize">
-                                        <a id="wateringStation{{ forloop.counter }}"
-                                            href="{{ watering_station.get_absolute_url }}">{{ forloop.counter }}</a>
+                                        <a
+                                            id="wateringStation{{ forloop.counter }}"
+                                            href="{{ watering_station.get_absolute_url }}"
+                                            >{{ forloop.counter }}</a
+                                        >
                                     </td>
                                     <td scope="row text-capitalize">{{ watering_station.plant_type }}</td>
                                     <td scope="row text-capitalize">{{ watering_station.status_string }}</td>

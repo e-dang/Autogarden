@@ -1,3 +1,4 @@
+from garden.formatters import GardenFormatter
 import re
 
 from selenium.common.exceptions import NoSuchElementException
@@ -99,13 +100,14 @@ class GardenDetailPage(BasePage):
         return self._get_inner_text('updateFrequency')
 
     def is_displaying_info_for_garden(self, garden):
+        formatter = GardenFormatter(garden)
         return all([
-            self.get_garden_status() == garden.status,
-            self.get_last_connected_from() == str(garden.last_connection_ip),
-            self.get_last_connected_at() == garden.get_formatted_last_connection_time(),
-            self.get_update_frequency() == garden.update_frequency_display(),
-            self.get_connection_strength() == garden.get_connection_strength_display(),
-            self.get_water_level() == str(garden.get_water_level_display()),
+            self.get_garden_status() == formatter.get_is_connected_display(),
+            self.get_last_connected_from() == str(formatter.last_connection_ip),
+            self.get_last_connected_at() == formatter.get_last_connection_time_display(),
+            self.get_update_frequency() == formatter.get_update_frequency_display(),
+            self.get_connection_strength() == formatter.get_connection_strength_display(),
+            self.get_water_level() == formatter.get_water_level_display(),
         ])
 
     def _get_field_index(self, field_name):

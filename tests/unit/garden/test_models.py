@@ -21,19 +21,6 @@ class TestGardenModel:
 
         assert getattr(garden, field) == get_default()
 
-    @pytest.mark.parametrize('garden_factory, is_connected, expected', [
-        (None, True, models.Garden.CONNECTED_STR),
-        (None, False, models.Garden.DISCONNECTED_STR),
-    ],
-        indirect=['garden_factory'],
-        ids=['connected', 'disconnected'])
-    def test_status_returns_connected_if_is_connected_is_true(self, garden_factory, is_connected, expected):
-        garden = garden_factory.build(is_connected=is_connected)
-
-        ret_val = garden.status
-
-        assert ret_val == expected
-
     def test_calc_time_till_next_update_returns_expected_time_to_within_a_second(self, garden_factory):
         minutes = 10
         last_connection_time = datetime.now(pytz.UTC) - timedelta(minutes=minutes - 2)
@@ -64,102 +51,6 @@ class TestGardenModel:
         ret_val = garden.calc_time_till_next_update()
 
         assert int(expected.total_seconds()) == ret_val
-
-    def test_get_formatted_last_connection_time_returns_correct_format(self, garden_factory):
-        day = 25
-        month = 2
-        year = 2021
-        hour = 12
-        minute = 13
-        period = 'PM'
-        dtime = datetime(day=day, month=month, year=year, hour=hour, minute=minute, tzinfo=pytz.UTC)
-        garden = garden_factory.build(last_connection_time=dtime)
-
-        ret_val = garden.get_formatted_last_connection_time()
-
-        assert ret_val == f'{month}/{day}/{year} {hour}:{minute} {period}'
-
-    def test_get_formatted_last_connection_time_returns_None_if_last_connection_time_is_none(self, garden_factory):
-        garden = garden_factory.build(last_connection_time=None)
-
-        ret_val = garden.get_formatted_last_connection_time()
-
-        assert ret_val == str(None)
-
-    @pytest.mark.parametrize('value, message', [
-        (None, models.Garden.CONN_NOT_AVAILABLE_MSG),
-        (-81, models.Garden.CONN_BAD_MSG),
-        (-80, models.Garden.CONN_POOR_MSG),
-        (-71, models.Garden.CONN_POOR_MSG),
-        (-70, models.Garden.CONN_OK_MSG),
-        (-68, models.Garden.CONN_OK_MSG),
-        (-67, models.Garden.CONN_GOOD_MSG),
-        (-31, models.Garden.CONN_GOOD_MSG),
-        (-30, models.Garden.CONN_EXCELLENT_MSG),
-    ],
-        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
-    def test_get_connection_strength_display_returns_correct_message(self, garden_factory, value, message):
-        garden = garden_factory.build(connection_strength=value)
-
-        ret_val = garden.get_connection_strength_display()
-
-        assert ret_val == message
-
-    @pytest.mark.parametrize('update_frequency, expected', [
-        (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
-        (timedelta(minutes=0, seconds=45), '45 Sec'),
-        (timedelta(minutes=10), '10 Min')
-    ],
-        ids=['1:30', '0:45', '10:00'])
-    def test_update_frequency_display_returns_correct_string(self, garden_factory, update_frequency, expected):
-        garden = garden_factory.build(update_frequency=update_frequency)
-
-        ret_val = garden.update_frequency_display()
-
-        assert ret_val == expected
-
-    @pytest.mark.parametrize('value, klass', [
-        (None, models.Garden.CONN_NOT_AVAILABLE_BADGE),
-        (-81, models.Garden.CONN_BAD_BADGE),
-        (-80, models.Garden.CONN_POOR_BADGE),
-        (-71, models.Garden.CONN_POOR_BADGE),
-        (-70, models.Garden.CONN_OK_BADGE),
-        (-68, models.Garden.CONN_OK_BADGE),
-        (-67, models.Garden.CONN_GOOD_BADGE),
-        (-31, models.Garden.CONN_GOOD_BADGE),
-        (-30, models.Garden.CONN_EXCELLENT_BADGE),
-    ],
-        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
-    def test_get_connection_strength_badge_class_returns_correct_class(self, garden_factory, value, klass):
-        garden = garden_factory.build(connection_strength=value)
-
-        ret_val = garden.get_connection_strength_badge_class()
-
-        assert ret_val == klass
-
-    @pytest.mark.parametrize('value, klass', [
-        (models.Garden.LOW, models.Garden.WL_LOW_BADGE),
-        (models.Garden.OK, models.Garden.WL_OK_BADGE)
-    ],
-        ids=['low', 'ok'])
-    def test_get_water_level_badge_class_returns_correct_badge(self, garden_factory, value, klass):
-        garden = garden_factory.build(water_level=value)
-
-        ret_val = garden.get_water_level_badge_class()
-
-        assert ret_val == klass
-
-    @pytest.mark.parametrize('value, klass', [
-        (True, models.Garden.CONNECTED_BADGE),
-        (False, models.Garden.DISCONNECTED_BADGE)
-    ],
-        ids=['connected', 'disconnected'])
-    def test_get_is_connected_badge_class_returns_correct_class(self, garden_factory, value, klass):
-        garden = garden_factory.build(is_connected=value)
-
-        ret_val = garden.get_is_connected_badge_class()
-
-        assert ret_val == klass
 
 
 @pytest.mark.unit

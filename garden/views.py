@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from garden.formatters import GardenFormatter
 from typing import Any
 
 import pytz
@@ -90,7 +91,7 @@ class GardenDetailView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden.refresh_connection_status()
-            return render(request, 'garden_detail.html', context={'garden': garden})
+            return render(request, 'garden_detail.html', context={'garden': GardenFormatter(garden)})
 
 
 class GardenUpdateView(LoginRequiredMixin, View):
