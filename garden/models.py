@@ -56,6 +56,11 @@ class Garden(models.Model):
     connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
+    # def __getitem__(self, idx):
+    #     for i, station in enumerate(self.watering_stations.all()):
+    #         if i == idx:
+    #             return station
+
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
 
@@ -98,6 +103,16 @@ class Garden(models.Model):
         for watering_station in self.watering_stations.all():
             yield WateringStationFormatter(watering_station)
 
+    def get_watering_station_idx(self, watering_station) -> int:
+        for i, station in enumerate(self.watering_stations.all()):
+            if station == watering_station:
+                return i
+
+    def get_watering_station_at_idx(self, idx):
+        for i, station in enumerate(self.watering_stations.all()):
+            if i == idx:
+                return station
+
 
 class Token(models.Model):
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)
@@ -129,6 +144,9 @@ class WateringStation(models.Model):
 
     def get_records_url(self):
         return reverse('watering-station-record-list', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
+
+    def get_idx(self):
+        return self.garden.get_watering_station_idx(self)
 
 
 class WateringStationRecord(models.Model):
