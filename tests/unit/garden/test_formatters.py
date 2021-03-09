@@ -1,11 +1,23 @@
 from datetime import timedelta, datetime
 from garden.models import Garden
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 import pytz
 
-from garden.formatters import GardenFormatter, ModelFormatter
+from garden.formatters import GardenFormatter, ModelFormatter, WateringStationFormatter, format_duration
+
+
+@pytest.mark.parametrize('duration, expected', [
+    (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
+    (timedelta(minutes=0, seconds=45), '45 Sec'),
+    (timedelta(minutes=10), '10 Min')
+],
+    ids=['1:30', '0:45', '10:00'])
+def test_format_duration(duration, expected):
+    ret_val = format_duration(duration.total_seconds())
+
+    assert ret_val == expected
 
 
 @pytest.mark.unit
@@ -156,18 +168,15 @@ class TestGardenFormatter:
         assert formatter.instance.get_water_level_display() in ret_val
         assert formatter.get_water_level_badge_class.return_value in ret_val
 
-    @pytest.mark.parametrize('update_frequency, expected', [
-        (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
-        (timedelta(minutes=0, seconds=45), '45 Sec'),
-        (timedelta(minutes=10), '10 Min')
-    ],
-        ids=['1:30', '0:45', '10:00'])
-    def test_get_update_frequency_display_returns_correct_string(self, garden_factory, update_frequency, expected):
-        formatter = GardenFormatter(garden_factory.build(update_frequency=update_frequency))
+    @patch('garden.formatters.format_duration')
+    def test_get_update_frequency_display_calls_format_duration_and_returns_its_return_value(self, mock_format_duration, garden_factory):
+        garden = garden_factory.build(update_frequency=timedelta(minutes=1))
+        formatter = GardenFormatter(garden)
 
         ret_val = formatter.get_update_frequency_display()
 
-        assert ret_val == expected
+        mock_format_duration.assert_called_once_with(garden.update_frequency.total_seconds())
+        assert ret_val == mock_format_duration.return_value
 
     def test_get_last_connection_time_display_returns_correct_format(self, garden_factory):
         day = 25
@@ -189,3 +198,52 @@ class TestGardenFormatter:
         ret_val = formatter.get_last_connection_time_display()
 
         assert ret_val == str(None)
+
+
+@pytest.mark.unit
+class TestWateringStationFormatter:
+    @patch('garden.formatters.format_duration')
+    def test_get_watering_duration_display_calls_format_duration_and_returns_its_return_value(self, mock_format_duration, watering_station_factory):
+        watering_station = watering_station_factory.build(watering_duration=timedelta(minutes=1))
+        formatter = WateringStationFormatter(watering_station)
+
+        ret_val = formatter.get_watering_duration_display()
+
+        mock_format_duration.assert_called_once_with(watering_station.watering_duration.total_seconds())
+        assert ret_val == mock_format_duration.return_value
+
+    @pytest.mark.parametrize('status, expected', [
+        (True, WateringStationFormatter.ACTIVE_STATUS_STR),
+        (False, WateringStationFormatter.INACTIVE_STATUS_STR),
+    ],
+        ids=['active', 'inactive'])
+    def test_get_status_display_returns_correct_string(self, watering_station_factory, status, expected):
+        formatter = WateringStationFormatter(watering_station_factory.build(status=status))
+
+        ret_val = formatter.get_status_display()
+
+        assert ret_val == expected
+
+    @pytest.mark.parametrize('status, expected', [
+        (True, WateringStationFormatter.ACTIVE_STATUS_BADGE),
+        (False, WateringStationFormatter.INACTIVE_STATUS_BADGE)
+    ],
+        ids=['active', 'inactive'])
+    def test_get_status_badge_class_returns_the_correct_class(self, watering_station_factory, status, expected):
+        formatter = WateringStationFormatter(watering_station_factory.build(status=status))
+
+        ret_val = formatter.get_status_badge_class()
+
+        assert ret_val == expected
+
+    def test_get_status_element_return_value_contains_status_display_and_badge_classes(self, watering_station_factory):
+        formatter = WateringStationFormatter(watering_station_factory.build())
+        ret1 = 'ret1'
+        ret2 = 'ret2'
+        formatter.get_status_display = Mock(return_value=ret1)
+        formatter.get_status_badge_class = Mock(return_value=ret2)
+
+        ret_val = formatter.get_status_element()
+
+        assert formatter.get_status_display.return_value in ret_val
+        assert formatter.get_status_badge_class.return_value in ret_val

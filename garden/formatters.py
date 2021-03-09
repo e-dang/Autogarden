@@ -3,6 +3,18 @@ from typing import Any
 from django.db.models import Model
 
 
+def format_duration(duration: int) -> str:
+    minutes, seconds = divmod(duration, 60)
+    minutes = int(minutes)
+    seconds = int(seconds)
+    string = ''
+    if minutes != 0:
+        string += f'{minutes} Min '
+    if seconds != 0:
+        string += f'{seconds} Sec'
+    return string.strip()
+
+
 class ModelFormatter:
     def __init__(self, instance: Model) -> None:
         self.instance = instance
@@ -16,6 +28,15 @@ class ModelFormatter:
                 return super().__getattribute__(format_attr)()
             except AttributeError:
                 return getattr(super().__getattribute__('instance'), name)
+
+    def _create_badge(self, id_: str, klass: str, text: str) -> str:
+        return f'''
+                <span class="lead">
+                    <span id="{id_}" class="badge badge-pill {klass}">
+                        {text}
+                    </span>
+                </span>
+        '''
 
 
 class GardenFormatter(ModelFormatter):
@@ -106,27 +127,33 @@ class GardenFormatter(ModelFormatter):
         )
 
     def get_update_frequency_display(self) -> str:
-        total = self.instance.update_frequency.total_seconds()
-        minutes, seconds = divmod(total, 60)
-        minutes = int(minutes)
-        seconds = int(seconds)
-        string = ''
-        if minutes != 0:
-            string += f'{minutes} Min '
-        if seconds != 0:
-            string += f'{seconds} Sec'
-        return string.strip()
+        return format_duration(self.instance.update_frequency.total_seconds())
 
     def get_last_connection_time_display(self) -> str:
         if self.instance.last_connection_time is None:
             return str(None)
         return self.instance.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
-    def _create_badge(self, id_: str, klass: str, text: str) -> str:
-        return f'''
-                <span class="lead">
-                    <span id="{id_}" class="badge badge-pill {klass}">
-                        {text}
-                    </span>
-                </span>
-        '''
+
+class WateringStationFormatter(ModelFormatter):
+    ACTIVE_STATUS_STR = 'Active'
+    INACTIVE_STATUS_STR = 'Inactive'
+
+    ACTIVE_STATUS_BADGE = 'badge-success'
+    INACTIVE_STATUS_BADGE = 'badge-danger'
+
+    def get_watering_duration_display(self):
+        return format_duration(self.instance.watering_duration.total_seconds())
+
+    def get_status_display(self):
+        return self.ACTIVE_STATUS_STR if self.instance.status else self.INACTIVE_STATUS_STR
+
+    def get_status_badge_class(self):
+        return self.ACTIVE_STATUS_BADGE if self.instance.status else self.INACTIVE_STATUS_BADGE
+
+    def get_status_element(self):
+        return self._create_badge(
+            '',
+            self.get_status_badge_class(),
+            self.get_status_display()
+        )

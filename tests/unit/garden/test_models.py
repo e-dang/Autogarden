@@ -65,32 +65,3 @@ class TestWateringStationModel:
         watering_station = models.WateringStation(garden=models.Garden())
 
         assert getattr(watering_station, field) == get_default()
-
-    @patch('garden.models.derive_duration_string')
-    def test_get_formatted_duration_calls_derive_duration_string_with_watering_duration_field(self, mock_derive_duration_string):
-        mock_ws = Mock()
-
-        models.WateringStation.get_formatted_duration(mock_ws)
-
-        mock_derive_duration_string.assert_called_once_with(mock_ws.watering_duration)
-
-    @patch('garden.models.derive_duration_string')
-    def test_get_formatted_duration_returns_return_value_of_derive_duration_string(self, mock_derive_duration_string):
-        mock_ws = Mock()
-
-        ret_val = models.WateringStation.get_formatted_duration(mock_ws)
-
-        assert ret_val == mock_derive_duration_string.return_value
-
-    @pytest.mark.parametrize('watering_station_factory, status, expected', [
-        (None, True, models.WateringStation.ACTIVE_STATUS_STR),
-        (None, False, models.WateringStation.INACTIVE_STATUS_STR),
-    ],
-        indirect=['watering_station_factory'],
-        ids=['active', 'inactive'])
-    def test_status_string_returns_correct_string_based_on_status(self, watering_station_factory, status, expected):
-        station = watering_station_factory.build(status=status)
-
-        ret_val = station.status_string
-
-        assert ret_val == expected

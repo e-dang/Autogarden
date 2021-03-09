@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 import pytz
 
+from garden.formatters import WateringStationFormatter
 from garden.models import Garden, Token, WateringStation
 
 
@@ -110,6 +111,13 @@ class TestGardenModel:
         garden.refresh_connection_status()
 
         assert garden.connection_strength is None
+
+    @pytest.mark.django_db
+    def test_get_watering_station_formatters_returns_all_watering_stations_wrapped_in_a_formatter(self, garden):
+        formatter_ids = set()
+        for station in garden.get_watering_station_formatters():
+            formatter_ids.add(station.pk)
+            assert isinstance(station, WateringStationFormatter)
 
 
 @pytest.mark.integration

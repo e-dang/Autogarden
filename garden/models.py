@@ -7,7 +7,7 @@ from django.db import models
 from django.urls import reverse
 from rest_framework.request import Request
 
-from .utils import derive_duration_string
+from garden.formatters import WateringStationFormatter
 
 
 def _default_moisture_threshold():
@@ -94,6 +94,10 @@ class Garden(models.Model):
             self.connection_strength = None
             self.save()
 
+    def get_watering_station_formatters(self):
+        for watering_station in self.watering_stations.all():
+            yield WateringStationFormatter(watering_station)
+
 
 class Token(models.Model):
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)
@@ -104,9 +108,6 @@ class Token(models.Model):
 
 
 class WateringStation(models.Model):
-    ACTIVE_STATUS_STR = 'Active'
-    INACTIVE_STATUS_STR = 'Inactive'
-
     garden = models.ForeignKey(Garden, related_name='watering_stations', on_delete=models.CASCADE)
     image = models.ImageField(null=True, blank=True)
     moisture_threshold = models.IntegerField(default=_default_moisture_threshold)
@@ -128,13 +129,6 @@ class WateringStation(models.Model):
 
     def get_records_url(self):
         return reverse('watering-station-record-list', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
-
-    def get_formatted_duration(self):
-        return derive_duration_string(self.watering_duration)
-
-    @property
-    def status_string(self):
-        return self.ACTIVE_STATUS_STR if self.status else self.INACTIVE_STATUS_STR
 
 
 class WateringStationRecord(models.Model):
