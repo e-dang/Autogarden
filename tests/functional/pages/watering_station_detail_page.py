@@ -37,7 +37,7 @@ class WateringStationDetailPage(BasePage):
     def is_displaying_data_for_watering_station(self, watering_station):
         formatter = WateringStationFormatter(watering_station)
         return all([
-            self.get_idx() == str(formatter.get_idx() + 1),
+            self.get_idx() == str(formatter.idx + 1),
             self.get_plant_type() == formatter.plant_type,
             self.get_status() == formatter.status,
             self.get_moisture_threshold() == str(formatter.moisture_threshold),

@@ -197,10 +197,10 @@ class TestWateringStationModel:
 
     @pytest.mark.django_db
     @pytest.mark.parametrize('num_watering_stations', [5], ids=[5])
-    def test_get_idx_returns_the_correct_idx_within_the_garden(self, watering_station_factory, watering_station, num_watering_stations):
+    def test_idx_returns_the_correct_idx_within_the_garden(self, watering_station_factory, watering_station, num_watering_stations):
         watering_stations = [watering_station]
         for _ in range(num_watering_stations - 1):
             watering_stations.append(watering_station_factory(garden=watering_station.garden))
 
         for i, station in enumerate(watering_stations):
-            assert station.get_idx() == i
+            assert station.idx == i

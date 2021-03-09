@@ -79,7 +79,7 @@ class TestWateringStationModel:
         ret_val = watering_station.__str__()
 
         assert str(watering_station.garden) in ret_val
-        assert str(watering_station.get_idx()) in ret_val
+        assert str(watering_station.idx) in ret_val
 
 
 @pytest.mark.unit
@@ -100,5 +100,5 @@ class TestWateringStationRecord:
         ret_val = record.__str__()
 
         assert str(record.watering_station.garden) in ret_val
-        assert str(record.watering_station.get_idx()) in ret_val
+        assert str(record.watering_station.idx) in ret_val
         assert str(record.created) in ret_val

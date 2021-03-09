@@ -132,7 +132,7 @@ class WateringStation(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return f'{str(self.garden)} - {self.get_idx()}'
+        return f'{str(self.garden)} - {self.idx}'
 
     def get_absolute_url(self):
         return reverse('watering-station-detail', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
@@ -146,7 +146,8 @@ class WateringStation(models.Model):
     def get_records_url(self):
         return reverse('watering-station-record-list', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
 
-    def get_idx(self):
+    @property
+    def idx(self):
         return self.garden.get_watering_station_idx(self)
 
 
@@ -159,4 +160,4 @@ class WateringStationRecord(models.Model):
         ordering = ['created']
 
     def __str__(self):
-        return f'{self.watering_station.garden}/{self.watering_station.get_idx()}/{self.created}'
+        return f'{self.watering_station.garden}/{self.watering_station.idx}/{self.created}'
