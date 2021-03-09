@@ -5,7 +5,7 @@ from selenium.common.exceptions import NoSuchElementException
 from tests.functional.base import wait_for
 
 from .base_page import BasePage
-from .elements import Button, ButtonGroup
+from .elements import Button, ButtonGroup, EditButton
 
 
 class WateringStationButtons(ButtonGroup):
@@ -18,10 +18,6 @@ class AddWateringStationButton(Button):
 
 class DeactivateButton(Button):
     LOCATOR = 'deactivateAllBtn'
-
-
-class EditButton(Button):
-    LOCATOR = 'editButton'
 
 
 class ActivateButton(Button):
@@ -60,18 +56,6 @@ class GardenDetailPage(BasePage):
         cols = rows[ws_idx - 1].find_elements_by_tag_name('td')
         return cols[idx].get_attribute('innerText')
 
-    def get_water_station_data_from_table(self, ws_idx):
-        ws_status = self.get_watering_station_field_value(ws_idx, 'Status')
-        plant_type = self.get_watering_station_field_value(ws_idx, 'Plant Type')
-        moisture_threshold = self.get_watering_station_field_value(ws_idx, 'Moisture Threshold')
-        watering_duration = self.get_watering_station_field_value(ws_idx, 'Watering Duration')
-        return {
-            'status': ws_status,
-            'plant_type': plant_type,
-            'moisture_threshold': moisture_threshold,
-            'watering_duration': watering_duration
-        }
-
     def is_table_row_displaying_data_for_watering_station(self, row, watering_station):
         formatter = WateringStationFormatter(watering_station)
         return all([
@@ -98,10 +82,10 @@ class GardenDetailPage(BasePage):
         return self._get_inner_text('waterLevel')
 
     def get_garden_name(self):
-        return self._get_inner_text('gardenName')
+        return self._get_inner_text('name')
 
     def get_garden_image_src(self):
-        return wait_for(lambda: self.driver.find_element_by_id('gardenImage')).get_attribute('src')
+        return wait_for(lambda: self.driver.find_element_by_tag_name('img')).get_attribute('src')
 
     def get_connection_strength(self):
         return self._get_inner_text('connectionStrength')

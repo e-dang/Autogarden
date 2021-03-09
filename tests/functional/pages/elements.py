@@ -91,3 +91,8 @@ class DeleteButton(Button):
 class ConfirmDeleteButton(Button):
     LOCATOR = '//input[@name="confirm_delete"]'
     BY = 'find_element_by_xpath'
+
+
+class EditButton(Button):
+    LOCATOR = 'Edit'
+    BY = 'find_element_by_link_text'

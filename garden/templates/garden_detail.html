@@ -8,23 +8,7 @@
 
 <div class="row mt-3 justify-content-center">
     <div class="col-sm-auto col-lg-4 px-lg-4">
-        <div class="card card-body h-100">
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <h1 id="gardenName" class="text-center">{{garden.name}}</h1>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <img id="gardenImage" class="header-photo" src="{{garden.image.url}}" alt="" />
-                </div>
-            </div>
-            <div class="row justify-content-center mt-4">
-                <div class="col">
-                    <a id="editButton" class="btn btn-sm btn-outline-info w-100" href="{% url 'garden-update' garden.pk %}">Edit</a>
-                </div>
-            </div>
-        </div>
+        {% include 'components/image_box.html' with instance=garden %}
     </div>
     <div class="col-sm-12 col-lg-8 mt-sm-3 mt-lg-0">
         <div class="row">

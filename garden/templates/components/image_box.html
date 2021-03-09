@@ -1,0 +1,17 @@
+<div class="card card-body h-100">
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <h1 id="name" class="text-center">{{instance.name}}</h1>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <img class="header-photo" src="{{instance.image.url}}" />
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col">
+            <a class="btn btn-sm btn-outline-info w-100" href="{{instance.get_update_url}}">Edit</a>
+        </div>
+    </div>
+</div>
