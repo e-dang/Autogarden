@@ -75,8 +75,8 @@ class GardenDetailPage(BasePage):
     def get_last_connected_at(self):
         return self._get_inner_text('lastConnectedAt')
 
-    def get_next_expected_update(self):
-        return self._get_inner_text('nextExpectedUpdate')
+    def get_api_key(self):
+        return self._get_inner_text('apiKey')
 
     def get_water_level(self):
         return self._get_inner_text('waterLevel')
@@ -102,6 +102,7 @@ class GardenDetailPage(BasePage):
             self.get_update_frequency() == formatter.get_update_frequency_display(),
             self.get_connection_strength() == formatter.get_connection_strength_display(),
             self.get_water_level() == formatter.get_water_level_display(),
+            self.get_api_key() == str(formatter.token.uuid)
         ])
 
     def _get_field_index(self, field_name):
