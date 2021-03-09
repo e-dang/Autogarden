@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
 
 import pytest
 import pytz
 
 from garden import models
+import garden
 
 
 @pytest.mark.unit
@@ -52,6 +52,13 @@ class TestGardenModel:
 
         assert int(expected.total_seconds()) == ret_val
 
+    def test__str__returns_garden_name(self, garden_factory):
+        garden = garden_factory.build()
+
+        ret_val = garden.__str__()
+
+        assert garden.name in ret_val
+
 
 @pytest.mark.unit
 class TestWateringStationModel:
@@ -65,3 +72,33 @@ class TestWateringStationModel:
         watering_station = models.WateringStation(garden=models.Garden())
 
         assert getattr(watering_station, field) == get_default()
+
+    def test___str__returns_garden_name_and_watering_station_idx(self, garden_factory, watering_station_factory):
+        watering_station = watering_station_factory.build(garden=garden_factory.build())
+
+        ret_val = watering_station.__str__()
+
+        assert str(watering_station.garden) in ret_val
+        assert str(watering_station.get_idx()) in ret_val
+
+
+@pytest.mark.unit
+class TestTokenModel:
+    def test___str___method_returns_str_of_uuid(self, token_factory):
+        token = token_factory.build()
+
+        ret_val = token.__str__()
+
+        assert ret_val == str(token.uuid)
+
+
+@pytest.mark.unit
+class TestWateringStationRecord:
+    def test__str__method_returns_str_containing_garden_watering_station_date(self, watering_station_record_factory):
+        record = watering_station_record_factory.build()
+
+        ret_val = record.__str__()
+
+        assert str(record.watering_station.garden) in ret_val
+        assert str(record.watering_station.get_idx()) in ret_val
+        assert str(record.created) in ret_val

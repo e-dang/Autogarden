@@ -85,7 +85,7 @@ class UserFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
 
 @factory.django.mute_signals(post_save)
 class TokenFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
-    garden = factory.SubFactory('tests.factories.GardenFactory', profile=None)
+    garden = factory.SubFactory('tests.factories.GardenFactory', token=None)
     uuid = factory.Faker('uuid4')
 
     class Meta:
@@ -159,7 +159,7 @@ class WateringStationFactory(factory.django.DjangoModelFactory, JsonFactoryMixin
 
 
 class WateringStationRecordFactory(factory.django.DjangoModelFactory, JsonFactoryMixin):
-    garden = factory.SubFactory(WateringStationFactory)
+    watering_station = factory.SubFactory(WateringStationFactory)
     moisture_level = factory.Faker('random_int', min=0, max=100)
 
     class Meta:

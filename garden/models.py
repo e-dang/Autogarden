@@ -56,10 +56,8 @@ class Garden(models.Model):
     connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
 
-    # def __getitem__(self, idx):
-    #     for i, station in enumerate(self.watering_stations.all()):
-    #         if i == idx:
-    #             return station
+    def __str__(self):
+        return self.name
 
     def get_absolute_url(self):
         return reverse('garden-detail', kwargs={'pk': self.pk})
@@ -133,6 +131,9 @@ class WateringStation(models.Model):
     class Meta:
         ordering = ['id']
 
+    def __str__(self):
+        return f'{str(self.garden)} - {self.get_idx()}'
+
     def get_absolute_url(self):
         return reverse('watering-station-detail', kwargs={'garden_pk': self.garden.pk, 'ws_pk': self.pk})
 
@@ -156,3 +157,6 @@ class WateringStationRecord(models.Model):
 
     class Meta:
         ordering = ['created']
+
+    def __str__(self):
+        return f'{self.watering_station.garden}/{self.watering_station.get_idx()}/{self.created}'
