@@ -119,7 +119,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for watering_station in garden.watering_stations.all %}
+                                {% for watering_station in garden.get_watering_station_formatters %}
                                 <tr>
                                     <td scope="row text-capitalize">
                                         <a
@@ -129,9 +129,9 @@
                                         >
                                     </td>
                                     <td scope="row text-capitalize">{{ watering_station.plant_type }}</td>
-                                    <td scope="row text-capitalize">{{ watering_station.status_string }}</td>
+                                    <td scope="row text-capitalize">{{ watering_station.get_status_element|safe }}</td>
                                     <td scope="row">{{ watering_station.moisture_threshold }}</td>
-                                    <td scope="row">{{ watering_station.get_formatted_duration }}</td>
+                                    <td scope="row">{{ watering_station.watering_duration }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

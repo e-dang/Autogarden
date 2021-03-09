@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from garden.formatters import GardenFormatter
+from garden.formatters import GardenFormatter, WateringStationFormatter
 from typing import Any
 
 import pytz
@@ -178,7 +178,7 @@ class WateringStationDetailView(LoginRequiredMixin, View):
         else:
             for i, station in enumerate(garden.watering_stations.all(), start=1):
                 if station.pk == ws_pk:
-                    return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
+                    return render(request, 'watering_station_detail.html', context={'watering_station': WateringStationFormatter(station), 'idx': i})
 
 
 class WateringStationUpdateView(LoginRequiredMixin, View):
