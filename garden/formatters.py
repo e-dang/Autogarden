@@ -142,16 +142,16 @@ class WateringStationFormatter(ModelFormatter):
     ACTIVE_STATUS_BADGE = 'badge-success'
     INACTIVE_STATUS_BADGE = 'badge-danger'
 
-    def get_watering_duration_display(self):
+    def get_watering_duration_display(self) -> str:
         return format_duration(self.instance.watering_duration.total_seconds())
 
-    def get_status_display(self):
+    def get_status_display(self) -> str:
         return self.ACTIVE_STATUS_STR if self.instance.status else self.INACTIVE_STATUS_STR
 
-    def get_status_badge_class(self):
+    def get_status_badge_class(self) -> str:
         return self.ACTIVE_STATUS_BADGE if self.instance.status else self.INACTIVE_STATUS_BADGE
 
-    def get_status_element(self):
+    def get_status_element(self) -> str:
         return self._create_badge(
             '',
             self.get_status_badge_class(),

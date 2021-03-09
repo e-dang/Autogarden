@@ -176,9 +176,8 @@ class WateringStationDetailView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            for i, station in enumerate(garden.watering_stations.all(), start=1):
-                if station.pk == ws_pk:
-                    return render(request, 'watering_station_detail.html', context={'watering_station': WateringStationFormatter(station), 'idx': i})
+            watering_station = garden.watering_stations.get(pk=ws_pk)
+            return render(request, 'watering_station_detail.html', context={'watering_station': WateringStationFormatter(watering_station)})
 
 
 class WateringStationUpdateView(LoginRequiredMixin, View):
