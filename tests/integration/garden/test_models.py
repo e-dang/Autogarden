@@ -138,6 +138,12 @@ class TestGardenModel:
 
         assert ret_val == list(garden.watering_stations.all())[idx]
 
+    @pytest.mark.django_db
+    def test_get_watering_station_formatters_returns_generator_of_formatters_for_each_watering_station(self, garden2):
+        for formatter, station in zip(garden2.get_watering_station_formatters(), garden2.watering_stations.all()):
+            assert isinstance(formatter, WateringStationFormatter)
+            assert formatter.instance == station
+
 
 @pytest.mark.integration
 class TestTokenModel:

@@ -174,16 +174,19 @@ class WateringStationForm(forms.ModelForm, CropperMixin):
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Field('plant_type'),
-            Field('status'),
             Field('moisture_threshold'),
             Field('watering_duration'),
+            Field('status'),
             Field('image', id='id_image'),
             *self.cropper_fields,
-            Submit('submit', 'Update'),
-            Button('delete', 'Delete', css_class='btn btn-danger',
-                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
+            FormActions(
+                Button('delete', 'Delete', css_class='btn btn-danger mr-2',
+                       data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
+                Submit('submit', 'Update'),
+                css_class="form-row justify-content-end"
+            )
         )
-
+        self.fields['status'].label = 'Enable'
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'
 

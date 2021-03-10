@@ -150,6 +150,9 @@ class WateringStation(models.Model):
     def idx(self):
         return self.garden.get_watering_station_idx(self)
 
+    def get_formatter(self):
+        return WateringStationFormatter(self)
+
 
 class WateringStationRecord(models.Model):
     watering_station = models.ForeignKey(WateringStation, related_name='records', on_delete=models.CASCADE)

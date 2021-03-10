@@ -4,7 +4,7 @@ import pytest
 import pytz
 
 from garden import models
-import garden
+from garden.formatters import WateringStationFormatter
 
 
 @pytest.mark.unit
@@ -80,6 +80,14 @@ class TestWateringStationModel:
 
         assert str(watering_station.garden) in ret_val
         assert str(watering_station.idx) in ret_val
+
+    def test_get_formatter_returns_a_watering_station_formatter_initialized_with_self(self, watering_station_factory):
+        watering_station = watering_station_factory.build()
+
+        ret_val = watering_station.get_formatter()
+
+        assert isinstance(ret_val, WateringStationFormatter)
+        assert ret_val.instance is watering_station
 
 
 @pytest.mark.unit
