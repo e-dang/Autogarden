@@ -1,6 +1,8 @@
-<div class="row mt-4 justify-content-start">
+<div class="row mt-4 justify-content-center">
     <div class="col-sm-auto col-lg-4">
-        {% include 'components/image_box.html' with instance=instance %}
+        <div class="card h-100">
+            {% include 'components/image_box.html' with instance=instance button='edit' %}
+        </div>
     </div>
     {% include component with instance=instance %}
 </div>

@@ -10,7 +10,9 @@
     {% else %}
         <div class="row mt-4 justify-content-start">
             <div class="col-5">
-                {% include 'components/image_box.html' with instance=watering_station %}
+                <div class="card">
+                    {% include 'components/image_box.html' with instance=watering_station button='edit' %}
+                </div>
             </div>
             <div class="col">
                 {% include 'components/info_card.html' with id='plantType' title='Plant Type' body=watering_station.plant_type %}
@@ -42,6 +44,6 @@
     <script src="/static/javascript/soil_moisture.js"></script>
     <script src="/static/javascript/jquery.fittext.js"></script>
     <script>
-        $('#name').fitText(0.8, {maxFontSize: 23})
+        $('#name').fitText(0.8, {maxFontSize: 30})
     </script>
 {% endblock %}

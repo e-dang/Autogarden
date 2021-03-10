@@ -2,7 +2,7 @@ import datetime
 
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import (HTML, Button, Field, Layout,
+from crispy_forms.layout import (Column, HTML, Button, Field, Layout, Row,
                                  Submit)
 from django import forms
 from django.core.exceptions import ValidationError
@@ -40,11 +40,12 @@ class DeleteForm(forms.Form):
         self.helper.form_id = self.FORM_ID
         self.helper.method = 'post'
         self.helper.layout = Layout(
+            HTML(self.MESSAGE),
             FormActions(
-                HTML(self.MESSAGE),
-                Button('cancel', 'Cancel', css_class='btn btn-info',
+                Button('cancel', 'Cancel', css_class='btn-info',
                        data_dismiss='modal', aria_hidden='true'),
-                Submit('confirm_delete', 'Delete', css_class='btn btn-danger'),
+                Submit('confirm_delete', 'Delete', css_class='btn-danger ml-2'),
+                css_class="form-row justify-content-end"
             )
         )
 
@@ -53,16 +54,30 @@ class CropperMixin(forms.Form):
     CROP_BTN_ID = 'cropBtn'
     RESET_BTN_ID = 'resetBtn'
     IMAGE_CONTAINER_ID = 'imageContainer'
+    BUTTON_CSS = 'btn-primary my-2'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cropper_fields = [
-            HTML(f'''
-                <div id="{self.IMAGE_CONTAINER_ID}">
+            Row(
+                Column(
+                    HTML(f'''
+                <div class="row justify-content-center">
+                    <div id="{self.IMAGE_CONTAINER_ID}" class="photo-container">
+                    </div>
                 </div>
             '''),
-            Button('crop', 'Crop', css_id=self.CROP_BTN_ID, hidden=True),
-            Button('reset', 'Reset', css_id=self.RESET_BTN_ID, hidden=True)
+                )
+            ),
+            FormActions(
+
+                Button('crop', 'Crop', css_id=self.CROP_BTN_ID,
+                       css_class=self.BUTTON_CSS, hidden=True),
+                Button('reset', 'Reset', css_id=self.RESET_BTN_ID,
+                       css_class=self.BUTTON_CSS, hidden=True),
+                css_class='form-row justify-content-center'
+            ),
+            HTML('<hr>')
         ]
 
 
@@ -83,13 +98,24 @@ class GardenForm(forms.ModelForm, CropperMixin):
         self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
-            Field('name'),
-            Field('update_frequency'),
-            Field('image', id='id_image'),
+            'name',
+            'update_frequency',
+            Row(
+                Column(
+                    Field('image', id='id_image'),
+                )
+            ),
             *self.cropper_fields,
-            Submit('submit', 'Update'),
-            Button('delete', 'Delete', css_class='btn btn-danger',
-                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
+            Row(
+                Column(
+                    FormActions(
+                        Button('delete', 'Delete', css_class='btn btn-danger mr-2',
+                               data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
+                        Submit('submit', 'Update'),
+                        css_class="form-row justify-content-end"
+                    )
+                )
+            )
         )
 
         self.fields['update_frequency'].label = 'Update Frequency'
