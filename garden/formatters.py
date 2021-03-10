@@ -39,6 +39,9 @@ class ModelFormatter:
         '''
 
 
+NOT_AVAILABLE_MSG = 'N/A'
+
+
 class GardenFormatter(ModelFormatter):
     CONNECTED_STR = 'Connected'
     DISCONNECTED_STR = 'Disconnected'
@@ -51,7 +54,6 @@ class GardenFormatter(ModelFormatter):
     CONN_GOOD = -67
     CONN_EXCELLENT = -30
 
-    CONN_NOT_AVAILABLE_MSG = 'N/A'
     CONN_BAD_MSG = 'Bad'
     CONN_POOR_MSG = 'Poor'
     CONN_OK_MSG = 'Ok'
@@ -83,7 +85,7 @@ class GardenFormatter(ModelFormatter):
 
     def get_connection_strength_display(self) -> str:
         if self.instance.connection_strength is None:
-            return self.CONN_NOT_AVAILABLE_MSG
+            return NOT_AVAILABLE_MSG
         elif self.instance.connection_strength >= self.CONN_EXCELLENT:
             return self.CONN_EXCELLENT_MSG
         elif self.instance.connection_strength >= self.CONN_GOOD:
@@ -117,7 +119,7 @@ class GardenFormatter(ModelFormatter):
         )
 
     def get_water_level_badge_class(self):
-        return self.WL_LOW_BADGE if self.instance.water_level == self.instance.LOW else self.WL_OK_BADGE
+        return self.WL_OK_BADGE if self.instance.water_level == self.instance.OK else self.WL_LOW_BADGE
 
     def get_water_level_element(self):
         return self._create_badge(
@@ -134,6 +136,17 @@ class GardenFormatter(ModelFormatter):
             return str(None)
         return self.instance.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
+    def get_plant_types_display(self) -> str:
+        result = ', '.join(self.instance.plant_types)
+        if len(result) == 0:
+            return NOT_AVAILABLE_MSG
+        return result
+
+    def get_time_since_last_connection_display(self) -> str:
+        if self.instance.time_since_last_connection is None:
+            return ''
+        return f'updated {self.instance.time_since_last_connection.days} days ago'
+
 
 class WateringStationFormatter(ModelFormatter):
     ACTIVE_STATUS_STR = 'Active'
@@ -141,8 +154,6 @@ class WateringStationFormatter(ModelFormatter):
 
     ACTIVE_STATUS_BADGE = 'badge-success'
     INACTIVE_STATUS_BADGE = 'badge-danger'
-
-    PLANT_TYPE_NOT_AVAILABLE = 'N/A'
 
     def get_watering_duration_display(self) -> str:
         return format_duration(self.instance.watering_duration.total_seconds())
@@ -167,4 +178,4 @@ class WateringStationFormatter(ModelFormatter):
         return f'Watering Station #{self.get_idx_display()}'
 
     def get_plant_type_display(self) -> str:
-        return self.instance.plant_type or self.PLANT_TYPE_NOT_AVAILABLE
+        return self.instance.plant_type or self.NOT_AVAILABLE_MSG

@@ -111,6 +111,23 @@ class Garden(models.Model):
             if i == idx:
                 return station
 
+    def get_active_watering_stations(self):
+        return self.watering_stations.filter(status=True)
+
+    def get_num_active_watering_stations(self):
+        return self.get_active_watering_stations().count()
+
+    @property
+    def plant_types(self):
+        return self.watering_stations.exclude(plant_type__exact='').values_list('plant_type', flat=True)
+
+    @property
+    def time_since_last_connection(self):
+        if self.last_connection_time is None:
+            return None
+
+        return datetime.now(pytz.UTC) - self.last_connection_time
+
 
 class Token(models.Model):
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)

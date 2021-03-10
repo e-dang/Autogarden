@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 import pytz
+from tests.assertions import assert_durations_are_eq
 
 from garden import models
 from garden.formatters import WateringStationFormatter
@@ -58,6 +59,21 @@ class TestGardenModel:
         ret_val = garden.__str__()
 
         assert garden.name in ret_val
+
+    def test_time_since_last_connection_returns_correct_duration(self, garden_factory):
+        expected_duration = timedelta(hours=3)
+        garden = garden_factory.build(last_connection_time=datetime.now(pytz.UTC) - expected_duration)
+
+        ret_val = garden.time_since_last_connection
+
+        assert_durations_are_eq(ret_val, expected_duration)
+
+    def test_time_since_last_connection_returns_none_if_last_connection_time_is_none(self, garden_factory):
+        garden = garden_factory.build(last_connection_time=None)
+
+        ret_val = garden.time_since_last_connection
+
+        assert ret_val is None
 
 
 @pytest.mark.unit

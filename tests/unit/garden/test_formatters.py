@@ -1,11 +1,11 @@
 from datetime import timedelta, datetime
 from garden.models import Garden
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
 import pytz
 
-from garden.formatters import GardenFormatter, ModelFormatter, WateringStationFormatter, format_duration
+from garden.formatters import GardenFormatter, ModelFormatter, WateringStationFormatter, format_duration, NOT_AVAILABLE_MSG
 
 
 @pytest.mark.parametrize('duration, expected', [
@@ -97,7 +97,7 @@ class TestGardenFormatter:
         assert formatter.get_is_connected_badge_class.return_value in ret_val
 
     @pytest.mark.parametrize('value, message', [
-        (None, GardenFormatter.CONN_NOT_AVAILABLE_MSG),
+        (None, NOT_AVAILABLE_MSG),
         (-81, GardenFormatter.CONN_BAD_MSG),
         (-80, GardenFormatter.CONN_POOR_MSG),
         (-71, GardenFormatter.CONN_POOR_MSG),
@@ -148,9 +148,10 @@ class TestGardenFormatter:
 
     @pytest.mark.parametrize('value, klass', [
         (Garden.LOW, GardenFormatter.WL_LOW_BADGE),
-        (Garden.OK, GardenFormatter.WL_OK_BADGE)
+        (Garden.OK, GardenFormatter.WL_OK_BADGE),
+        (None, GardenFormatter.WL_LOW_BADGE)
     ],
-        ids=['low', 'ok'])
+        ids=['low', 'ok', 'none'])
     def test_get_water_level_badge_class_returns_correct_badge(self, garden_factory, value, klass):
         formatter = GardenFormatter(garden_factory.build(water_level=value))
 
@@ -198,6 +199,39 @@ class TestGardenFormatter:
         ret_val = formatter.get_last_connection_time_display()
 
         assert ret_val == str(None)
+
+    @patch('garden.models.Garden.plant_types', new_callable=PropertyMock)
+    @pytest.mark.parametrize('plant_types, expected', [
+        (['lettuce', 'spinach'], 'lettuce, spinach'),
+        ([], NOT_AVAILABLE_MSG)
+    ], ids=['values', 'N/A'])
+    def test_get_plant_types_diplay(self, mock_plant_types, plant_types, expected):
+        mock_plant_types.return_value = plant_types
+        mock_garden = create_autospec(Garden)
+        type(mock_garden).plant_types = mock_plant_types
+        formatter = GardenFormatter(mock_garden)
+
+        ret_val = formatter.get_plant_types_display()
+
+        assert ret_val == expected
+
+    def test_get_time_since_last_connection_display_returns_the_duration_rounded_to_days(self, garden_factory):
+        days = 3
+        duration = timedelta(days=days, hours=2, seconds=1)
+        garden = garden_factory.build(last_connection_time=datetime.now(pytz.UTC) - duration)
+        formatter = GardenFormatter(garden)
+
+        ret_val = formatter.get_time_since_last_connection_display()
+
+        assert ret_val == f'updated {days} days ago'
+
+    def test_get_time_since_last_connection_display_returns_empty_string_when_time_since_last_connection_is_none(self, garden_factory):
+        garden = garden_factory.build(last_connection_time=None)
+        formatter = GardenFormatter(garden)
+
+        ret_val = formatter.get_time_since_last_connection_display()
+
+        assert ret_val == ''
 
 
 @pytest.mark.unit
@@ -250,7 +284,7 @@ class TestWateringStationFormatter:
 
     @pytest.mark.parametrize('plant_type, expected', [
         ('spinach', 'spinach'),
-        (None, WateringStationFormatter.PLANT_TYPE_NOT_AVAILABLE)
+        (None, NOT_AVAILABLE_MSG)
     ],
         ids=['spinach', 'N/A'])
     def get_plant_type_display_returns_instance_plant_type_when_plant_type_is_not_none(self, watering_station_factory, plant_type, expected):

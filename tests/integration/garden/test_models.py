@@ -5,6 +5,7 @@ import pytz
 
 from garden.formatters import WateringStationFormatter
 from garden.models import Garden, Token, WateringStation
+from tests.assertions import assert_unordered_data_eq
 
 
 @pytest.mark.integration
@@ -143,6 +144,44 @@ class TestGardenModel:
         for formatter, station in zip(garden2.get_watering_station_formatters(), garden2.watering_stations.all()):
             assert isinstance(formatter, WateringStationFormatter)
             assert formatter.instance == station
+
+    @pytest.mark.django_db
+    def test_get_active_watering_stations_returns_only_watering_stations_that_are_active(self, garden, watering_station_factory):
+        watering_stations = []
+        for i in range(10):
+            status = i % 2 == 0
+            station = watering_station_factory(garden=garden, status=status)
+            if status:
+                watering_stations.append(station)
+
+        ret_val = garden.get_active_watering_stations()
+
+        assert list(ret_val) == watering_stations
+
+    @pytest.mark.django_db
+    def test_get_num_active_watering_stations_returns_number_of_active_watering_stations(self, garden, watering_station_factory):
+        watering_stations = []
+        for i in range(10):
+            status = i % 2 == 0
+            station = watering_station_factory(garden=garden, status=status)
+            if status:
+                watering_stations.append(station)
+
+        ret_val = garden.get_num_active_watering_stations()
+
+        assert ret_val == len(watering_stations)
+
+    @pytest.mark.django_db
+    def test_plant_types_returns_an_iterable_of_the_unique_plant_types_defined_in_its_watering_stations(self, garden, watering_station_factory):
+        plant_types = ['lettuce', 'spinach']
+        watering_station_factory(garden=garden, plant_type='')
+        for i in range(5):
+            plant_type = plant_types[0] if i % 2 == 0 else plant_types[1]
+            watering_station_factory(garden=garden, plant_type=plant_type)
+
+        ret_val = garden.plant_types
+
+        assert_unordered_data_eq(ret_val, plant_types)
 
 
 @pytest.mark.integration
