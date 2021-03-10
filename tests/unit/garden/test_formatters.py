@@ -247,3 +247,15 @@ class TestWateringStationFormatter:
 
         assert formatter.get_status_display.return_value in ret_val
         assert formatter.get_status_badge_class.return_value in ret_val
+
+    @pytest.mark.parametrize('plant_type, expected', [
+        ('spinach', 'spinach'),
+        (None, WateringStationFormatter.PLANT_TYPE_NOT_AVAILABLE)
+    ],
+        ids=['spinach', 'N/A'])
+    def get_plant_type_display_returns_instance_plant_type_when_plant_type_is_not_none(self, watering_station_factory, plant_type, expected):
+        formatter = WateringStationFormatter(watering_station_factory.build(plant_type=plant_type))
+
+        ret_val = formatter.get_plant_type_display()
+
+        assert ret_val == expected
