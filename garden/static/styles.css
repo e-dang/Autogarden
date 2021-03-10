@@ -44,3 +44,7 @@ hr {
 .welcome-text {
     color: var(--light);
 }
+
+.list-group-item-action:hover {
+    background-color: var(--gray);
+}
