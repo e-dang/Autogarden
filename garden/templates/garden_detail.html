@@ -12,80 +12,84 @@
 
 <div class="row justify-content-center">
     <div class="col">
-        <div class="card card-body">
-            <div class="row justify-content-between">
-                <div class="col-auto">
-                    <h3>Watering Stations</h3>
-                </div>
-                <div class="col-auto mb-sm-3 mb-md-0">
-                    <div class="btn-toolbar">
-                        <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
-                            {% csrf_token %}
-                            <input type="hidden" name="_method" value="patch" />
-                            <input
-                                id="deactivateAllBtn"
-                                type="submit"
-                                class="btn btn-outline-danger"
-                                value="Deactivate All"
-                            />
-                        </form>
+        <div class="card">
+            <div class="card-header">
+                <div class="row d-flex justify-content-center justify-content-md-between">
+                    <div class="col-auto mb-2 mb-md-0 pr-0">
+                        <h3 class="mb-0">Watering Stations</h3>
+                    </div>
+                    <div class="col-auto align-self-center pl-0">
+                        <div class="btn-toolbar">
+                            <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input type="hidden" name="_method" value="patch" />
+                                <input
+                                    id="deactivateAllBtn"
+                                    type="submit"
+                                    class="btn btn-outline-danger"
+                                    value="Deactivate All"
+                                />
+                            </form>
 
-                        <form class="form mx-2" method="post" action="{{garden.get_watering_stations_url}}">
-                            {% csrf_token %}
-                            <input type="hidden" name="_method" value="patch" />
-                            <input type="hidden" name="status" value="true" />
-                            <input
-                                id="activateAllBtn"
-                                type="submit"
-                                class="btn btn-outline-primary"
-                                value="Activate All"
-                            />
-                        </form>
+                            <form class="form mx-2" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input type="hidden" name="_method" value="patch" />
+                                <input type="hidden" name="status" value="true" />
+                                <input
+                                    id="activateAllBtn"
+                                    type="submit"
+                                    class="btn btn-outline-primary"
+                                    value="Activate All"
+                                />
+                            </form>
 
-                        <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
-                            {% csrf_token %}
-                            <input
-                                id="addWateringStationBtn"
-                                type="submit"
-                                class="btn btn-outline-success"
-                                value="+ Add Watering Station"
-                            />
-                        </form>
+                            <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input
+                                    id="addWateringStationBtn"
+                                    type="submit"
+                                    class="btn btn-outline-success"
+                                    value="+ Add Watering Station"
+                                />
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col">
-                    <div class="table-responsive-lg">
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th scope="col text-capitalize">#</th>
-                                    <th scope="col text-capitalize">Plant Type</th>
-                                    <th scope="col text-capitalize">Status</th>
-                                    <th scope="col text-capitalize">Moisture Threshold</th>
-                                    <th scope="col text-capitalize">Watering Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for watering_station in garden.get_watering_station_formatters %}
-                                <tr>
-                                    <td scope="row text-capitalize">
-                                        <a
-                                            id="wateringStation{{ forloop.counter }}"
-                                            href="{{ watering_station.get_absolute_url }}"
-                                            >{{ forloop.counter }}</a
-                                        >
-                                    </td>
-                                    <td scope="row text-capitalize">{{ watering_station.plant_type }}</td>
-                                    <td scope="row text-capitalize">{{ watering_station.get_status_element|safe }}</td>
-                                    <td scope="row">{{ watering_station.moisture_threshold }}</td>
-                                    <td scope="row">{{ watering_station.watering_duration }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="table-responsive-lg">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Plant Type</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Moisture Threshold</th>
+                                        <th scope="col">Watering Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for watering_station in garden.get_watering_station_formatters %}
+                                    <tr>
+                                        <td scope="row text-capitalize">
+                                            <a
+                                                id="wateringStation{{ forloop.counter }}"
+                                                href="{{ watering_station.get_absolute_url }}"
+                                                >{{ forloop.counter }}</a
+                                            >
+                                        </td>
+                                        <td scope="row text-capitalize">{{ watering_station.plant_type }}</td>
+                                        <td scope="row text-capitalize">{{ watering_station.get_status_element|safe }}</td>
+                                        <td scope="row">{{ watering_station.moisture_threshold }}</td>
+                                        <td scope="row">{{ watering_station.watering_duration }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
