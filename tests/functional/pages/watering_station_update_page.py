@@ -1,10 +1,12 @@
 import re
 
 from garden.forms import CropperMixin, WateringStationForm
+from garden.utils import derive_duration_string
 
 from ..base import wait_for
 from .base_page import BasePage
-from .elements import Button, CancelButton, DeleteButton, ImageInput, TextInput, ToggleButton, SubmitButton, ConfirmDeleteButton
+from .elements import (Button, CancelButton, ConfirmDeleteButton, DeleteButton,
+                       ImageInput, SubmitButton, TextInput, ToggleButton)
 
 
 class MoistureThresholdInput(TextInput):
@@ -74,3 +76,11 @@ class WateringStationUpdatePage(BasePage):
             self.image = image
             crop_image(self, image)
         self.submit_button.click()
+
+    def form_has_values_from_watering_station(self, watering_station):
+        return all([
+            self.status == watering_station.status,
+            self.plant_type == watering_station.plant_type,
+            self.watering_duration == derive_duration_string(watering_station.watering_duration),
+            self.moisture_threshold == str(watering_station.moisture_threshold)
+        ])

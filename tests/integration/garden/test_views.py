@@ -37,7 +37,7 @@ class TestGardenAPIView:
     def test_GET_returns_data_with_correct_fields(self, auth_api_client):
         resp = auth_api_client.get(self.url)
 
-        assertions.assert_data_contains_fields(resp.data, GardenGetSerializer.Meta.fields)
+        assertions.assert_unordered_data_eq(resp.data, GardenGetSerializer.Meta.fields)
 
     @pytest.mark.django_db
     def test_GET_returns_garden_config_data(self, auth_api_client):

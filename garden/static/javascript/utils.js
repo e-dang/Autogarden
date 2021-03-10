@@ -53,7 +53,6 @@ function addCropImageHandler(configs) {
                 aspectRatio: 1,
                 scalable: false,
                 zoomable: false,
-                cropBoxResizable: false,
                 dragMode: 'none',
             });
             cropper = img.data('cropper');

@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
 
 import pytest
 import pytz
+from tests.assertions import assert_durations_are_eq
 
 from garden import models
+from garden.formatters import WateringStationFormatter
 
 
 @pytest.mark.unit
@@ -20,19 +21,6 @@ class TestGardenModel:
         garden = models.Garden()
 
         assert getattr(garden, field) == get_default()
-
-    @pytest.mark.parametrize('garden_factory, is_connected, expected', [
-        (None, True, models.Garden.CONNECTED_STR),
-        (None, False, models.Garden.DISCONNECTED_STR),
-    ],
-        indirect=['garden_factory'],
-        ids=['connected', 'disconnected'])
-    def test_status_returns_connected_if_is_connected_is_true(self, garden_factory, is_connected, expected):
-        garden = garden_factory.build(is_connected=is_connected)
-
-        ret_val = garden.status
-
-        assert ret_val == expected
 
     def test_calc_time_till_next_update_returns_expected_time_to_within_a_second(self, garden_factory):
         minutes = 10
@@ -65,101 +53,27 @@ class TestGardenModel:
 
         assert int(expected.total_seconds()) == ret_val
 
-    def test_get_formatted_last_connection_time_returns_correct_format(self, garden_factory):
-        day = 25
-        month = 2
-        year = 2021
-        hour = 12
-        minute = 13
-        period = 'PM'
-        dtime = datetime(day=day, month=month, year=year, hour=hour, minute=minute, tzinfo=pytz.UTC)
-        garden = garden_factory.build(last_connection_time=dtime)
+    def test__str__returns_garden_name(self, garden_factory):
+        garden = garden_factory.build()
 
-        ret_val = garden.get_formatted_last_connection_time()
+        ret_val = garden.__str__()
 
-        assert ret_val == f'{month}/{day}/{year} {hour}:{minute} {period}'
+        assert garden.name in ret_val
 
-    def test_get_formatted_last_connection_time_returns_None_if_last_connection_time_is_none(self, garden_factory):
+    def test_time_since_last_connection_returns_correct_duration(self, garden_factory):
+        expected_duration = timedelta(hours=3)
+        garden = garden_factory.build(last_connection_time=datetime.now(pytz.UTC) - expected_duration)
+
+        ret_val = garden.time_since_last_connection
+
+        assert_durations_are_eq(ret_val, expected_duration)
+
+    def test_time_since_last_connection_returns_none_if_last_connection_time_is_none(self, garden_factory):
         garden = garden_factory.build(last_connection_time=None)
 
-        ret_val = garden.get_formatted_last_connection_time()
+        ret_val = garden.time_since_last_connection
 
-        assert ret_val == str(None)
-
-    @pytest.mark.parametrize('value, message', [
-        (None, models.Garden.CONN_NOT_AVAILABLE_MSG),
-        (-81, models.Garden.CONN_BAD_MSG),
-        (-80, models.Garden.CONN_POOR_MSG),
-        (-71, models.Garden.CONN_POOR_MSG),
-        (-70, models.Garden.CONN_OK_MSG),
-        (-68, models.Garden.CONN_OK_MSG),
-        (-67, models.Garden.CONN_GOOD_MSG),
-        (-31, models.Garden.CONN_GOOD_MSG),
-        (-30, models.Garden.CONN_EXCELLENT_MSG),
-    ],
-        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
-    def test_get_connection_strength_display_returns_correct_message(self, garden_factory, value, message):
-        garden = garden_factory.build(connection_strength=value)
-
-        ret_val = garden.get_connection_strength_display()
-
-        assert ret_val == message
-
-    @pytest.mark.parametrize('update_frequency, expected', [
-        (timedelta(minutes=1, seconds=30), '1 Min 30 Sec'),
-        (timedelta(minutes=0, seconds=45), '45 Sec'),
-        (timedelta(minutes=10), '10 Min')
-    ],
-        ids=['1:30', '0:45', '10:00'])
-    def test_update_frequency_display_returns_correct_string(self, garden_factory, update_frequency, expected):
-        garden = garden_factory.build(update_frequency=update_frequency)
-
-        ret_val = garden.update_frequency_display()
-
-        assert ret_val == expected
-
-    @pytest.mark.parametrize('value, klass', [
-        (None, models.Garden.CONN_NOT_AVAILABLE_BADGE),
-        (-81, models.Garden.CONN_BAD_BADGE),
-        (-80, models.Garden.CONN_POOR_BADGE),
-        (-71, models.Garden.CONN_POOR_BADGE),
-        (-70, models.Garden.CONN_OK_BADGE),
-        (-68, models.Garden.CONN_OK_BADGE),
-        (-67, models.Garden.CONN_GOOD_BADGE),
-        (-31, models.Garden.CONN_GOOD_BADGE),
-        (-30, models.Garden.CONN_EXCELLENT_BADGE),
-    ],
-        ids=['n/a', 'bad', 'poor_low', 'poor_high', 'ok_low', 'ok_high', 'good_low', 'good_high', 'excellent'])
-    def test_get_connection_strength_badge_class_returns_correct_class(self, garden_factory, value, klass):
-        garden = garden_factory.build(connection_strength=value)
-
-        ret_val = garden.get_connection_strength_badge_class()
-
-        assert ret_val == klass
-
-    @pytest.mark.parametrize('value, klass', [
-        (models.Garden.LOW, models.Garden.WL_LOW_BADGE),
-        (models.Garden.OK, models.Garden.WL_OK_BADGE)
-    ],
-        ids=['low', 'ok'])
-    def test_get_water_level_badge_class_returns_correct_badge(self, garden_factory, value, klass):
-        garden = garden_factory.build(water_level=value)
-
-        ret_val = garden.get_water_level_badge_class()
-
-        assert ret_val == klass
-
-    @pytest.mark.parametrize('value, klass', [
-        (True, models.Garden.CONNECTED_BADGE),
-        (False, models.Garden.DISCONNECTED_BADGE)
-    ],
-        ids=['connected', 'disconnected'])
-    def test_get_is_connected_badge_class_returns_correct_class(self, garden_factory, value, klass):
-        garden = garden_factory.build(is_connected=value)
-
-        ret_val = garden.get_is_connected_badge_class()
-
-        assert ret_val == klass
+        assert ret_val is None
 
 
 @pytest.mark.unit
@@ -175,31 +89,40 @@ class TestWateringStationModel:
 
         assert getattr(watering_station, field) == get_default()
 
-    @patch('garden.models.derive_duration_string')
-    def test_get_formatted_duration_calls_derive_duration_string_with_watering_duration_field(self, mock_derive_duration_string):
-        mock_ws = Mock()
+    def test___str__returns_garden_name_and_watering_station_idx(self, garden_factory, watering_station_factory):
+        watering_station = watering_station_factory.build(garden=garden_factory.build())
 
-        models.WateringStation.get_formatted_duration(mock_ws)
+        ret_val = watering_station.__str__()
 
-        mock_derive_duration_string.assert_called_once_with(mock_ws.watering_duration)
+        assert str(watering_station.garden) in ret_val
+        assert str(watering_station.idx) in ret_val
 
-    @patch('garden.models.derive_duration_string')
-    def test_get_formatted_duration_returns_return_value_of_derive_duration_string(self, mock_derive_duration_string):
-        mock_ws = Mock()
+    def test_get_formatter_returns_a_watering_station_formatter_initialized_with_self(self, watering_station_factory):
+        watering_station = watering_station_factory.build()
 
-        ret_val = models.WateringStation.get_formatted_duration(mock_ws)
+        ret_val = watering_station.get_formatter()
 
-        assert ret_val == mock_derive_duration_string.return_value
+        assert isinstance(ret_val, WateringStationFormatter)
+        assert ret_val.instance is watering_station
 
-    @pytest.mark.parametrize('watering_station_factory, status, expected', [
-        (None, True, models.WateringStation.ACTIVE_STATUS_STR),
-        (None, False, models.WateringStation.INACTIVE_STATUS_STR),
-    ],
-        indirect=['watering_station_factory'],
-        ids=['active', 'inactive'])
-    def test_status_string_returns_correct_string_based_on_status(self, watering_station_factory, status, expected):
-        station = watering_station_factory.build(status=status)
 
-        ret_val = station.status_string
+@pytest.mark.unit
+class TestTokenModel:
+    def test___str___method_returns_str_of_uuid(self, token_factory):
+        token = token_factory.build()
 
-        assert ret_val == expected
+        ret_val = token.__str__()
+
+        assert ret_val == str(token.uuid)
+
+
+@pytest.mark.unit
+class TestWateringStationRecord:
+    def test__str__method_returns_str_containing_garden_watering_station_date(self, watering_station_record_factory):
+        record = watering_station_record_factory.build()
+
+        ret_val = record.__str__()
+
+        assert str(record.watering_station.garden) in ret_val
+        assert str(record.watering_station.idx) in ret_val
+        assert str(record.created) in ret_val

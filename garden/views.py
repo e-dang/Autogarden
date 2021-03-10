@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from garden.formatters import GardenFormatter, WateringStationFormatter
 from typing import Any
 
 import pytz
@@ -66,7 +67,7 @@ class WateringStationAPIView(APIView):
 class GardenListView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
         form = NewGardenForm()
-        gardens = request.user.gardens.all()
+        gardens = [GardenFormatter(garden) for garden in request.user.gardens.all()]
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
@@ -90,7 +91,7 @@ class GardenDetailView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden.refresh_connection_status()
-            return render(request, 'garden_detail.html', context={'garden': garden})
+            return render(request, 'garden_detail.html', context={'garden': GardenFormatter(garden)})
 
 
 class GardenUpdateView(LoginRequiredMixin, View):
@@ -175,9 +176,8 @@ class WateringStationDetailView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            for i, station in enumerate(garden.watering_stations.all(), start=1):
-                if station.pk == ws_pk:
-                    return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
+            watering_station = garden.watering_stations.get(pk=ws_pk)
+            return render(request, 'watering_station_detail.html', context={'watering_station': WateringStationFormatter(watering_station)})
 
 
 class WateringStationUpdateView(LoginRequiredMixin, View):

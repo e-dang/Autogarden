@@ -4,7 +4,7 @@ from unittest.mock import Mock, create_autospec, patch
 import pytest
 from django.http.request import HttpRequest
 from rest_framework.request import Request
-from tests.assertions import assert_data_contains_fields
+from tests.assertions import assert_unordered_data_eq
 
 from garden import models
 from garden.serializers import (GardenGetSerializer, GardenPatchSerializer,
@@ -19,7 +19,7 @@ class TestGardenGetSerializer:
 
         serializer = GardenGetSerializer(garden)
 
-        assert_data_contains_fields(serializer.data, expected_fields)
+        assert_unordered_data_eq(serializer.data, expected_fields)
 
     def test_get_update_frequency_returns_return_value_of_total_seconds_method_call(self):
         mock_garden = Mock()
@@ -37,7 +37,7 @@ class TestGardenPatchSerializer:
 
         serializer = GardenPatchSerializer(garden)
 
-        assert_data_contains_fields(serializer.data, expected_fields)
+        assert_unordered_data_eq(serializer.data, expected_fields)
 
     @patch('garden.serializers.serializers.ModelSerializer.save')
     def test_save_calls_update_on_garden_with_request(self, mock_super):
@@ -58,7 +58,7 @@ class TestWateringStationSerializer:
 
         serializer = WateringStationSerializer(watering_station)
 
-        assert_data_contains_fields(serializer.data, expected_fields)
+        assert_unordered_data_eq(serializer.data, expected_fields)
 
     def test_get_watering_duration_returns_return_value_of_total_seconds_method_call(self):
         mock_watering_station = Mock()

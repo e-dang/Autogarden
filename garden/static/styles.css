@@ -2,14 +2,20 @@
     display: none;
 }
 
+.photo-container {
+    max-width: 300px;
+    max-height: 300px;
+}
+
 img.cropper-photo {
     max-width: 100%;
 }
 
 img.header-photo {
     border-radius: 100%;
-    max-width: 300px;
-    max-height: 300px;
+    max-width: 200px;
+    max-height: 200px;
+    margin: 0 auto;
 }
 
 .table th {
@@ -18,4 +24,8 @@ img.header-photo {
 
 .table td {
     text-align: center;
+}
+
+hr {
+    background-color: #375a7f;
 }

@@ -1,0 +1,25 @@
+<div class="card-header">
+    <h1 id="name" class="text-center">{{instance.name}}</h1>
+</div>
+<div class="card-body">
+    {% if instance.image %}
+        <div class="row justify-content-center">
+            <img class="header-photo" src="{{instance.image.url}}" />
+        </div>
+        <hr>
+    {% endif %}
+    {% if button == 'back' %}
+        <div class="row justify-content-center">
+            <div class="col align-self-center">
+                <a class="btn btn-sm btn-outline-info w-100" href="{{instance.get_absolute_url}}">&#8592; Back</a>
+            </div>
+        </div>
+    {% endif %}
+    {% if button == 'edit' %}
+        <div class="row justify-content-center">
+            <div class="col align-self-center">
+                <a class="btn btn-sm btn-outline-info w-100" href="{{instance.get_update_url}}">Edit</a>
+            </div>
+        </div>
+    {% endif %}
+</div>

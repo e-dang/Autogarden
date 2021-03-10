@@ -56,21 +56,20 @@ class GardenListPage(BasePage):
         return re.search(pattern, self.driver.current_url) is not None
 
     def get_number_of_gardens(self):
-        gardens = self._get_garden_list()
-        return len(gardens.find_elements_by_css_selector('.card'))
+        return len(self.driver.find_elements_by_css_selector('.list-group-item'))
 
     @wait
     def wait_for_garden_in_list(self, name):
-        for element in self.driver.find_elements_by_css_selector('.card-title'):
+        for element in self.driver.find_elements_by_tag_name('h2'):
             if element.get_attribute('innerText') == name:
                 return element
 
         raise WebDriverException('Could not find garden with that name')
 
     def get_garden_image(self, name):
-        for card in self.driver.find_elements_by_css_selector('.card'):
-            if card.find_elements_by_css_selector('.card-title')[0].get_attribute('innerText') == name:
-                return card.find_elements_by_css_selector('.card-img-top')[0].get_attribute('src')
+        for card in self.driver.find_elements_by_css_selector('.list-group-item'):
+            if card.find_element_by_tag_name('h2').get_attribute('innerText') == name:
+                return card.find_element_by_tag_name('img').get_attribute('src')
 
         raise WebDriverException('Could not find garden with that name')
 
@@ -84,6 +83,3 @@ class GardenListPage(BasePage):
         self.garden_image = garden_image
         self.update_frequency = update_frequency
         self.submit_button.click()
-
-    def _get_garden_list(self):
-        return self.driver.find_element_by_id('gardenList')
