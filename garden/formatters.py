@@ -137,7 +137,7 @@ class GardenFormatter(ModelFormatter):
         return self.instance.last_connection_time.strftime('%-m/%d/%Y %I:%M %p')
 
     def get_plant_types_display(self) -> str:
-        result = ', '.join(self.instance.plant_types)
+        result = ', '.join(sorted(self.instance.plant_types))
         if len(result) == 0:
             return NOT_AVAILABLE_MSG
         return result
@@ -178,4 +178,4 @@ class WateringStationFormatter(ModelFormatter):
         return f'Watering Station #{self.get_idx_display()}'
 
     def get_plant_type_display(self) -> str:
-        return self.instance.plant_type or self.NOT_AVAILABLE_MSG
+        return self.instance.plant_type or NOT_AVAILABLE_MSG

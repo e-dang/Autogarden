@@ -215,6 +215,17 @@ class TestGardenFormatter:
 
         assert ret_val == expected
 
+    @patch('garden.models.Garden.plant_types', new_callable=PropertyMock)
+    def test_get_plant_types_display_returns_plant_types_in_alphabetical_order(self, mock_plant_types):
+        mock_plant_types = ['c', 'b', 'a']
+        mock_garden = create_autospec(Garden)
+        type(mock_garden).plant_types = mock_plant_types
+        formatter = GardenFormatter(mock_garden)
+
+        ret_val = formatter.get_plant_types_display()
+
+        assert ret_val == 'a, b, c'
+
     def test_get_time_since_last_connection_display_returns_the_duration_rounded_to_days(self, garden_factory):
         days = 3
         duration = timedelta(days=days, hours=2, seconds=1)
@@ -284,10 +295,10 @@ class TestWateringStationFormatter:
 
     @pytest.mark.parametrize('plant_type, expected', [
         ('spinach', 'spinach'),
-        (None, NOT_AVAILABLE_MSG)
+        ('', NOT_AVAILABLE_MSG)
     ],
         ids=['spinach', 'N/A'])
-    def get_plant_type_display_returns_instance_plant_type_when_plant_type_is_not_none(self, watering_station_factory, plant_type, expected):
+    def get_plant_type_display_returns_correct_plant_type_string(self, watering_station_factory, plant_type, expected):
         formatter = WateringStationFormatter(watering_station_factory.build(plant_type=plant_type))
 
         ret_val = formatter.get_plant_type_display()
