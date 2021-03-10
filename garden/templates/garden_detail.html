@@ -6,40 +6,7 @@
 
 {% block main_content %}
 
-<div class="row mt-4 justify-content-center">
-    <div class="col-sm-auto col-lg-4">
-        {% include 'components/image_box.html' with instance=garden %}
-    </div>
-    <div class="col-sm-12 col-lg-8 mt-sm-4 mt-lg-0">
-        <div class="row">
-            <div class="col">
-                {% include 'components/info_card.html' with id='apiKey' title='API key' body=garden.token.uuid %}
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col">
-                {% include 'components/info_card.html' with title='Status' body=garden.get_is_connected_element|safe %}
-            </div>
-            <div class="col">
-                {% include 'components/info_card.html' with title='Connection Strength' body=garden.get_connection_strength_element|safe %}
-            </div>
-            <div class="col">
-                {% include 'components/info_card.html' with title='Water Level' body=garden.get_water_level_element|safe %}
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col">
-                {% include 'components/info_card.html' with id="lastConnectionFrom" title='Last Connected From' body=garden.last_connection_ip %}
-            </div>
-            <div class="col">
-                {% include 'components/info_card.html' with id="lastConnectedAt" title='Last Connected At' body=garden.last_connection_time %}
-            </div>
-            <div class="col">
-                {% include 'components/info_card.html' with id="updateFrequency" title='Update Frequency' body=garden.update_frequency %}
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'components/model_display.html' with instance=garden component='components/garden_config.html' %}
 
 <hr />
 

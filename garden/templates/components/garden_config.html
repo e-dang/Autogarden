@@ -1,0 +1,29 @@
+<div class="col-sm-12 col-lg-8 mt-sm-4 mt-lg-0">
+    <div class="row">
+        <div class="col">
+            {% include 'components/info_card.html' with id='apiKey' title='API key' body=instance.token.uuid %}
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            {% include 'components/info_card.html' with title='Status' body=instance.get_is_connected_element|safe %}
+        </div>
+        <div class="col">
+            {% include 'components/info_card.html' with title='Connection Strength' body=instance.get_connection_strength_element|safe %}
+        </div>
+        <div class="col">
+            {% include 'components/info_card.html' with title='Water Level' body=instance.get_water_level_element|safe %}
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            {% include 'components/info_card.html' with id="lastConnectionFrom" title='Last Connected From' body=instance.last_connection_ip %}
+        </div>
+        <div class="col">
+            {% include 'components/info_card.html' with id="lastConnectedAt" title='Last Connected At' body=instance.last_connection_time %}
+        </div>
+        <div class="col">
+            {% include 'components/info_card.html' with id="updateFrequency" title='Update Frequency' body=instance.update_frequency %}
+        </div>
+    </div>
+</div>
