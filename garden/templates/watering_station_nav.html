@@ -1,17 +1,4 @@
 {% include 'garden_detail_nav.html' with garden=watering_station.garden %}
-<li>
-    <div class="dropdown show">
-        <a id="navWateringStations" class="btn btn-secondary dropdown-toggle" href="#" role="button"
-            id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Watering Stations
-        </a>
-
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            {% for ws in watering_station.garden.watering_stations.all %}
-            <a id="navWateringStation{{ forloop.counter }}" class="dropdown-item" href="{{ ws.get_absolute_url }}">
-                {{forloop.counter }}
-            </a>
-            {% endfor %}
-        </div>
-    </div>
+<li class="nav-item dropdown">
+    <a class="nav-link active" href="{{watering_station.get_absolute_url}}">{{watering_station.get_name_display}}</a>
 </li>

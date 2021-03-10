@@ -1,6 +1,20 @@
-{% include 'garden_list_nav.html' %}
-<li>
-    <a id="navGardenDetail" class="btn btn-primary" href="{{ garden.get_absolute_url }}" role="button">
-        {{ garden.name}}
+{% include 'garden_list_nav.html' with state='' %}
+<li class='nav-item'>
+    <a id="navGardenDetail" class="nav-link {{state}}" href="{{garden.get_absolute_url}}">
+        {{garden.name}}
     </a>
+</li>
+<li class="nav-item dropdown order-12">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">
+        Watering Stations
+    </a>
+
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        {% for ws in garden.get_watering_station_formatters %}
+            <a class="dropdown-item" href="{{ws.get_absolute_url}}">
+                {{ws.get_name_display}}
+            </a>
+        {% endfor %}
+    </div>
 </li>

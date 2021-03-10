@@ -41,6 +41,8 @@ def driver_init(request):
     else:
         request.cls.driver = webdriver.Firefox()
 
+    request.cls.driver.set_window_size(1500, 1500)
+
     yield
 
     request.cls.driver.quit()

@@ -3,7 +3,8 @@ from .elements import Button
 
 
 class HomeButton(Button):
-    LOCATOR = 'navBarHome'
+    LOCATOR = 'AutoGarden'
+    BY = 'find_element_by_link_text'
 
 
 class GardenDetailButton(Button):
@@ -11,11 +12,13 @@ class GardenDetailButton(Button):
 
 
 class LogoutButton(Button):
-    LOCATOR = 'logoutBtn'
+    LOCATOR = 'Logout'
+    BY = 'find_element_by_link_text'
 
 
 class SettingsButton(Button):
-    LOCATOR = 'settingsBtn'
+    LOCATOR = 'Settings'
+    BY = 'find_element_by_link_text'
 
 
 class BasePage:

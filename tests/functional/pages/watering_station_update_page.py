@@ -60,8 +60,9 @@ class WateringStationUpdatePage(BasePage):
         return re.search(pattern, self.driver.current_url) is not None
 
     def go_to_watering_station_page(self, ws_num):
-        wait_for(lambda: self.driver.find_element_by_id('navWateringStations')).click()
-        wait_for(lambda: self.driver.find_element_by_id(f'navWateringStation{ws_num}')).click()
+        wait_for(lambda: self.driver.find_element_by_link_text('Watering Stations')).click()
+        wait_for(lambda: self.driver.find_element_by_xpath(
+            f'//div[contains(@class, "dropdown-menu")]//a[contains(., "#{ws_num}")]')).click()
 
     def update_info(self, status=None, plant_type=None, moisture_threshold=None, watering_duration=None, image=None, crop_image=lambda x, y: None):
         if status is not None:

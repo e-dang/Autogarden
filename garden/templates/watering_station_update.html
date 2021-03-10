@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block navbar %}
-{% include 'watering_station_nav.html' with watering_station=form.instance %}
+    {% include 'watering_station_nav.html' with watering_station=form.instance.get_formatter %}
 {% endblock %}
 
 {% block main_content %}
