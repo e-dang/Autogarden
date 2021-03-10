@@ -5,21 +5,60 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="row justify-content-center my-5">
-    <button id="addNewGardenBtn" class="btn btn-primary" data-toggle="modal" data-target="#newGardenModal">Add New
-        Garden</button>
-</div>
 
-<div id="gardenList" class="row">
-    {% for garden in gardens %}
-    <div class="card">
-        <img class="card-img-top" src="{{garden.image.url}}" alt="Garden Image">
-        <div class="card-body">
-            <h5 class="card-title text-center"><a href="{% url 'garden-detail' garden.pk %}"
-                    class="btn btn-primary">{{garden.name}}</a></h5>
+<div class="row mt-4 justify-content-center">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <div class="row justify-content-between">
+                    <div class="col-auto align-self-center">
+                        <h1>Your Gardens</h1>
+                    </div>
+                    <div class="col-auto align-self-center">
+                        <button id="addNewGardenBtn" class="btn btn-success" data-toggle="modal" data-target="#newGardenModal">+ Create Garden</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for garden in gardens %}
+                        <a href="{{garden.get_absolute_url}}" class="list-group-item list-group-item-action flex-column align-items-start active border-dark">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h2 class="mb-2">{{garden.name}}</h2>
+                                <small>{{garden.time_since_last_connection}}</small>
+                            </div>
+                            <div class="row justify-content-between">
+                                <div class="col">
+                                    <dl class="row ml-3">
+                                        <dt class="col-sm-4 text-truncate">Status</dt>
+                                        <dd class="col-sm-8">{{garden.get_is_connected_element|safe}}</dd>
+
+                                        <dt class="col-sm-4 text-truncate">Watering Stations</dt>
+                                        <dd class="col-sm-8">{{garden.watering_stations.count}}</dd>
+
+                                        <dt class="col-sm-4 text-truncate">Plants</dt>
+                                        <dd class="col-sm-8">{{garden.plant_types}}</dd>
+
+                                        <dt class="col-sm-4 text-truncate">Active</dt>
+                                        <dd class="col-sm-8">{{garden.get_num_active_watering_stations}}/{{garden.watering_stations.count}}</dd>
+
+                                        <dt class="col-sm-4 text-truncate">Water Level</dt>
+                                        <dd class="col-sm-8">{{garden.get_water_level_element|safe}}</dd>
+
+                                        <dt class="col-sm-4 text-truncate">Update Frequency</dt>
+                                        <dd class="col-sm-8">{{garden.update_frequency}}</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-auto">
+                                    <img class="header-photo" src="{{garden.image.url}}" alt="Garden Image">
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
 </div>
 
 <div id="{{form.MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog"
