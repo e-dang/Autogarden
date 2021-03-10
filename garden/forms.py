@@ -106,15 +106,11 @@ class GardenForm(forms.ModelForm, CropperMixin):
                 )
             ),
             *self.cropper_fields,
-            Row(
-                Column(
-                    FormActions(
-                        Button('delete', 'Delete', css_class='btn btn-danger mr-2',
-                               data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
-                        Submit('submit', 'Update'),
-                        css_class="form-row justify-content-end"
-                    )
-                )
+            FormActions(
+                Button('delete', 'Delete', css_class='btn btn-danger mr-2',
+                       data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
+                Submit('submit', 'Update'),
+                css_class="form-row justify-content-end"
             )
         )
 
@@ -131,17 +127,13 @@ class NewGardenForm(GardenForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper.form_action = 'garden-list'
-        self.helper.layout = Layout(
-            Field('name'),
-            Field('update_frequency'),
-            Field('num_watering_stations', ),
-            Field('image', id='id_image'),
-            *self.cropper_fields,
-            Submit('submit', 'Create', css_class='btn btn-success'),
-            Button('cancel', 'Cancel', css_class='btn btn-info',
-                   data_toggle='modal', data_target=f'#{self.MODAL_ID}')
+        self.helper.layout.insert(2, Field('num_watering_stations'))
+        self.helper.layout[-1] = FormActions(
+            Button('cancel', 'Cancel', css_class='btn-info',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
+            Submit('submit', 'Create', css_class='btn-success'),
+            css_class='form-row justify-content-end'
         )
-
         self.fields['update_frequency'].initial = _default_update_frequency()
 
     def save(self, owner):
