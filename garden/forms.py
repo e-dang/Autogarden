@@ -42,7 +42,7 @@ class DeleteForm(forms.Form):
         self.helper.layout = Layout(
             HTML(self.MESSAGE),
             FormActions(
-                Button('cancel', 'Cancel', css_class='btn-info',
+                Button('cancel', 'Cancel', css_class='btn-primary',
                        data_dismiss='modal', aria_hidden='true'),
                 Submit('confirm_delete', 'Delete', css_class='btn-danger ml-2'),
                 css_class="form-row justify-content-end"
@@ -129,7 +129,7 @@ class NewGardenForm(GardenForm):
         self.helper.form_action = 'garden-list'
         self.helper.layout.insert(2, Field('num_watering_stations'))
         self.helper.layout[-1] = FormActions(
-            Button('cancel', 'Cancel', css_class='btn-info mr-2',
+            Button('cancel', 'Cancel', css_class='btn-primary mr-2',
                    data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
             Submit('submit', 'Create', css_class='btn-success'),
             css_class='form-row justify-content-end'
