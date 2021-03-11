@@ -23,13 +23,22 @@ class UserCreateForm(UserCreationForm):
         self.helper.form_id = self.FORM_ID
         self.helper.form_method = 'post'
         self.helper.form_action = 'register'
-        self.helper.add_input(Submit('submit', 'Submit'))
+        self.helper.layout = Layout(
+            'email',
+            'first_name',
+            'last_name',
+            'password1',
+            'password2',
+            FormActions(
+                Submit('submit', 'Submit'),
+                css_class="form-row justify-content-center"
+            ),
+        )
+        self.helper.label_class = 'text-capitalize'
 
 
 class LoginForm(forms.Form):
     FORM_ID = 'loginForm'
-    REGISTER_BTN_ID = 'registerBtn'
-    RESET_PASSWORD_BTN = 'resetPasswordBtn'
 
     email = forms.EmailField()
     password = forms.CharField(
@@ -58,12 +67,9 @@ class LoginForm(forms.Form):
             Field('email'),
             Field('password'),
             FormActions(
-                Submit('submit', 'Login')
-            ),
-            HTML(
-                f'<p>Don\'t have an account? <a id="{self.REGISTER_BTN_ID}" href="{{% url \'register\' %}}">Sign Up</a>'),
-            HTML(
-                f'<p>Forgot Password? <a id="{self.RESET_PASSWORD_BTN}" href="{{% url \'reset_password\' %}}">Reset Password</a>')
+                Submit('submit', 'Login'),
+                css_class="form-row justify-content-center"
+            )
         )
 
     def clean(self):
@@ -111,21 +117,44 @@ class CustomPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Reset my password'))
+        self.helper.layout = Layout(
+            'email',
+            FormActions(
+                Submit('submit', 'Reset my password'),
+                css_class="form-row justify-content-center"
+            )
+        )
 
 
 class CustomSetPasswordForm(SetPasswordForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Reset my password'))
+        self.helper.layout = Layout(
+            Field('new_password1'),
+            'new_password2',
+            FormActions(
+                Submit('submit', 'Reset my password'),
+                css_class="form-row justify-content-center"
+            )
+        )
+        self.helper.label_class = 'text-capitalize'
 
 
 class CustomChangePasswordForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Change my password'))
+        self.helper.layout = Layout(
+            'old_password',
+            'new_password1',
+            'new_password2',
+            FormActions(
+                Submit('submit', 'Change my password'),
+                css_class="form-row justify-content-center"
+            )
+        )
+        self.helper.label_class = 'text-capitalize'
 
 
 class UpdateUserForm(forms.ModelForm):
@@ -137,4 +166,18 @@ class UpdateUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Update'))
+        self.helper.layout = Layout(
+            'email',
+            'first_name',
+            'last_name',
+            HTML('''<label for="id_change_password">Password</label><br>
+                <a id="changePasswordBtn" class="btn btn-primary" href="{% url 'password_change_view' %}">Change Password</a>
+                <hr>
+            '''),
+            FormActions(
+                Submit('submit', 'Update'),
+                css_class="form-row justify-content-end"
+            )
+        )
+
+        self.helper.label_class = 'text-capitalize'

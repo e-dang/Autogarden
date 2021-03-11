@@ -1,10 +1,12 @@
 import re
 
 from garden.forms import CropperMixin, WateringStationForm
+from garden.utils import derive_duration_string
 
 from ..base import wait_for
 from .base_page import BasePage
-from .elements import Button, CancelButton, DeleteButton, ImageInput, TextInput, ToggleButton, SubmitButton, ConfirmDeleteButton
+from .elements import (Button, CancelButton, ConfirmDeleteButton, DeleteButton,
+                       ImageInput, SubmitButton, TextInput, ToggleButton)
 
 
 class MoistureThresholdInput(TextInput):
@@ -58,8 +60,9 @@ class WateringStationUpdatePage(BasePage):
         return re.search(pattern, self.driver.current_url) is not None
 
     def go_to_watering_station_page(self, ws_num):
-        wait_for(lambda: self.driver.find_element_by_id('navWateringStations')).click()
-        wait_for(lambda: self.driver.find_element_by_id(f'navWateringStation{ws_num}')).click()
+        wait_for(lambda: self.driver.find_element_by_link_text('Watering Stations')).click()
+        wait_for(lambda: self.driver.find_element_by_xpath(
+            f'//div[contains(@class, "dropdown-menu")]//a[contains(., "#{ws_num}")]')).click()
 
     def update_info(self, status=None, plant_type=None, moisture_threshold=None, watering_duration=None, image=None, crop_image=lambda x, y: None):
         if status is not None:
@@ -74,3 +77,11 @@ class WateringStationUpdatePage(BasePage):
             self.image = image
             crop_image(self, image)
         self.submit_button.click()
+
+    def form_has_values_from_watering_station(self, watering_station):
+        return all([
+            self.status == watering_station.status,
+            self.plant_type == watering_station.plant_type,
+            self.watering_duration == derive_duration_string(watering_station.watering_duration),
+            self.moisture_threshold == str(watering_station.moisture_threshold)
+        ])

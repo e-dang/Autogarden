@@ -1,47 +1,49 @@
 {% extends 'base.html' %}
 
 {% block navbar %}
-{% include 'watering_station_nav.html' with watering_station=watering_station %}
+    {% include 'watering_station_nav.html' %}
 {% endblock %}
 
 {% block main_content %}
-<div class="row mt-3">
-    <div class="col-auto">
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-auto">
-                    <h1>Watering Station #<span id="wsIdx">{{idx}}</span></h1>
+    {% if watering_station.image %}
+        {% include 'components/model_display.html' with instance=watering_station component='components/watering_station_config.html' %}
+    {% else %}
+        <div class="row mt-4 justify-content-start">
+            <div class="col-5">
+                <div class="card">
+                    {% include 'components/image_box.html' with instance=watering_station button='edit' %}
                 </div>
-                <div class="col-auto align-self-center">
-                    <a id="editButton" class="btn btn-sm btn-outline-info"
-                        href="{{watering_station.get_update_url}}">Edit</a>
-                </div>
+            </div>
+            <div class="col">
+                {% include 'components/info_card.html' with id='plantType' title='Plant Type' body=watering_station.plant_type %}
+            </div>
+            <div class="col">
+                {% include 'components/info_card.html' with title='Status' body=watering_station.get_status_element|safe %}
+            </div>
+            <div class="col">
+                {% include 'components/info_card.html' with id='moistureThreshold' title='Moisture Threshold' body=watering_station.moisture_threshold %}
+            </div>
+            <div class="col">
+                {% include 'components/info_card.html' with id='wateringDuration' title='Watering Duration' body=watering_station.watering_duration %}
+            </div>
+        </div>
+    {% endif %}
+
+    <hr>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col">
+            <div class="card card-body">
+                <canvas id="soilMoistureChart" data-url={{watering_station.get_records_url}}></canvas>
             </div>
         </div>
     </div>
-    <div clas="col-auto">
-        <div class="card card-body">
-            <table>
-                <tbody class="table">
-                    <tr>
-                        <td>Status: </td>
-                        <td id="status">{{watering_station.status_string}}</td>
-                    </tr>
-                    <tr>
-                        <td>Plant Type: </td>
-                        <td id="plantType">{{watering_station.plant_type}}</td>
-                    </tr>
-                    <tr>
-                        <td>Moisture Threshold: </td>
-                        <td id="moistureThreshold">{{watering_station.moisture_threshold}}</td>
-                    </tr>
-                    <tr>
-                        <td>Watering Duration: </td>
-                        <td id="wateringDuration">{{watering_station.get_formatted_duration}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="/static/javascript/soil_moisture.js"></script>
+    <script src="/static/javascript/jquery.fittext.js"></script>
+    <script>
+        $('#name').fitText(0.8, {maxFontSize: 30})
+    </script>
 {% endblock %}

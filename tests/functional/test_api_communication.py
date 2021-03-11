@@ -85,8 +85,6 @@ class TestAPICommunication(Base):
         self.wait_for_page_to_be_loaded(update_gpage)
         update_frequency = timedelta(minutes=7, seconds=20)
         update_gpage.update_garden(update_frequency=derive_duration_string(update_frequency))
-        # update_gpage.garden_update_frequency = derive_duration_string(update_frequency)
-        # update_gpage.submit_button.click()
         update_gpage.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(detail_gpage)
 

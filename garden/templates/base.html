@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <nav id="navBar" class="navbar navbar-expand-sm navbar-dark bg-primary">
+    <nav id="navBar" class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
         <a id="navBarHome" class="navbar-brand" href="{% url 'garden-list' %}">AutoGarden</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,25 +23,29 @@
         </button>
 
         <div id="navbarSupportedContent" class="collapse navbar-collapse">
-            <ul class="navbar-nav mt-auto mb-auto mr-auto">
-                {% block navbar%}
+            <ul class="nav nav-pills mr-lg-auto">
+                {% block navbar %}
                 {% endblock %}
             </ul>
             {% if user.email %}
-            <span class="nav-text">Welcome, {{user.first_name}}!</span>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a id="settingsBtn" class="btn nav-link" role="button" href="{% url 'settings' %}">Settings</a>
-                </li>
-                <li class="nav-item">
-                    <a id="logoutBtn" class="btn nav-link" role="button" href="{% url 'logout' %}">Logout</a>
-                </li>
-            </ul>
+                {% if user.first_name %}
+                    <span class="nav-text welcome-text d-none d-lg-block">Welcome, {{user.first_name}}!</span>
+                {% else %}
+                    <span class="nav-text welcome-text d-none d-lg-block">Welcome! {{user.email}}</span>
+                {% endif %}
+                <ul class="nav nav-pills ml-2">
+                    <li class="nav-item">
+                        <a class="btn nav-link" href="{% url 'settings' %}">Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                </ul>
             {% endif %}
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container-fluid">
         {% block main_content %}
         {% endblock %}
     </div>
@@ -56,6 +60,10 @@
     crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cropper/1.0.1/jquery-cropper.min.js"
     integrity="sha512-V8cSoC5qfk40d43a+VhrTEPf8G9dfWlEJgvLSiq2T2BmgGRmZzB8dGe7XAABQrWj3sEfrR5xjYICTY4eJr76QQ=="
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+    integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
     crossorigin="anonymous"></script>
 
 {% load compress %}

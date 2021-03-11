@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.http.request import HttpRequest
 from tests.assertions import assert_render_context_called_with
 
+from garden.formatters import GardenFormatter
 from garden.views import (GardenDetailView, GardenListView, GardenUpdateView,
                           WateringStationListView, WateringStationUpdateView)
 
@@ -23,24 +24,26 @@ class TestGardenListView:
     def test_GET_only_renders_requesting_users_gardens_in_template(self, mock_render, mock_auth_user):
         request = HttpRequest()
         request.user = mock_auth_user
+        expected = [GardenFormatter(garden) for garden in mock_auth_user.gardens.all.return_value]
 
         resp = GardenListView().get(request)
 
-        assert_render_context_called_with(mock_render, {'gardens': mock_auth_user.gardens.all.return_value})
+        assert_render_context_called_with(mock_render, {'gardens': expected})
         assert resp == mock_render.return_value
 
 
 @pytest.mark.unit
 class TestGardenDetailView:
     @patch('garden.views.render')
-    def test_GET_passes_garden_as_context_to_render(self, mock_render, mock_auth_user):
+    @patch('garden.views.GardenFormatter')
+    def test_GET_passes_garden_formatter_as_context_to_render(self, mock_formatter_class, mock_render, mock_auth_user):
         pk = 0
         request = HttpRequest()
         request.user = mock_auth_user
 
         GardenDetailView().get(request, pk)
 
-        assert_render_context_called_with(mock_render, {'garden': mock_auth_user.gardens.get.return_value})
+        assert_render_context_called_with(mock_render, {'garden': mock_formatter_class.return_value})
 
 
 @pytest.mark.unit

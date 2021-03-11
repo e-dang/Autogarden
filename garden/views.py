@@ -1,6 +1,8 @@
-from garden.permissions import TokenPermission
+from datetime import datetime, timedelta
+from garden.formatters import GardenFormatter, WateringStationFormatter
 from typing import Any
 
+import pytz
 from crispy_forms.utils import render_crispy_form
 from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,13 +17,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
-                          DeleteWateringStationForm, NewGardenForm,
-                          GardenForm, WateringStationForm)
+                          DeleteWateringStationForm, GardenForm, NewGardenForm,
+                          WateringStationForm)
+from garden.permissions import TokenPermission
 
-from .models import Garden
+from .models import Garden, WateringStation
+from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
-from .permissions import TokenPermission
 
 
 class GardenAPIView(APIView):
@@ -64,7 +67,7 @@ class WateringStationAPIView(APIView):
 class GardenListView(LoginRequiredMixin, View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
         form = NewGardenForm()
-        gardens = request.user.gardens.all()
+        gardens = [GardenFormatter(garden) for garden in request.user.gardens.all()]
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
@@ -88,7 +91,7 @@ class GardenDetailView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden.refresh_connection_status()
-            return render(request, 'garden_detail.html', context={'garden': garden})
+            return render(request, 'garden_detail.html', context={'garden': GardenFormatter(garden)})
 
 
 class GardenUpdateView(LoginRequiredMixin, View):
@@ -173,9 +176,8 @@ class WateringStationDetailView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            for i, station in enumerate(garden.watering_stations.all(), start=1):
-                if station.pk == ws_pk:
-                    return render(request, 'watering_station_detail.html', context={'watering_station': station, 'idx': i})
+            watering_station = garden.watering_stations.get(pk=ws_pk)
+            return render(request, 'watering_station_detail.html', context={'watering_station': WateringStationFormatter(watering_station)})
 
 
 class WateringStationUpdateView(LoginRequiredMixin, View):
@@ -226,3 +228,23 @@ class WateringStationDeleteView(LoginRequiredMixin, View):
             station = garden.watering_stations.get(garden=garden_pk, pk=ws_pk)
             station.delete()
             return redirect('garden-detail', pk=garden_pk)
+
+
+class WateringStationRecordListView(LoginRequiredMixin, View):
+    def get(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
+        try:
+            garden = request.user.gardens.get(pk=garden_pk)
+            watering_station = garden.watering_stations.get(pk=ws_pk)
+        except (Garden.DoesNotExist, WateringStation.DoesNotExist):
+            raise Http404()
+        else:
+            labels = []
+            data = []
+            cut_off_time = datetime.now(pytz.UTC) - timedelta(hours=12)
+            for record in watering_station.records.filter(created__gte=cut_off_time).order_by('created'):
+                labels.append(record.created)
+                data.append(record.moisture_level)
+            return JsonResponse({
+                'labels': labels,
+                'data': data
+            })

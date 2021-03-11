@@ -1,7 +1,50 @@
+@import 'bootstrap.css';
+
 .asteriskField {
     display: none;
 }
 
-img {
+.photo-container {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+img.cropper-photo {
     max-width: 100%;
+}
+
+img.header-photo {
+    border-radius: 100%;
+    max-width: 200px;
+    max-height: 200px;
+    margin: 0 auto;
+}
+
+.table th {
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
+}
+
+hr {
+    background-color: var(--primary);
+}
+
+.nav-pills .nav-link {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #222;
+}
+
+.welcome-text {
+    color: var(--light);
+}
+
+.list-group-item-action:hover {
+    background-color: var(--gray);
 }

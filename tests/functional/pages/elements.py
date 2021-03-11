@@ -70,7 +70,7 @@ class ImageInput:
             return instance.driver.find_element_by_xpath(
                 f'//div[@class="form-control custom-file"]//label[@for="{self.INPUT_LOCATOR}"]').get_attribute('innerText')
         else:
-            return instance.driver.find_element_by_id(self.IMAGE_LOCATOR).get_attribute('src')
+            return instance.driver.find_element_by_class_name(self.IMAGE_LOCATOR).get_attribute('src')
 
 
 class SubmitButton(Button):
@@ -91,3 +91,8 @@ class DeleteButton(Button):
 class ConfirmDeleteButton(Button):
     LOCATOR = '//input[@name="confirm_delete"]'
     BY = 'find_element_by_xpath'
+
+
+class EditButton(Button):
+    LOCATOR = 'Edit'
+    BY = 'find_element_by_link_text'

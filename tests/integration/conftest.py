@@ -1,11 +1,7 @@
-from typing import Any
-
 import pytest
-from django import http
 from django.test import Client
 from pytest_factoryboy import register
 from pytest_factoryboy.fixture import LazyFixture
-from rest_framework import status
 from tests import factories
 
 

@@ -15,7 +15,7 @@ class GardenNameInput(TextInput):
 
 class GardenImageInput(ImageInput):
     INPUT_LOCATOR = 'id_image'
-    IMAGE_LOCATOR = 'gardenImage'
+    IMAGE_LOCATOR = 'header-photo'
 
 
 class UpdateFrequency(TextInput):

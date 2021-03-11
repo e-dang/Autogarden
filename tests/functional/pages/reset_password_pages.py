@@ -17,7 +17,7 @@ class EmailInput(TextInput):
 
 
 class LoginButton(Button):
-    LOCATOR = 'Log in'
+    LOCATOR = 'Log In'
     BY = 'find_element_by_link_text'
 
 

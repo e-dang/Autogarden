@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 import pytest
 import pytz
 
+from garden.formatters import WateringStationFormatter
 from garden.models import Garden, Token, WateringStation
+from tests.assertions import assert_unordered_data_eq
 
 
 @pytest.mark.integration
@@ -111,6 +113,76 @@ class TestGardenModel:
 
         assert garden.connection_strength is None
 
+    @pytest.mark.django_db
+    def test_get_watering_station_formatters_returns_all_watering_stations_wrapped_in_a_formatter(self, garden):
+        formatter_ids = set()
+        for station in garden.get_watering_station_formatters():
+            formatter_ids.add(station.pk)
+            assert isinstance(station, WateringStationFormatter)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('garden__watering_stations, idx', [
+        (4, 2)
+    ])
+    def test_get_watering_station_idx_returns_the_idx_of_the_watering_station_out_of_the_gardens_watering_stations(self, garden, idx):
+        station = list(garden.watering_stations.all())[idx]
+
+        ret_val = garden.get_watering_station_idx(station)
+
+        assert ret_val == idx
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('garden__watering_stations', [4])
+    @pytest.mark.parametrize('idx', [0, 1, 2, 3], ids=[0, 1, 2, 3])
+    def test_get_watering_station_at_idx_returns_correct_watering_station(self, garden, idx):
+        ret_val = garden.get_watering_station_at_idx(idx)
+
+        assert ret_val == list(garden.watering_stations.all())[idx]
+
+    @pytest.mark.django_db
+    def test_get_watering_station_formatters_returns_generator_of_formatters_for_each_watering_station(self, garden2):
+        for formatter, station in zip(garden2.get_watering_station_formatters(), garden2.watering_stations.all()):
+            assert isinstance(formatter, WateringStationFormatter)
+            assert formatter.instance == station
+
+    @pytest.mark.django_db
+    def test_get_active_watering_stations_returns_only_watering_stations_that_are_active(self, garden, watering_station_factory):
+        watering_stations = []
+        for i in range(10):
+            status = i % 2 == 0
+            station = watering_station_factory(garden=garden, status=status)
+            if status:
+                watering_stations.append(station)
+
+        ret_val = garden.get_active_watering_stations()
+
+        assert list(ret_val) == watering_stations
+
+    @pytest.mark.django_db
+    def test_get_num_active_watering_stations_returns_number_of_active_watering_stations(self, garden, watering_station_factory):
+        watering_stations = []
+        for i in range(10):
+            status = i % 2 == 0
+            station = watering_station_factory(garden=garden, status=status)
+            if status:
+                watering_stations.append(station)
+
+        ret_val = garden.get_num_active_watering_stations()
+
+        assert ret_val == len(watering_stations)
+
+    @pytest.mark.django_db
+    def test_plant_types_returns_an_iterable_of_the_unique_plant_types_defined_in_its_watering_stations(self, garden, watering_station_factory):
+        plant_types = ['lettuce', 'spinach']
+        watering_station_factory(garden=garden, plant_type='')
+        for i in range(5):
+            plant_type = plant_types[0] if i % 2 == 0 else plant_types[1]
+            watering_station_factory(garden=garden, plant_type=plant_type)
+
+        ret_val = garden.plant_types
+
+        assert_unordered_data_eq(ret_val, plant_types)
+
 
 @pytest.mark.integration
 class TestTokenModel:
@@ -152,6 +224,14 @@ class TestWateringStationModel:
         assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/delete/'
 
     @pytest.mark.django_db
+    def test_get_records_url_returns_the_correct_url(self, watering_station):
+        garden = watering_station.garden
+
+        url = watering_station.get_records_url()
+
+        assert url == f'/gardens/{garden.pk}/watering-stations/{watering_station.pk}/records/'
+
+    @pytest.mark.django_db
     def test_watering_station_gets_deleted_when_garden_gets_delete(self, watering_station):
         garden = watering_station.garden
 
@@ -159,3 +239,13 @@ class TestWateringStationModel:
 
         with pytest.raises(WateringStation.DoesNotExist):
             watering_station.refresh_from_db()
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('num_watering_stations', [5], ids=[5])
+    def test_idx_returns_the_correct_idx_within_the_garden(self, watering_station_factory, watering_station, num_watering_stations):
+        watering_stations = [watering_station]
+        for _ in range(num_watering_stations - 1):
+            watering_stations.append(watering_station_factory(garden=watering_station.garden))
+
+        for i, station in enumerate(watering_stations):
+            assert station.idx == i

@@ -1,7 +1,5 @@
 import re
 
-from users.forms import LoginForm
-
 from .base_page import BasePage
 from .elements import Button, SubmitButton, TextInput
 
@@ -15,11 +13,13 @@ class PasswordField(TextInput):
 
 
 class RegisterButton(Button):
-    LOCATOR = LoginForm.REGISTER_BTN_ID
+    LOCATOR = 'Sign Up'
+    BY = 'find_element_by_link_text'
 
 
 class ResetPasswordButton(Button):
-    LOCATOR = LoginForm.RESET_PASSWORD_BTN
+    LOCATOR = 'Reset Password'
+    BY = 'find_element_by_link_text'
 
 
 class LoginPage(BasePage):

@@ -1,83 +1,95 @@
 {% extends 'base.html' %}
 
 {% block navbar %}
-{% include 'garden_detail_nav.html' with garden=garden %}
+    {% include 'garden_detail_nav.html' with state='active' %}
 {% endblock %}
 
 {% block main_content %}
 
-<div class="row mt-3">
-    <div class="col-4 align-self-end">
-        <div class="row ">
-            <h1 id="gardenName">{{garden.name}}</h1>
-            <a id="editButton" class="btn btn-sm btn-outline-info ml-4 h-50 align-self-center"
-                href="{% url 'garden-update' garden.pk %}">Edit</a>
-        </div>
-        <div class="row">
-            <img id="gardenImage" src="{{garden.image.url}}" alt="">
-        </div>
-    </div>
-    <div class="col align-self-end">
-        <div class="row">
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Status</div>
-                    <div class="card-body">
-                        {% if garden.is_connected %}
-                        <p class="card-text text-center"><span id="connectionStatus"
-                                class="badge badge-pill badge-success">{{garden.status}}</span></p>
-                        {% else %}
-                        <p class="card-text text-center"><span id="connectionStatus"
-                                class="badge badge-pill badge-danger">{{garden.status}}</span></p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Last Connected From</div>
-                    <div class="card-body">
-                        <p id="lastConnectionFrom" class="card-text text-center">{{garden.last_connection_ip}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Last Connected At</div>
-                    <div class="card-body">
-                        <p id="lastConnectedAt" class="card-text text-center">
-                            {{garden.get_formatted_last_connection_time}}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% include 'components/model_display.html' with instance=garden component='components/garden_config.html' %}
 
-        <div class="row mt-4">
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Connection Strength</div>
-                    <div class="card-body">
-                        <p id="connectionStrength" class="card-text text-center">
-                            {{garden.get_connection_strength_display}}
-                        </p>
+<hr />
+
+<div class="row justify-content-center">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <div class="row d-flex justify-content-center justify-content-md-between">
+                    <div class="col-auto mb-2 mb-md-0 pr-0">
+                        <h3 class="mb-0">Watering Stations</h3>
+                    </div>
+                    <div class="col-auto align-self-center pl-0">
+                        <div class="btn-toolbar">
+                            <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input type="hidden" name="_method" value="patch" />
+                                <input
+                                    id="deactivateAllBtn"
+                                    type="submit"
+                                    class="btn btn-outline-danger"
+                                    value="Deactivate All"
+                                />
+                            </form>
+
+                            <form class="form mx-2" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input type="hidden" name="_method" value="patch" />
+                                <input type="hidden" name="status" value="true" />
+                                <input
+                                    id="activateAllBtn"
+                                    type="submit"
+                                    class="btn btn-outline-info"
+                                    value="Activate All"
+                                />
+                            </form>
+
+                            <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
+                                {% csrf_token %}
+                                <input
+                                    id="addWateringStationBtn"
+                                    type="submit"
+                                    class="btn btn-outline-success"
+                                    value="+ Add Watering Station"
+                                />
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Water Level</div>
-                    <div class="card-body">
-                        <p id="waterLevel" class="card-text text-center">{{garden.get_water_level_display}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header text-center h-50">Update Frequency</div>
-                    <div class="card-body">
-                        <p id="updateFrequency" class="card-text text-center">
-                            {{garden.update_frequency_display}}
-                        </p>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="table-responsive-lg">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Plant Type</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Moisture Threshold</th>
+                                        <th scope="col">Watering Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for watering_station in garden.get_watering_station_formatters %}
+                                    <tr>
+                                        <td scope="row text-capitalize">
+                                            <a
+                                                id="wateringStation{{ forloop.counter }}"
+                                                href="{{ watering_station.get_absolute_url }}"
+                                                >{{ forloop.counter }}</a
+                                            >
+                                        </td>
+                                        <td scope="row text-capitalize">{{ watering_station.plant_type }}</td>
+                                        <td scope="row text-capitalize">{{ watering_station.get_status_element|safe }}</td>
+                                        <td scope="row">{{ watering_station.moisture_threshold }}</td>
+                                        <td scope="row">{{ watering_station.watering_duration }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -85,74 +97,11 @@
     </div>
 </div>
 
-<hr>
+{% endblock %}
 
-<div class="row">
-    <div class="col">
-        <h3>Watering Stations</h3>
-    </div>
-    <div class="col">
-        <form class="form-inline float-right" method="post" action="{{garden.get_watering_stations_url}}">
-            {% csrf_token %}
-            <div class="control-group">
-                <div class="controls">
-                    <input type="hidden" name="_method" value="patch" />
-                    <input id="deactivateAllBtn" type="submit" class="btn btn-outline-danger" value="Deactivate All">
-                </div>
-            </div>
-        </form>
-        <form class="form-inline float-right mx-2" method="post" action="{{garden.get_watering_stations_url}}">
-            {% csrf_token %}
-            <div class="control-group">
-                <div class="controls">
-                    <input type="hidden" name="_method" value="patch" />
-                    <input type="hidden" name="status" value="true" />
-                    <input id="activateAllBtn" type="submit" class="btn btn-outline-primary" value="Activate All">
-                </div>
-            </div>
-        </form>
-        <form class="form-inline float-right" method="post" action="{{garden.get_watering_stations_url}}">
-            {% csrf_token %}
-            <div class="control-group">
-                <div class="controls">
-                    <input id="addWateringStationBtn" type="submit" class="btn btn-outline-success"
-                        value="Add Watering Station">
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col">
-        <div class="table-responsive-md">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col text-capitalize">Watering Station Number</th>
-                        <th scope="col">Status</th>
-                        <th scope="col text-capitalize">Plant Type</th>
-                        <th scope="col text-capitalize">Moisture Threshold</th>
-                        <th scope="col text-capitalize">Watering Duration</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for watering_station in garden.watering_stations.all %}
-                    <tr>
-                        <td scope="row">
-                            <a id="wateringStation{{ forloop.counter }}"
-                                href="{{ watering_station.get_absolute_url }}">{{ forloop.counter }}</a>
-                        </td>
-                        <td scope="row">{{ watering_station.status_string }}</td>
-                        <td scope="row">{{ watering_station.plant_type }}</td>
-                        <td scope="row">{{ watering_station.moisture_threshold }}</td>
-                        <td scope="row">{{ watering_station.get_formatted_duration }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
+{% block javascript %}
+<script src="/static/javascript/jquery.fittext.js"></script>
+<script>
+$('#name').fitText(0.8, {maxFontSize: 30})
+</script>
 {% endblock %}
