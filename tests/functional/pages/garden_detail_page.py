@@ -1,11 +1,12 @@
-from garden.formatters import GardenFormatter, WateringStationFormatter
 import re
 
+from garden.formatters import GardenFormatter, WateringStationFormatter
+from garden.forms import NewWateringStationForm
 from selenium.common.exceptions import NoSuchElementException
 from tests.functional.base import wait_for
 
 from .base_page import BasePage
-from .elements import Button, ButtonGroup, EditButton
+from .elements import Button, ButtonGroup, CropButton, EditButton, CancelButton, ImageInput, ResetButton, TextInput
 
 
 class WateringStationButtons(ButtonGroup):
@@ -24,8 +25,28 @@ class ActivateButton(Button):
     LOCATOR = 'activateAllBtn'
 
 
+class SubmitButton(Button):
+    LOCATOR = '//input[@type="submit" and @value="Create"]'
+    BY = 'find_element_by_xpath'
+
+
+class MoistureThresholdInput(TextInput):
+    LOCATOR = 'id_moisture_threshold'
+
+
+class WateringDurationInput(TextInput):
+    LOCATOR = 'id_watering_duration'
+
+
+class WateringStationImageInput(ImageInput):
+    INPUT_LOCATOR = 'id_image'
+
+
 class GardenDetailPage(BasePage):
     watering_station = WateringStationButtons()
+    moisture_threshold = MoistureThresholdInput()
+    watering_duration = WateringDurationInput()
+    image = WateringStationImageInput()
 
     FIELD_NOT_FOUND = -1
 
@@ -36,6 +57,19 @@ class GardenDetailPage(BasePage):
         self.deactivate_button = DeactivateButton(self)
         self.activate_button = ActivateButton(self)
         self.edit_button = EditButton(self)
+        self.submit_button = SubmitButton(self)
+        self.cancel_button = CancelButton(self)
+        self.crop_image_button = CropButton(self)
+        self.reset_image_button = ResetButton(self)
+        self.modal_id = NewWateringStationForm.MODAL_ID
+
+    def enter_form_fields(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def create_watering_station(self, **kwargs):
+        self.enter_form_fields(**kwargs)
+        self.submit_button.click()
 
     def has_correct_url(self):
         pattern = r'/gardens/[0-9]+/$'

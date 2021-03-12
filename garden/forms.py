@@ -180,7 +180,7 @@ class WateringStationForm(forms.ModelForm, CropperMixin):
             Field('image', id='id_image'),
             *self.cropper_fields,
             FormActions(
-                Button('delete', 'Delete', css_class='btn btn-danger mr-2',
+                Button('delete', 'Delete', css_class='btn-danger mr-2',
                        data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
                 Submit('submit', 'Update'),
                 css_class="form-row justify-content-end"
@@ -189,6 +189,24 @@ class WateringStationForm(forms.ModelForm, CropperMixin):
         self.fields['status'].label = 'Enable'
         self.fields['moisture_threshold'].label = 'Moisture Threshold'
         self.fields['watering_duration'].label = 'Watering Duration'
+
+
+class NewWateringStationForm(WateringStationForm):
+    FORM_ID = 'newWateringStationForm'
+    MODAL_ID = 'newWateringStationModal'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.form_id = self.FORM_ID
+        self.helper.layout[-1] = FormActions(
+            Button('cancel', 'Cancel', css_class='btn-primary mr-2',
+                   data_toggle='modal', data_target=f'#{self.MODAL_ID}'),
+            Submit('submit', 'Create', css_class='btn-success'),
+            css_class='form-row justify-content-end'
+        )
+
+    def save(self, garden):
+        return garden.watering_stations.create(**self.cleaned_data)
 
 
 class BulkUpdateWateringStationForm(WateringStationForm):

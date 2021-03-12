@@ -149,22 +149,19 @@ class TestGardenModification(Base):
         detail_ws_page.edit_button.click()
         assert update_ws_page.form_has_values_from_watering_station(watering_station)
 
-        # the user then goes back to the garden detail page and clicks on the add watering station button and sees
-        # that the page now displays and extra watering station in the table
+        # the user then goes back to the garden detail page
         update_ws_page.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(garden_page)
-        garden_page.add_watering_station_button.click()
-        assert garden_page.get_number_watering_stations() == self.num_watering_stations + 1
 
         # the user then clicks the deactivate all button and all watering stations in the table are deactivated
         garden_page.deactivate_button.click()
-        for i in range(1, self.num_watering_stations + 1):
+        for i in range(1, self.num_watering_stations):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert not self.ws_status_to_bool(status)
 
         # the user then clicks the activate all button and all watering statios in the table are activated
         garden_page.activate_button.click()
-        for i in range(1, self.num_watering_stations + 1):
+        for i in range(1, self.num_watering_stations):
             status = garden_page.get_watering_station_field_value(i, 'Status')
             assert self.ws_status_to_bool(status)
 
@@ -177,7 +174,7 @@ class TestGardenModification(Base):
 
         # They are then redirected back to the garden detail page, where they see 1 less watering station
         self.wait_for_page_to_be_loaded(garden_page)
-        assert garden_page.get_number_watering_stations() == self.num_watering_stations
+        assert garden_page.get_number_watering_stations() == self.num_watering_stations - 1
 
     def assert_watering_station_table_contains_correct_headers(self, garden_page):
         assert garden_page.get_number_watering_stations() == self.garden.watering_stations.count()

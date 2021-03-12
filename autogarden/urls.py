@@ -19,9 +19,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
-                          GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
+                          GardenAPIView, WateringStationCreateView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
-                          WateringStationAPIView, WateringStationRecordListView)
+                          WateringStationAPIView, WateringStationRecordListView, home)
 from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, SettingsView
 from django.contrib.auth import views as auth_views
 
@@ -29,6 +29,8 @@ API_PREFIX = 'api/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('', home, name='home'),
 
     path(API_PREFIX + 'gardens/<int:pk>/', GardenAPIView.as_view(), name='api-garden'),
     path(API_PREFIX + 'gardens/<int:pk>/watering-stations/',
@@ -58,6 +60,8 @@ urlpatterns = [
     path('gardens/<int:pk>/watering-stations/', WateringStationListView.as_view(), name='watering-station-list'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),
+    path('gardens/<int:pk>/watering-stations/create/',
+         WateringStationCreateView.as_view(), name='watering-station-create'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/update/',
          WateringStationUpdateView.as_view(), name='watering-station-update'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/delete/',

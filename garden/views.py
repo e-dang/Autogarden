@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
-                          DeleteWateringStationForm, GardenForm, NewGardenForm,
+                          DeleteWateringStationForm, GardenForm, NewGardenForm, NewWateringStationForm,
                           WateringStationForm)
 from garden.permissions import TokenPermission
 
@@ -25,6 +25,10 @@ from .models import Garden, WateringStation
 from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
+
+
+def home(request: http.HttpRequest) -> http.HttpResponse:
+    return redirect(reverse('garden-list'))
 
 
 class GardenAPIView(APIView):
@@ -167,6 +171,33 @@ class WateringStationListView(LoginRequiredMixin, View):
                 if form.is_valid():
                     form.save()
             return redirect('garden-detail', pk=pk)
+
+
+class WateringStationCreateView(LoginRequiredMixin, View):
+    def get(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            form = NewWateringStationForm()
+            form.helper.form_action = reverse('watering-station-create', kwargs={'pk': garden.pk})
+            form_html = render_crispy_form(form, context=csrf(request))
+            return JsonResponse({'html': form_html})
+
+    def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            form = NewWateringStationForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                form.save(garden)
+                return JsonResponse({'success': True, 'url': garden.get_absolute_url()})
+            form.helper.form_action = reverse('watering-station-create', kwargs={'pk': garden.pk})
+            form_html = render_crispy_form(form, context=csrf(request))
+            return JsonResponse({'success': False, 'html': form_html})
 
 
 class WateringStationDetailView(LoginRequiredMixin, View):
