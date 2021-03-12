@@ -1,12 +1,13 @@
 import re
-from tests.assertions.assertions import assert_image_files_equal
 
 import pytest
-
 from garden.forms import GardenForm
+from tests.assertions.assertions import assert_image_files_equal
 
 from .base_page import BasePage
-from .elements import Button, CancelButton, ConfirmDeleteButton, DeleteButton, SubmitButton, TextInput, ImageInput
+from .elements import (CancelButton, ConfirmDeleteButton, CropButton,
+                       DeleteButton, ImageInput, ResetButton, SubmitButton,
+                       TextInput)
 
 
 class GardenNameInput(TextInput):
@@ -20,14 +21,6 @@ class GardenImageInput(ImageInput):
 
 class UpdateFrequency(TextInput):
     LOCATOR = 'id_update_frequency'
-
-
-class CropButton(Button):
-    LOCATOR = GardenForm.CROP_BTN_ID
-
-
-class ResetButton(Button):
-    LOCATOR = GardenForm.RESET_BTN_ID
 
 
 class GardenUpdatePage(BasePage):

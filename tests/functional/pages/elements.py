@@ -1,6 +1,6 @@
-from tests.conftest import TEST_IMAGE_DIR
-
+from garden.forms import GardenForm
 from selenium.webdriver import ActionChains
+from tests.conftest import TEST_IMAGE_DIR
 
 from ..base import wait_for
 
@@ -96,3 +96,11 @@ class ConfirmDeleteButton(Button):
 class EditButton(Button):
     LOCATOR = 'Edit'
     BY = 'find_element_by_link_text'
+
+
+class CropButton(Button):
+    LOCATOR = GardenForm.CROP_BTN_ID
+
+
+class ResetButton(Button):
+    LOCATOR = GardenForm.RESET_BTN_ID
