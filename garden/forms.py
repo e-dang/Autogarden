@@ -1,13 +1,13 @@
 import datetime
 
-from crispy_forms.bootstrap import FormActions
+from crispy_forms.bootstrap import FieldWithButtons, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (Column, HTML, Button, Field, Layout, Row,
                                  Submit)
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Garden, WateringStation, _default_update_frequency
+from .models import Garden, Token, WateringStation, _default_update_frequency
 from .utils import (derive_duration_string,
                     set_num_watering_stations)
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -79,6 +79,24 @@ class CropperMixin(forms.Form):
             ),
             HTML('<hr>')
         ]
+
+
+class TokenForm(forms.ModelForm):
+    FORM_ID = 'tokenForm'
+
+    class Meta:
+        model = Token
+        fields = ['uuid']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = self.FORM_ID
+        self.helper.layout = Layout(
+            FieldWithButtons('uuid', Submit('reset', 'Reset')),
+        )
+        self.fields['uuid'].label = 'API Key'
+        self.fields['uuid'].disabled = True
 
 
 class GardenForm(forms.ModelForm, CropperMixin):
