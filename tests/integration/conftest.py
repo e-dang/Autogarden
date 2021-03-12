@@ -50,5 +50,9 @@ def true_auth_user(true_auth_client_user):
     yield true_auth_client_user[1]
 
 
-register(factories.GardenFactory, 'auth_user_garden', owner=LazyFixture('auth_user'))
+@pytest.fixture
+def auth_user_garden(auth_user, garden_factory):
+    yield garden_factory(owner=auth_user)
+
+
 register(factories.WateringStationFactory, 'auth_user_ws', garden=LazyFixture('auth_user_garden'))

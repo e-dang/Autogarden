@@ -17,11 +17,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from garden.forms import (BulkUpdateWateringStationForm, DeleteGardenForm,
-                          DeleteWateringStationForm, GardenForm, NewGardenForm, NewWateringStationForm,
+                          DeleteWateringStationForm, GardenForm, NewGardenForm, NewWateringStationForm, TokenForm,
                           WateringStationForm)
 from garden.permissions import TokenPermission
 
-from .models import Garden, WateringStation
+from .models import Garden, Token, WateringStation
 from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
@@ -105,8 +105,10 @@ class GardenUpdateView(LoginRequiredMixin, View):
         except Garden.DoesNotExist:
             raise Http404()
         else:
-            form = GardenForm(instance=garden)
-            return render(request, 'garden_update.html', context={'form': form})
+            garden_form = GardenForm(instance=garden)
+            token_form = TokenForm(instance=garden.token)
+            token_form.helper.form_action = reverse('token-reset', kwargs={'pk': garden.pk})
+            return render(request, 'garden_update.html', context={'token_form': token_form, 'garden_form': garden_form})
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         try:
@@ -120,6 +122,18 @@ class GardenUpdateView(LoginRequiredMixin, View):
                 return JsonResponse({'success': True, 'url': garden.get_update_url()})
             form_html = render_crispy_form(form, context=csrf(request))
             return JsonResponse({'success': False, 'html': form_html})
+
+
+class TokenUpdateView(LoginRequiredMixin, View):
+    def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
+        try:
+            garden = request.user.gardens.get(pk=pk)
+        except Garden.DoesNotExist:
+            raise Http404()
+        else:
+            garden.token.delete()
+            Token.objects.create(garden=garden)
+            return JsonResponse({'success': True, 'html': str(garden.token.uuid)})
 
 
 class GardenDeleteView(LoginRequiredMixin, View):

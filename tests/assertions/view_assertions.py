@@ -35,3 +35,7 @@ def assert_data_present_in_json_response_html(response: http.HttpResponse, value
 def assert_render_context_called_with(mock_render: Mock, kwarg: Dict) -> None:
     for key, item in kwarg.items():
         assert mock_render.call_args.kwargs['context'][key] == item
+
+
+def assert_404_rendered(response: http.HttpResponse) -> None:
+    assert_template_is_rendered(response, '404.html', expected_status=status.HTTP_404_NOT_FOUND)

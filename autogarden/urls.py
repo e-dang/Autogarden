@@ -21,7 +21,7 @@ from django.urls import path
 from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
                           GardenAPIView, WateringStationCreateView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
-                          WateringStationAPIView, WateringStationRecordListView, home)
+                          WateringStationAPIView, WateringStationRecordListView, home, TokenUpdateView)
 from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, SettingsView
 from django.contrib.auth import views as auth_views
 
@@ -67,7 +67,9 @@ urlpatterns = [
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/delete/',
          WateringStationDeleteView.as_view(), name='watering-station-delete'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/records/',
-         WateringStationRecordListView.as_view(), name='watering-station-record-list')
+         WateringStationRecordListView.as_view(), name='watering-station-record-list'),
+
+    path('gardens/<int:pk>/token-reset/', TokenUpdateView.as_view(), name='token-reset'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
