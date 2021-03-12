@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
-                          GardenAPIView, WateringStationDeleteView, WateringStationDetailView,
+                          GardenAPIView, WateringStationCreateView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
                           WateringStationAPIView, WateringStationRecordListView)
 from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, SettingsView
@@ -58,6 +58,8 @@ urlpatterns = [
     path('gardens/<int:pk>/watering-stations/', WateringStationListView.as_view(), name='watering-station-list'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/',
          WateringStationDetailView.as_view(), name='watering-station-detail'),
+    path('gardens/<int:pk>/watering-stations/create/',
+         WateringStationCreateView.as_view(), name='watering-station-create'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/update/',
          WateringStationUpdateView.as_view(), name='watering-station-update'),
     path('gardens/<int:garden_pk>/watering-stations/<int:ws_pk>/delete/',

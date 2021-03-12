@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from tests import assertions
 
-from garden.forms import MIN_VALUE_ERR_MSG
+from garden.forms import MIN_VALUE_ERR_MSG, REQUIRED_FIELD_ERR_MSG
 from garden.models import Garden, WateringStation
 from garden.serializers import GardenGetSerializer, WateringStationSerializer
 from garden.utils import derive_duration_string
@@ -689,5 +689,86 @@ class TestWateringStationRecordListView:
         url = self.create_url(self.garden.pk, num_watering_stations + 1)
 
         resp = auth_client.get(url)
+
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+
+@pytest.mark.integration
+class TestWateringStationCreateView:
+    def create_url(self, pk):
+        return reverse('watering-station-create', kwargs={'pk': pk})
+
+    @pytest.fixture(autouse=True)
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
+        self.url = self.create_url(self.garden.pk)
+
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/watering-stations/create/'
+
+    @pytest.mark.django_db
+    def test_GET_returns_json_response_with_NewWateringStation_form_html(self, auth_client, watering_station_form_fields):
+        expected = watering_station_form_fields.keys()
+
+        resp = auth_client.get(self.url)
+
+        assertions.assert_data_present_in_json_response_html(resp, expected)
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_creates_a_new_watering_station_instance_on_garden(self, auth_client, watering_station_form_fields):
+        prev_num_watering_stations = self.garden.watering_stations.count()
+
+        auth_client.post(self.url, data=watering_station_form_fields)
+
+        self.garden.refresh_from_db()
+        assert self.garden.watering_stations.count() == prev_num_watering_stations + 1
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_creates_new_watering_station_with_supplied_data(self, auth_client, watering_station_form_fields):
+        auth_client.post(self.url, data=watering_station_form_fields)
+
+        self.garden.refresh_from_db()
+        watering_station = self.garden.watering_stations.last()
+        assert watering_station_form_fields.pop(
+            'watering_duration') == derive_duration_string(watering_station.watering_duration)
+        assertions.assert_model_fields_have_values(watering_station_form_fields, watering_station)
+
+    @pytest.mark.django_db
+    def test_POST_with_valid_data_returns_json_response_with_a_redirect_url_and_success_true_field(self, auth_client, watering_station_form_fields):
+        resp = auth_client.post(self.url, data=watering_station_form_fields)
+
+        assertions.assert_successful_json_response(resp, reverse('garden-detail', kwargs={'pk': self.garden.pk}))
+
+    @pytest.mark.django_db
+    def test_POST_with_invalid_data_returns_json_response_with_form_errors_and_success_false_field(self, auth_client, watering_station_form_fields):
+        watering_station_form_fields.pop('watering_duration')  # invalidate data
+        expected = [
+            REQUIRED_FIELD_ERR_MSG
+        ]
+
+        resp = auth_client.post(self.url, data=watering_station_form_fields)
+
+        assertions.assert_data_present_in_json_response_html(resp, expected)
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['get', 'post'], ids=['get', 'post'])
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client, method):
+        resp = getattr(client, method)(self.url)
+
+        assertions.assert_redirect(resp, reverse('login'), self.url)
+
+    @pytest.mark.django_db
+    def test_GET_returns_404_page_when_accessed_by_user_who_doesnt_own_the_garden(self, auth_client, garden):
+        url = self.create_url(garden.pk)
+
+        resp = auth_client.get(url)
+
+        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+
+    @pytest.mark.django_db
+    def test_POST_returns_404_page_when_accessed_by_user_who_doesnt_own_the_garden(self, auth_client, garden, watering_station_form_fields):
+        url = self.create_url(garden.pk)
+
+        resp = auth_client.post(url, data=watering_station_form_fields)
 
         assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)

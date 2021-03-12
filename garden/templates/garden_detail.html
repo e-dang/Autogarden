@@ -43,15 +43,7 @@
                                 />
                             </form>
 
-                            <form class="form" method="post" action="{{garden.get_watering_stations_url}}">
-                                {% csrf_token %}
-                                <input
-                                    id="addWateringStationBtn"
-                                    type="submit"
-                                    class="btn btn-outline-success"
-                                    value="+ Add Watering Station"
-                                />
-                            </form>
+                            <button id="addWateringStationBtn" class="btn btn-outline-success" data-toggle="modal" data-target="#newWateringStationModal">+ Add Watering Station</button>
                         </div>
                     </div>
                 </div>
@@ -97,11 +89,52 @@
     </div>
 </div>
 
+<div id="newWateringStationModal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="newWateringStationModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Watering Station</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block javascript %}
-<script src="/static/javascript/jquery.fittext.js"></script>
-<script>
-$('#name').fitText(0.8, {maxFontSize: 30})
-</script>
+    <script src="/static/javascript/jquery.fittext.js"></script>
+    <script src="/static/javascript/utils.js"></script>
+    <script>
+    $('#name').fitText(0.8, {maxFontSize: 30})
+
+    const configs = {
+        imgInputSelector: '#id_image',
+        cropBtnSelector: '#cropBtn',
+        resetBtnSelector: '#resetBtn',
+        imgContainerSelector: '#imageContainer',
+        formSelector: '#newWateringStationForm',
+        url: "{% url 'watering-station-create' pk=garden.pk %}",
+        formContainerSelector: '.modal-body'
+
+    }
+
+    function successCb(data) {
+        window.location = data.url;
+    }
+
+    function failCb(data) {
+        $(configs.formContainerSelector).html(data.html);
+        addAjaxFormHandler(configs.formSelector, successCb, failCb);
+        addCropImageHandler(configs);
+    }
+
+    getModalDataAjax(configs.url, () => {
+        addAjaxFormHandler(configs.formSelector, successCb, failCb);
+        addCropImageHandler(configs);
+    });
+    </script>
 {% endblock %}

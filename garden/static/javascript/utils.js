@@ -1,10 +1,11 @@
-function getModalDataAjax(url) {
+function getModalDataAjax(url, successCb = (data) => null) {
     $(document).ready(() => {
         $.ajax({
             type: 'get',
             url: url,
             success: (data) => {
                 $('.modal-body').html(data.html);
+                successCb(data);
             },
         });
     });
