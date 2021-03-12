@@ -8,6 +8,11 @@ function failCb(data) {
     addCropImageHandler(configs);
 }
 
+function tokenSuccessCb(data) {
+    $('#id_uuid').val(data.html);
+}
+
 getModalDataAjax(configs.deleteUrl);
 addAjaxFormHandler(configs.formSelector, successCb, failCb);
+addAjaxFormHandler('#tokenForm', tokenSuccessCb, () => null);
 addCropImageHandler(configs);
