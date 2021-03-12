@@ -27,6 +27,10 @@ from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
 
 
+def home(request: http.HttpRequest) -> http.HttpResponse:
+    return redirect(reverse('garden-list'))
+
+
 class GardenAPIView(APIView):
     permission_classes = [TokenPermission]
 

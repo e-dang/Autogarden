@@ -17,6 +17,15 @@ from garden.utils import derive_duration_string
 
 
 @pytest.mark.integration
+def test_home_redirects_to_garden_list_view(auth_client):
+    url = reverse('home')
+
+    resp = auth_client.get(url)
+
+    assertions.assert_redirect(resp, reverse('garden-list'))
+
+
+@pytest.mark.integration
 class TestGardenAPIView:
     @pytest.fixture(autouse=True)
     def setup(self, auth_api_garden):

@@ -21,7 +21,7 @@ from django.urls import path
 from garden.views import (GardenDeleteView, GardenDetailView, GardenListView, GardenUpdateView,
                           GardenAPIView, WateringStationCreateView, WateringStationDeleteView, WateringStationDetailView,
                           WateringStationUpdateView, WateringStationListView,
-                          WateringStationAPIView, WateringStationRecordListView)
+                          WateringStationAPIView, WateringStationRecordListView, home)
 from users.views import CreateUserView, LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, SettingsView
 from django.contrib.auth import views as auth_views
 
@@ -29,6 +29,8 @@ API_PREFIX = 'api/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('', home, name='home'),
 
     path(API_PREFIX + 'gardens/<int:pk>/', GardenAPIView.as_view(), name='api-garden'),
     path(API_PREFIX + 'gardens/<int:pk>/watering-stations/',
