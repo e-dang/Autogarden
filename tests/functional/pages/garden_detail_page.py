@@ -136,7 +136,7 @@ class GardenDetailPage(BasePage):
             self.get_update_frequency() == formatter.get_update_frequency_display(),
             self.get_connection_strength() == formatter.get_connection_strength_display(),
             self.get_water_level() == formatter.get_water_level_display(),
-            self.get_api_key() == str(formatter.token.uuid)
+            self.get_api_key() == str(formatter.token)
         ])
 
     def _get_field_index(self, field_name):

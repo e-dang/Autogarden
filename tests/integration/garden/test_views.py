@@ -1,3 +1,4 @@
+from garden.formatters import TokenFormatter
 import os
 import random
 from datetime import datetime, timedelta
@@ -819,7 +820,7 @@ class TestTokenUpdateView:
         resp = auth_client.post(self.url)
 
         self.garden.refresh_from_db()
-        uuid = str(self.garden.token.uuid)
+        uuid = TokenFormatter(self.garden.token).uuid
         assertions.assert_data_present_in_json_response_html(resp, [uuid])
         assert resp.json()['success'] == True
 

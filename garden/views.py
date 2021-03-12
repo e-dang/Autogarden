@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from garden.formatters import GardenFormatter, WateringStationFormatter
+from garden.formatters import GardenFormatter, TokenFormatter, WateringStationFormatter
 from typing import Any
 
 import pytz
@@ -106,7 +106,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden_form = GardenForm(instance=garden)
-            token_form = TokenForm(instance=garden.token)
+            token_form = TokenForm(initial={'uuid': TokenFormatter(garden.token).uuid})
             token_form.helper.form_action = reverse('token-reset', kwargs={'pk': garden.pk})
             return render(request, 'garden_update.html', context={'token_form': token_form, 'garden_form': garden_form})
 
@@ -132,8 +132,8 @@ class TokenUpdateView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden.token.delete()
-            Token.objects.create(garden=garden)
-            return JsonResponse({'success': True, 'html': str(garden.token.uuid)})
+            token = Token.objects.create(garden=garden)
+            return JsonResponse({'success': True, 'html': TokenFormatter(token).uuid})
 
 
 class GardenDeleteView(LoginRequiredMixin, View):
