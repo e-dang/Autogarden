@@ -5,6 +5,13 @@ from pytest_factoryboy.fixture import LazyFixture
 from tests import factories
 
 
+@pytest.fixture(autouse=True)
+def fast_hasher(settings):
+    settings.PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+
+
 @pytest.fixture
 def auth_client_user(db, user1):
     """Cheap authenticated client and user tuple"""

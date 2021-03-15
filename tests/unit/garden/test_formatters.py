@@ -244,14 +244,6 @@ class TestGardenFormatter:
 
         assert ret_val == ''
 
-    @patch('garden.formatters.TokenFormatter')
-    def test_get_token_display_returns_the_return_value_of_token_formatter(self, mock_token_formatter, garden_factory):
-        formatter = GardenFormatter(garden_factory.build())
-
-        ret_val = formatter.get_token_display()
-
-        assert ret_val == mock_token_formatter.return_value.uuid
-
 
 @pytest.mark.unit
 class TestWateringStationFormatter:
@@ -316,10 +308,9 @@ class TestWateringStationFormatter:
 
 @pytest.mark.unit
 class TestTokenFormmatter:
-    def test_get_uuid_display_blocks_out_all_but_first_five_chars(self, token_factory):
+    def test_get_uuid_display_only_returns_asterisks(self, token_factory):
         token = TokenFormatter(token_factory.build())
-        length = len(str(token.uuid))
 
         ret_val = token.get_uuid_display()
 
-        assert ret_val[5:] == '*' * (length - 5) and ret_val[:5] == str(token.uuid)[:5]
+        assert set(ret_val) == {'*'}

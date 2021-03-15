@@ -50,10 +50,10 @@ def garden_missing_patch_serializer_data(request, garden_patch_serializer_data):
 
 
 @pytest.fixture
-def auth_api_client_garden(db, garden_factory):
+def auth_api_client_garden(db, garden_factory, token_uuid):
     api_client = APIClient()
-    garden = garden_factory(watering_stations=3)
-    api_client.credentials(HTTP_AUTHORIZATION='Token ' + garden.token.uuid)
+    garden = garden_factory(watering_stations=3, token__uuid=token_uuid)
+    api_client.credentials(HTTP_AUTHORIZATION='Token ' + token_uuid)
     yield api_client, garden
 
 

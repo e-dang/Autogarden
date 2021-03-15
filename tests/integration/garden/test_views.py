@@ -1,9 +1,8 @@
-from garden.views import TokenUpdateView
-from garden.formatters import TokenFormatter
 import os
 import random
 from datetime import datetime, timedelta
 from random import randint
+from unittest.mock import patch
 
 import pytest
 import pytz
@@ -817,24 +816,15 @@ class TestTokenUpdateView:
         assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
-    def test_POST_returns_json_response_with_success_true_and_new_api_token(self, auth_client):
+    @patch('garden.views.secrets')
+    def test_POST_returns_json_response_with_success_true_and_new_api_token(self, mock_secrets, auth_client):
+        uuid = mock_secrets.token_hex.return_value = 'random hex'
+
         resp = auth_client.post(self.url)
 
         self.garden.refresh_from_db()
-        uuid = TokenFormatter(self.garden.token).uuid
         assertions.assert_data_present_in_json_response_html(resp, [uuid])
         assert resp.json()['success'] == True
-
-    @pytest.mark.django_db
-    def test_POST_sends_email_to_user_containing_the_full_api_key(self, auth_client, auth_user, mailoutbox, settings):
-        auth_client.post(self.url)
-
-        self.garden.refresh_from_db()
-        mail = mailoutbox[0]
-        assert mail.subject == TokenUpdateView.API_TOKEN_SUBJECT
-        assert mail.body == TokenUpdateView.API_TOKEN_MESSAGE.format(self.garden.token.uuid)
-        assert mail.from_email == settings.EMAIL_HOST_USER
-        assert list(mail.to) == [auth_user.email]
 
     @pytest.mark.django_db
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):

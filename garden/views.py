@@ -1,10 +1,10 @@
+import secrets
 from datetime import datetime, timedelta
 from typing import Any
 
 import pytz
 from crispy_forms.utils import render_crispy_form
 from django import http
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, render
@@ -28,7 +28,6 @@ from .models import Garden, Token, WateringStation
 from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
-from django.core.mail import send_mail
 
 
 def home(request: http.HttpRequest) -> http.HttpResponse:
@@ -129,12 +128,6 @@ class GardenUpdateView(LoginRequiredMixin, View):
 
 
 class TokenUpdateView(LoginRequiredMixin, View):
-    API_TOKEN_SUBJECT = 'New API Key'
-    API_TOKEN_MESSAGE = '''Your new API Key is {}
-
-Place this key on your microcontroller so that it may access the API.
-    '''
-
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         try:
             garden = request.user.gardens.get(pk=pk)
@@ -142,14 +135,9 @@ Place this key on your microcontroller so that it may access the API.
             raise Http404()
         else:
             garden.token.delete()
-            token = Token.objects.create(garden=garden)
-            send_mail(
-                self.API_TOKEN_SUBJECT,
-                self.API_TOKEN_MESSAGE.format(token.uuid),
-                settings.EMAIL_HOST_USER,
-                [request.user.email]
-            )
-            return JsonResponse({'success': True, 'html': TokenFormatter(token).uuid})
+            uuid = secrets.token_hex()
+            Token.objects.create(garden=garden, uuid=uuid)
+            return JsonResponse({'success': True, 'html': uuid})
 
 
 class GardenDeleteView(LoginRequiredMixin, View):
