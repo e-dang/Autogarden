@@ -267,3 +267,13 @@ class TestWateringStationModel:
 
         for i, station in enumerate(watering_stations):
             assert station.idx == i
+
+    @pytest.mark.django_db
+    def test_watering_stations_are_kept_in_the_order_they_are_created(self, watering_station_factory, garden):
+        watering_stations = []
+        for _ in range(5):
+            watering_stations.append(watering_station_factory(garden=garden))
+
+        ret_val = list(garden.watering_stations.all())
+
+        assert watering_stations == ret_val
