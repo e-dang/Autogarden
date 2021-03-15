@@ -154,9 +154,10 @@ class WateringStation(models.Model):
     watering_duration = models.DurationField(default=_default_watering_duration)
     plant_type = models.CharField(max_length=255, blank=True)
     status = models.BooleanField(default=_default_status)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['created']
 
     def __str__(self):
         return f'{str(self.garden)} - {self.idx}'
