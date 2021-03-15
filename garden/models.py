@@ -1,13 +1,15 @@
-import uuid
 from datetime import datetime, timedelta
 
 import pytz
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
 from django.db import models
 from django.urls import reverse
 from rest_framework.request import Request
 
 from garden.formatters import WateringStationFormatter
+
+from .managers import TokenManager
 
 
 def _default_moisture_threshold():
@@ -130,11 +132,19 @@ class Garden(models.Model):
 
 
 class Token(models.Model):
+    MAX_HASH_LENGTH = 128
+
     garden = models.OneToOneField(Garden, on_delete=models.CASCADE)
-    uuid = models.UUIDField(default=uuid.uuid4)
+    uuid = models.CharField(max_length=MAX_HASH_LENGTH)
+    created = models.DateTimeField(auto_now_add=True)
+
+    objects = TokenManager()
 
     def __str__(self):
-        return str(self.uuid)
+        return self.created.strftime('%B %-d, %Y %-I:%M %p')
+
+    def verify(self, uuid):
+        return check_password(uuid, self.uuid)
 
 
 class WateringStation(models.Model):
@@ -144,9 +154,10 @@ class WateringStation(models.Model):
     watering_duration = models.DurationField(default=_default_watering_duration)
     plant_type = models.CharField(max_length=255, blank=True)
     status = models.BooleanField(default=_default_status)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['created']
 
     def __str__(self):
         return f'{str(self.garden)} - {self.idx}'

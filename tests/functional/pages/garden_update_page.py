@@ -6,8 +6,13 @@ from tests.assertions.assertions import assert_image_files_equal
 
 from .base_page import BasePage
 from .elements import (CancelButton, ConfirmDeleteButton, CropButton,
-                       DeleteButton, ImageInput, ResetButton, SubmitButton,
-                       TextInput)
+                       DeleteButton, ImageInput, ResetButton,
+                       TextInput, Button)
+
+
+class SubmitButton(Button):
+    LOCATOR = '//input[@type="submit" and @value="Update"]'
+    BY = 'find_element_by_xpath'
 
 
 class GardenNameInput(TextInput):
@@ -23,10 +28,19 @@ class UpdateFrequency(TextInput):
     LOCATOR = 'id_update_frequency'
 
 
+class APIKeyInput(TextInput):
+    LOCATOR = 'id_uuid'
+
+
+class ResetAPIKeyButton(Button):
+    LOCATOR = 'submit-id-reset'
+
+
 class GardenUpdatePage(BasePage):
     name = GardenNameInput()
     image = GardenImageInput()
     update_frequency = UpdateFrequency()
+    api_key = APIKeyInput()
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -36,6 +50,7 @@ class GardenUpdatePage(BasePage):
         self.cancel_button = CancelButton(self)
         self.crop_image_button = CropButton(self)
         self.reset_image_button = ResetButton(self)
+        self.reset_api_key_button = ResetAPIKeyButton(self)
         self.modal_id = GardenForm.MODAL_ID
 
     def has_correct_url(self):

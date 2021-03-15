@@ -22,7 +22,7 @@ from tests.assertions import assert_garden_connection_fields_are_updated, assert
 @pytest.mark.functional
 class TestAPICommunication(Base):
     @pytest.fixture(autouse=True)
-    def setup(self, user_factory, garden_factory, live_server, test_password, api_client, use_tmp_static_dir):
+    def setup(self, user_factory, garden_factory, live_server, test_password, api_client, token_uuid, use_tmp_static_dir):
         self.email = 'email@demo.com'
         self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 16
@@ -34,9 +34,10 @@ class TestAPICommunication(Base):
                                      last_connection_ip=None,
                                      last_connection_time=None,
                                      update_frequency=timedelta(seconds=self.update_frequency),
+                                     token__uuid=token_uuid
                                      )
         self.api_client = api_client
-        self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + self.garden.token.uuid)
+        self.api_client.credentials(HTTP_AUTHORIZATION='Token ' + token_uuid)
         self.url = live_server.url + reverse('garden-detail', kwargs={'pk': self.garden.pk})
         self.create_authenticated_session(self.user, live_server)
 

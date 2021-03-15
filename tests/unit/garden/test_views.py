@@ -48,16 +48,29 @@ class TestGardenDetailView:
 
 @pytest.mark.unit
 class TestGardenUpdateView:
+    @patch('garden.views.reverse')
     @patch('garden.views.render')
     @patch('garden.views.GardenForm')
-    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_auth_user):
+    def test_GET_passes_update_garden_formto_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user):
         pk = 1
         request = HttpRequest()
         request.user = mock_auth_user
 
         GardenUpdateView().get(request, pk)
 
-        assert_render_context_called_with(mock_render, {'form': mock_form.return_value})
+        assert_render_context_called_with(mock_render, {'garden_form': mock_form.return_value})
+
+    @patch('garden.views.reverse')
+    @patch('garden.views.render')
+    @patch('garden.views.TokenForm')
+    def test_GET_passes_token_form_to_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user):
+        pk = 1
+        request = HttpRequest()
+        request.user = mock_auth_user
+
+        GardenUpdateView().get(request, pk)
+
+        assert_render_context_called_with(mock_render, {'token_form': mock_form.return_value})
 
 
 @pytest.mark.unit

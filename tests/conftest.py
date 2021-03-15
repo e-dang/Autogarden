@@ -1,3 +1,4 @@
+import secrets
 import shutil
 
 import pytest
@@ -51,6 +52,11 @@ def driver_init(request):
 @pytest.fixture
 def test_password():
     return factories.TEST_PASSWORD
+
+
+@pytest.fixture
+def token_uuid():
+    return secrets.token_hex()
 
 
 @pytest.fixture

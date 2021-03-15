@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block navbar %}
-    {% include 'garden_detail_nav.html' with garden=form.instance state='active' %}
+    {% include 'garden_detail_nav.html' with garden=garden_form.instance state='active' %}
 {% endblock %}
 
 {% block main_content %}
@@ -9,7 +9,7 @@
 <div class="row mt-4 justify-content-center">
     <div class="col-sm-auto col-lg-4">
         <div class="card">
-            {% include 'components/image_box.html' with instance=form.instance button='back' %}
+            {% include 'components/image_box.html' with instance=garden_form.instance button='back' %}
         </div>
     </div>
     <div class="col-sm-10 col-lg-8 mt-4 mt-lg-0">
@@ -17,15 +17,18 @@
             <div class="card-header text-center">
                 <h2>Update Garden</h2>
             </div>
-            <div id={{form.FORM_CONTAINER_ID}} class="card-body">
+            <div class="card-body">
                 {% load crispy_forms_tags %}
-                {% crispy form %}
+                {% crispy token_form %}
+                <div id="{{garden_form.FORM_CONTAINER_ID}}">
+                    {% crispy garden_form %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="{{form.MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="{{form.MODAL_ID}}"
+<div id="{{garden_form.MODAL_ID}}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="{{garden_form.MODAL_ID}}"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -40,13 +43,13 @@
 {% block javascript %}
 <script>
     var configs = {
-        imgInputSelector: '#{{form.image.auto_id}}',
-        cropBtnSelector: '#{{form.CROP_BTN_ID}}',
-        resetBtnSelector: '#{{form.RESET_BTN_ID}}',
-        imgContainerSelector: '#{{form.IMAGE_CONTAINER_ID}}',
-        formSelector: '#{{form.FORM_ID}}',
-        deleteUrl: '{{ form.instance.get_delete_url }}',
-        formContainerSelector: '#{{form.FORM_CONTAINER_ID}}'
+        imgInputSelector: '#{{garden_form.image.auto_id}}',
+        cropBtnSelector: '#{{garden_form.CROP_BTN_ID}}',
+        resetBtnSelector: '#{{garden_form.RESET_BTN_ID}}',
+        imgContainerSelector: '#{{garden_form.IMAGE_CONTAINER_ID}}',
+        formSelector: '#{{garden_form.FORM_ID}}',
+        deleteUrl: '{{ garden_form.instance.get_delete_url }}',
+        formContainerSelector: '#{{garden_form.FORM_CONTAINER_ID}}'
     };
 </script>
 <script src="/static/javascript/utils.js"></script>

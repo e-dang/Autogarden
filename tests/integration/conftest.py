@@ -5,6 +5,13 @@ from pytest_factoryboy.fixture import LazyFixture
 from tests import factories
 
 
+@pytest.fixture(autouse=True)
+def fast_hasher(settings):
+    settings.PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+
+
 @pytest.fixture
 def auth_client_user(db, user1):
     """Cheap authenticated client and user tuple"""
@@ -50,5 +57,9 @@ def true_auth_user(true_auth_client_user):
     yield true_auth_client_user[1]
 
 
-register(factories.GardenFactory, 'auth_user_garden', owner=LazyFixture('auth_user'))
+@pytest.fixture
+def auth_user_garden(auth_user, garden_factory):
+    yield garden_factory(owner=auth_user)
+
+
 register(factories.WateringStationFactory, 'auth_user_ws', garden=LazyFixture('auth_user_garden'))

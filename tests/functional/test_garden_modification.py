@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse
 from garden.formatters import WateringStationFormatter
 from garden.utils import build_duration_string
+from selenium.common.exceptions import InvalidElementStateException
 from tests.assertions import assert_image_files_equal
 
 from .base import Base
@@ -52,6 +53,19 @@ class TestGardenModification(Base):
         )
         self.perform_image_crop(update_gpage, new_garden_image)
         update_gpage.submit_button.click()
+
+        # the user then tries to edit the api key field but fails. Instead they click the Reset button near it
+        # and it changes
+        orig_key = update_gpage
+        try:
+            update_gpage.api_key = 'aioufhaiulfhaofjsoieg'
+        except InvalidElementStateException:
+            pass
+        else:
+            pytest.fail('User should not be able to manually update API Key')
+
+        update_gpage.reset_api_key_button.click()
+        assert update_gpage.api_key != orig_key
 
         # goes back to the garden detail page where they see the new name and image
         update_gpage.garden_detail_nav_button.click()

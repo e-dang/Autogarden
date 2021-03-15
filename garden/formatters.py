@@ -147,6 +147,9 @@ class GardenFormatter(ModelFormatter):
             return ''
         return f'updated {self.instance.time_since_last_connection.days} days ago'
 
+    def get_token_display(self) -> str:
+        return ' '.join(['Created', str(self.instance.token), '-', TokenFormatter(self.instance.token).uuid])
+
 
 class WateringStationFormatter(ModelFormatter):
     ACTIVE_STATUS_STR = 'Active'
@@ -179,3 +182,8 @@ class WateringStationFormatter(ModelFormatter):
 
     def get_plant_type_display(self) -> str:
         return self.instance.plant_type or NOT_AVAILABLE_MSG
+
+
+class TokenFormatter(ModelFormatter):
+    def get_uuid_display(self) -> str:
+        return '*' * 64

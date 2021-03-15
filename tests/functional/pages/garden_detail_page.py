@@ -129,6 +129,16 @@ class GardenDetailPage(BasePage):
 
     def is_displaying_info_for_garden(self, garden):
         formatter = GardenFormatter(garden)
+        print([
+            self.get_garden_status() == formatter.get_is_connected_display(),
+            self.get_last_connected_from() == str(formatter.last_connection_ip),
+            self.get_last_connected_at() == formatter.get_last_connection_time_display(),
+            self.get_update_frequency() == formatter.get_update_frequency_display(),
+            self.get_connection_strength() == formatter.get_connection_strength_display(),
+            self.get_water_level() == formatter.get_water_level_display(),
+            self.get_api_key() == str(formatter.token)
+        ])
+        print(self.get_api_key(), str(formatter.token))
         return all([
             self.get_garden_status() == formatter.get_is_connected_display(),
             self.get_last_connected_from() == str(formatter.last_connection_ip),
@@ -136,7 +146,7 @@ class GardenDetailPage(BasePage):
             self.get_update_frequency() == formatter.get_update_frequency_display(),
             self.get_connection_strength() == formatter.get_connection_strength_display(),
             self.get_water_level() == formatter.get_water_level_display(),
-            self.get_api_key() == str(formatter.token.uuid)
+            self.get_api_key() == str(formatter.token)
         ])
 
     def _get_field_index(self, field_name):

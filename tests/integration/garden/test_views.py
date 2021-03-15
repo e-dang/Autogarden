@@ -2,6 +2,7 @@ import os
 import random
 from datetime import datetime, timedelta
 from random import randint
+from unittest.mock import patch
 
 import pytest
 import pytz
@@ -250,7 +251,7 @@ class TestGardenDetailView:
 
         resp = auth_client.get(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
@@ -301,7 +302,7 @@ class TestGardenUpdateView:
 
         resp = getattr(auth_client, method)(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_doesnt_update_garden_when_accessed_by_user_who_doesnt_own_it(self, auth_client, garden1, update_garden_form_fields):
@@ -377,7 +378,7 @@ class TestGardenDeleteView:
 
         resp = getattr(auth_client, method)(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_does_not_delete_the_garden_when_access_by_user_who_doesnt_own_garden(self, auth_client, garden):
@@ -423,7 +424,7 @@ class TestWateringStationDetailView:
 
         resp = auth_client.get(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
         resp = client.get(self.url, follow=False)
@@ -473,7 +474,7 @@ class TestWateringStationUpdateView:
 
         resp = getattr(auth_client, method)(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_doesnt_update_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station, watering_station_form_fields):
@@ -549,7 +550,7 @@ class TestWateringStationListView:
 
         resp = getattr(auth_client, method)(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_doesnt_create_new_garden_is_requesting_user_does_not_own_garden(self, auth_client, garden, watering_station_form_fields):
@@ -628,7 +629,7 @@ class TestWateringStationDeleteView:
 
         resp = getattr(auth_client, method)(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_doesnt_delete_watering_station_is_accessed_by_user_who_doesnt_own_it(self, auth_client, watering_station):
@@ -690,7 +691,7 @@ class TestWateringStationRecordListView:
 
         resp = auth_client.get(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_GET_returns_404_page_when_accessing_a_resource_that_doesnt_exist(self, auth_client):
@@ -699,7 +700,7 @@ class TestWateringStationRecordListView:
 
         resp = auth_client.get(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
 
 @pytest.mark.integration
@@ -772,7 +773,7 @@ class TestWateringStationCreateView:
 
         resp = auth_client.get(url)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
 
     @pytest.mark.django_db
     def test_POST_returns_404_page_when_accessed_by_user_who_doesnt_own_the_garden(self, auth_client, garden, watering_station_form_fields):
@@ -780,4 +781,53 @@ class TestWateringStationCreateView:
 
         resp = auth_client.post(url, data=watering_station_form_fields)
 
-        assertions.assert_template_is_rendered(resp, '404.html', expected_status=status.HTTP_404_NOT_FOUND)
+        assertions.assert_404_rendered(resp)
+
+
+@pytest.mark.integration
+class TestTokenUpdateView:
+    def create_url(self, pk):
+        return reverse('token-reset', kwargs={'pk': pk})
+
+    @pytest.fixture(autouse=True)
+    def setup(self, auth_user_garden):
+        self.garden = auth_user_garden
+        self.url = self.create_url(self.garden.pk)
+
+    @pytest.mark.django_db
+    def test_view_has_correct_url(self):
+        assert self.url == f'/gardens/{self.garden.pk}/token-reset/'
+
+    @pytest.mark.django_db
+    def test_POST_resets_the_token_on_garden_model(self, auth_client, garden):
+        uuid = self.garden.token.uuid
+
+        auth_client.post(self.url)
+
+        self.garden.refresh_from_db()
+        assert self.garden.token.uuid != uuid
+
+    @pytest.mark.django_db
+    def test_POST_returns_404_page_when_accessed_by_user_who_doesnt_own_the_garden(self, auth_client, garden):
+        url = self.create_url(garden.pk)
+
+        resp = auth_client.post(url)
+
+        assertions.assert_404_rendered(resp)
+
+    @pytest.mark.django_db
+    @patch('garden.views.secrets')
+    def test_POST_returns_json_response_with_success_true_and_new_api_token(self, mock_secrets, auth_client):
+        uuid = mock_secrets.token_hex.return_value = 'random hex'
+
+        resp = auth_client.post(self.url)
+
+        self.garden.refresh_from_db()
+        assertions.assert_data_present_in_json_response_html(resp, [uuid])
+        assert resp.json()['success'] == True
+
+    @pytest.mark.django_db
+    def test_logged_out_user_is_redirected_to_login_page_when_accessing_this_view(self, client):
+        resp = client.post(self.url)
+
+        assertions.assert_redirect(resp, reverse('login'), self.url)
