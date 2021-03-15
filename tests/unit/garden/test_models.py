@@ -108,12 +108,13 @@ class TestWateringStationModel:
 
 @pytest.mark.unit
 class TestTokenModel:
-    def test___str___method_returns_str_of_uuid(self, token_factory):
-        token = token_factory.build()
+    def test___str___method_returns_date_of_creation(self, token_factory):
+        created = datetime(year=2021, month=3, day=15, hour=13, minute=35)
+        token = token_factory.build(created=created)
 
         ret_val = token.__str__()
 
-        assert ret_val == str(token.uuid)
+        assert ret_val == 'March 15, 2021 1:35 PM'
 
 
 @pytest.mark.unit

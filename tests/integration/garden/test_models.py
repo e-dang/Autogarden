@@ -195,6 +195,24 @@ class TestTokenModel:
         with pytest.raises(Token.DoesNotExist):
             token.refresh_from_db()
 
+    @pytest.mark.django_db
+    def test_verify_returns_true_when_valid_token_is_passed_in(self, token_factory):
+        uuid = 'random uuid'
+        token = token_factory(uuid=uuid)
+
+        ret_val = token.verify(uuid)
+
+        assert ret_val == True
+
+    @pytest.mark.django_db
+    def test_verify_returns_false_when_invalid_token_is_passed_in(self, token_factory):
+        uuid = 'random uuid'
+        token = token_factory(uuid=uuid)
+
+        ret_val = token.verify(uuid + 'random chars')
+
+        assert ret_val == False
+
 
 @pytest.mark.integration
 class TestWateringStationModel:
