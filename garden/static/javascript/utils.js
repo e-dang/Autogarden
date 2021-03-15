@@ -61,9 +61,7 @@ function addCropImageHandler(configs) {
         resetCropper();
 
         cropBtn.on('click', (event) => {
-            const width = cropper.getCropBoxData().width;
-            const height = cropper.getCropBoxData().height;
-            const canvas = cropper.getCroppedCanvas({width: width, height: height});
+            const canvas = cropper.getCroppedCanvas({width: 200, height: 200});
             imgContainer.html(canvas);
             cropBtn.attr('hidden', true);
             resetBtn.attr('hidden', false);
