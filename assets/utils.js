@@ -1,5 +1,9 @@
 import $ from 'jquery';
 
+function goToUrl({url}) {
+    window.location = url;
+}
+
 function getModalDataAjax(url, successCb = (data) => null) {
     $(() => {
         $.ajax({
@@ -34,4 +38,4 @@ function addAjaxFormHandler(formId, successCb, failCb, getFormData = (form) => n
     });
 }
 
-export {getModalDataAjax, addAjaxFormHandler};
+export {getModalDataAjax, addAjaxFormHandler, goToUrl};
