@@ -1,4 +1,5 @@
-import {getModalDataAjax, addCropImageHandler, addAjaxFormHandler} from './utils.js';
+import {getModalDataAjax, addAjaxFormHandler} from './utils.js';
+import ImageCropper from './imageCropper';
 import $ from 'jquery';
 import 'fittextjs';
 import 'bootstrap';
@@ -12,12 +13,12 @@ function successCb(data) {
 function failCb(data) {
     $(configs.formContainerSelector).html(data.html);
     addAjaxFormHandler(configs.formSelector, successCb, failCb);
-    addCropImageHandler(configs, successCb, failCb);
+    new ImageCropper(successCb, failCb).init();
 }
 
 getModalDataAjax(configs.url, () => {
     addAjaxFormHandler(configs.formSelector, successCb, failCb);
-    addCropImageHandler(configs, successCb, failCb);
+    new ImageCropper(successCb, failCb).init();
 });
 
 $('#name').fitText(0.8, {maxFontSize: 30});

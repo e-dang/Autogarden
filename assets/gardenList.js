@@ -1,4 +1,5 @@
-import {addCropImageHandler, addAjaxFormHandler} from './utils.js';
+import {addAjaxFormHandler} from './utils.js';
+import ImageCropper from './imageCropper';
 import $ from 'jquery';
 import 'bootstrap';
 
@@ -17,8 +18,8 @@ function successCb(data) {
 function failCb(data) {
     $('.modal-body').html(data.html);
     addAjaxFormHandler(configs.formSelector, successCb, failCb);
-    addCropImageHandler(configs, successCb, failCb);
+    new ImageCropper(successCb, failCb).init();
 }
 
 addAjaxFormHandler(configs.formSelector, successCb, failCb);
-addCropImageHandler(configs, successCb, failCb);
+new ImageCropper(successCb, failCb).init();
