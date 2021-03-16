@@ -4,14 +4,17 @@ function goToUrl({url}) {
     window.location = url;
 }
 
-function getModalDataAjax(url, successCb = (data) => null) {
-    $(() => {
+function getModalDataAjax(url) {
+    return new Promise((resolve, reject) => {
         $.ajax({
             type: 'get',
             url: url,
             success: (data) => {
                 $('.modal-body').html(data.html);
-                successCb(data);
+                resolve(data);
+            },
+            error: (data) => {
+                reject(data);
             },
         });
     });

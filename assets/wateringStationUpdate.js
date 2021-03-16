@@ -12,7 +12,9 @@ function failCb(data) {
     new ImageCropper(goToUrl, failCb).init();
 }
 
-getModalDataAjax(configs.deleteUrl);
-addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
-new ImageCropper(goToUrl, failCb).init();
+getModalDataAjax(configs.deleteUrl).then(() => {
+    addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
+    new ImageCropper(goToUrl, failCb).init();
+});
+
 $('#name').fitText(0.8, {maxFontSize: 30});

@@ -12,7 +12,7 @@ function failCb(data) {
     new ImageCropper(goToUrl, failCb).init();
 }
 
-getModalDataAjax(configs.url, () => {
+getModalDataAjax(configs.url).then(() => {
     addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
     new ImageCropper(goToUrl, failCb).init();
 });
