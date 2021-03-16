@@ -10,12 +10,13 @@ const configs = {
     imgContainerSelector: '#imageContainer',
     formSelector: '#newGardenForm',
 };
+const cropper = new ImageCropper();
 
 function failCb(data) {
     $('.modal-body').html(data.html);
     addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
-    new ImageCropper(goToUrl, failCb).init();
+    cropper.init(goToUrl, failCb);
 }
 
 addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
-new ImageCropper(goToUrl, failCb).init();
+cropper.init(goToUrl, failCb);

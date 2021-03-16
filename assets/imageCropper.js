@@ -4,15 +4,11 @@ import {addAjaxFormHandler} from './utils';
 
 class ImageCropper {
     constructor(
-        successCb,
-        failCb,
         imgInputSelector = '#id_image',
         imgContainerSelector = '#imageContainer',
         cropBtnSelector = '#cropBtn',
         resetBtnSelector = '#resetBtn',
     ) {
-        this.successCb = successCb;
-        this.failCb = failCb;
         this.imgInputSelector = imgInputSelector;
         this.imgContainerSelector = imgContainerSelector;
         this.cropBtnSelector = cropBtnSelector;
@@ -21,7 +17,7 @@ class ImageCropper {
         this.cropper = null;
     }
 
-    init() {
+    init(successCb, failCb) {
         this._getElements();
 
         this.imgInput.on('change', (event) => {
@@ -31,7 +27,7 @@ class ImageCropper {
             this.imgContainer.html(this._getImageTag(event));
             this._resetCropper();
 
-            this._handleCrop();
+            this._handleCrop(successCb, failCb);
             this._handleReset(event);
         });
     }
@@ -65,14 +61,14 @@ class ImageCropper {
         this.cropper = img.data('cropper');
     }
 
-    _handleCrop() {
+    _handleCrop(successCb, failCb) {
         this.cropBtn.on('click', (event) => {
             const canvas = this.cropper.getCroppedCanvas({width: 200, height: 200});
             this.imgContainer.html(canvas);
             this._toggleCropResetBtns();
 
             canvas.toBlob((blob) => {
-                addAjaxFormHandler(configs.formSelector, this.successCb, this.failCb, (form) => {
+                addAjaxFormHandler(configs.formSelector, successCb, failCb, (form) => {
                     const filename = $(`#script-${configs.imgInputSelector.substring(1)}`)
                         .parent()
                         .children('.custom-file-label')
