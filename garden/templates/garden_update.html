@@ -41,21 +41,6 @@
 {% endblock %}
 
 {% block javascript %}
-<script>
-    var configs = {
-        imgInputSelector: '#{{garden_form.image.auto_id}}',
-        cropBtnSelector: '#{{garden_form.CROP_BTN_ID}}',
-        resetBtnSelector: '#{{garden_form.RESET_BTN_ID}}',
-        imgContainerSelector: '#{{garden_form.IMAGE_CONTAINER_ID}}',
-        formSelector: '#{{garden_form.FORM_ID}}',
-        deleteUrl: '{{ garden_form.instance.get_delete_url }}',
-        formContainerSelector: '#{{garden_form.FORM_CONTAINER_ID}}'
-    };
-</script>
-<script src="/static/javascript/utils.js"></script>
-<script src="/static/javascript/garden_update.js"></script>
-<script src="/static/javascript/jquery.fittext.js"></script>
-<script>
-        $('#name').fitText(0.8, {maxFontSize: 30})
-    </script>
+{{ configs|json_script:'configs' }}
+<script src="{% static 'javascript/gardenUpdate.js' %}"></script>
 {% endblock %}

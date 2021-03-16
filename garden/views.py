@@ -98,7 +98,19 @@ class GardenDetailView(LoginRequiredMixin, View):
             raise Http404()
         else:
             garden.refresh_connection_status()
-            return render(request, 'garden_detail.html', context={'garden': GardenFormatter(garden)})
+            configs = {
+                'imgInputSelector': '#id_image',
+                'cropBtnSelector': '#cropBtn',
+                'resetBtnSelector': '#resetBtn',
+                'imgContainerSelector': '#imageContainer',
+                'formSelector': '#newWateringStationForm',
+                'url': request.build_absolute_uri(reverse('watering-station-create', kwargs={'pk': pk})),
+                'formContainerSelector': '.modal-body',
+            }
+            return render(request, 'garden_detail.html', context={
+                'garden': GardenFormatter(garden),
+                'configs': configs
+            })
 
 
 class GardenUpdateView(LoginRequiredMixin, View):
@@ -111,7 +123,20 @@ class GardenUpdateView(LoginRequiredMixin, View):
             garden_form = GardenForm(instance=garden)
             token_form = TokenForm(initial={'uuid': TokenFormatter(garden.token).uuid})
             token_form.helper.form_action = reverse('token-reset', kwargs={'pk': garden.pk})
-            return render(request, 'garden_update.html', context={'token_form': token_form, 'garden_form': garden_form})
+            configs = {
+                'imgInputSelector': '#id_image',
+                'cropBtnSelector': f'#{garden_form.CROP_BTN_ID}',
+                'resetBtnSelector': f'#{garden_form.RESET_BTN_ID}',
+                'imgContainerSelector': f'#{garden_form.IMAGE_CONTAINER_ID}',
+                'formSelector': f'#{garden_form.FORM_ID}',
+                'deleteUrl': request.build_absolute_uri(garden.get_delete_url()),
+                'formContainerSelector': f'#{garden_form.FORM_CONTAINER_ID}'
+            }
+            return render(request, 'garden_update.html', context={
+                'token_form': token_form,
+                'garden_form': garden_form,
+                'configs': configs
+            })
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:
         try:
@@ -238,7 +263,19 @@ class WateringStationUpdateView(LoginRequiredMixin, View):
         else:
             station = garden.watering_stations.get(pk=ws_pk)
             form = WateringStationForm(instance=station)
-            return render(request, 'watering_station_update.html', context={'form': form})
+            configs = {
+                'imgInputSelector': '#id_image',
+                'cropBtnSelector': f'#{form.CROP_BTN_ID}',
+                'resetBtnSelector': f'#{form.RESET_BTN_ID}',
+                'imgContainerSelector': f'#{form.IMAGE_CONTAINER_ID}',
+                'formSelector': f'#{form.FORM_ID}',
+                'deleteUrl': request.build_absolute_uri(station.get_delete_url()),
+                'formContainerSelector': f'#{form.FORM_CONTAINER_ID}'
+            }
+            return render(request, 'watering_station_update.html', context={
+                'form': form,
+                'configs': configs
+            })
 
     def post(self, request: http.HttpRequest, garden_pk: int, ws_pk: int) -> http.JsonResponse:
         try:

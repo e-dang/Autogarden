@@ -41,9 +41,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="/static/javascript/soil_moisture.js"></script>
-    <script src="/static/javascript/jquery.fittext.js"></script>
-    <script>
-        $('#name').fitText(0.8, {maxFontSize: 30})
-    </script>
+<script src="{% static 'javascript/wateringStationDetail.js' %}"></script>
 {% endblock %}

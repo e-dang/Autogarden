@@ -1,5 +1,8 @@
+import $ from 'jquery';
+import 'jquery-cropper';
+
 function getModalDataAjax(url, successCb = (data) => null) {
-    $(document).ready(() => {
+    $(() => {
         $.ajax({
             type: 'get',
             url: url,
@@ -32,7 +35,7 @@ function addAjaxFormHandler(formId, successCb, failCb, getFormData = (form) => n
     });
 }
 
-function addCropImageHandler(configs) {
+function addCropImageHandler(configs, successCb, failCb) {
     const imgInput = $(configs.imgInputSelector);
     const cropBtn = $(configs.cropBtnSelector);
     const resetBtn = $(configs.resetBtnSelector);
@@ -65,7 +68,7 @@ function addCropImageHandler(configs) {
             imgContainer.html(canvas);
             cropBtn.attr('hidden', true);
             resetBtn.attr('hidden', false);
-            $(configs.formSelector).unbind();
+            $(configs.formSelector).off();
 
             canvas.toBlob((blob) => {
                 addAjaxFormHandler(configs.formSelector, successCb, failCb, (form) => {
@@ -89,3 +92,5 @@ function addCropImageHandler(configs) {
         });
     });
 }
+
+export {getModalDataAjax, addAjaxFormHandler, addCropImageHandler};

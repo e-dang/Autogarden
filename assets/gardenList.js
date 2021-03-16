@@ -1,3 +1,7 @@
+import {addCropImageHandler, addAjaxFormHandler} from './utils.js';
+import $ from 'jquery';
+import 'bootstrap';
+
 const configs = {
     imgInputSelector: '#id_image',
     cropBtnSelector: '#cropBtn',
@@ -13,8 +17,8 @@ function successCb(data) {
 function failCb(data) {
     $('.modal-body').html(data.html);
     addAjaxFormHandler(configs.formSelector, successCb, failCb);
-    addCropImageHandler(configs);
+    addCropImageHandler(configs, successCb, failCb);
 }
 
 addAjaxFormHandler(configs.formSelector, successCb, failCb);
-addCropImageHandler(configs);
+addCropImageHandler(configs, successCb, failCb);
