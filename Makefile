@@ -5,7 +5,11 @@ CPP_DIR := $(PROJECT_DIR)/cpp/Autogarden
 
 install:
 	python3 -m pip install -U pip && \
-	pip3 install -r requirements.txt
+	pip3 install -r requirements.txt \
+	npm install
+
+build:
+	npm run prod
 
 test-u:
 	pytest -m unit
