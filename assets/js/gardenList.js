@@ -1,4 +1,4 @@
-import {createAjaxImageFormHandler} from './ajaxFormHandler';
+import {createAjaxImageFormHandler} from './utils/ajaxFormHandler';
 
 const configs = {
     imgInputSelector: '#id_image',

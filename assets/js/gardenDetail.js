@@ -1,10 +1,10 @@
-import {getModalDataAjax, fitText} from './utils.js';
-import {createAjaxImageFormHandler} from './ajaxFormHandler';
+import {getModalDataAjax} from './utils/utils.js';
+import {createAjaxImageFormHandler} from './utils/ajaxFormHandler';
 
 const configs = JSON.parse(document.getElementById('configs').textContent);
 const imageFormHandler = createAjaxImageFormHandler(configs);
 
-getModalDataAjax(configs.deleteUrl).then(() => {
+getModalDataAjax(configs.url).then(() => {
     imageFormHandler.addFormListeners();
 });
 

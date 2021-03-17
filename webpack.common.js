@@ -5,16 +5,16 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 module.exports = {
     context: __dirname,
     entry: {
-        gardenUpdate: './assets/gardenUpdate.js',
-        gardenList: './assets/gardenList.js',
-        gardenDetail: './assets/gardenDetail.js',
-        wateringStationDetail: './assets/wateringStationDetail.js',
-        wateringStationUpdate: './assets/wateringStationUpdate.js',
-        vendor: './assets/vendor.js',
+        gardenUpdate: './assets/js/gardenUpdate.js',
+        gardenList: './assets/js/gardenList.js',
+        gardenDetail: './assets/js/gardenDetail.js',
+        wateringStationDetail: './assets/js/wateringStationDetail.js',
+        wateringStationUpdate: './assets/js/wateringStationUpdate.js',
+        vendor: './assets/js/vendor.js',
     },
     output: {
         filename: '[name]-[contenthash].js',
-        path: path.resolve(__dirname, './static/javascript'),
+        path: path.resolve(__dirname, './static/js'),
     },
     plugins: [new BundleTracker({filename: './webpack-stats.json'}), new CleanWebpackPlugin()],
     module: {

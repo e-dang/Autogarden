@@ -144,8 +144,8 @@ STATICFILES_FINDERS = (
 WEBPACK_LOADER = {
     'DEFAULT': {
         'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': 'javascript/',  # must end with slash
-        'STATS_FILE': BASE_DIR / 'static' / 'javascript' / 'webpack-stats.json',
+        'BUNDLE_DIR_NAME': 'js/',  # must end with slash
+        'STATS_FILE': BASE_DIR / 'static' / 'js' / 'webpack-stats.json',
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,
         'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],

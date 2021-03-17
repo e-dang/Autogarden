@@ -1,5 +1,5 @@
-import {getModalDataAjax, addAjaxFormHandler, getFormData, fitText} from './utils.js';
-import {AjaxFormHandler, createAjaxImageFormHandler} from './ajaxFormHandler';
+import {getModalDataAjax, addAjaxFormHandler, getFormData, fitText} from './utils/utils.js';
+import {AjaxFormHandler, createAjaxImageFormHandler} from './utils/ajaxFormHandler';
 
 function successCb(data) {
     $('#id_uuid').val(data.html);
