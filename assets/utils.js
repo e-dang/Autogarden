@@ -20,25 +20,21 @@ function getModalDataAjax(url) {
     });
 }
 
-function addAjaxFormHandler(formId, successCb, failCb, getFormData = (form) => new FormData(form)) {
-    $(formId).on('submit', (event) => {
-        const fd = getFormData(event.target);
-        event.preventDefault();
-        $.ajax({
-            type: $(formId).attr('method'),
-            url: $(formId).attr('action'),
-            data: fd,
-            contentType: false,
-            processData: false,
-            success: (data) => {
-                if (data.success) {
-                    successCb(data);
-                } else {
-                    failCb(data);
-                }
-            },
-        });
+function getFormData(form) {
+    return new FormData(form);
+}
+
+function addAjaxFormHandler(formHandler, extractFormData) {
+    $(formHandler.formSelector).on('submit', (event) => {
+        formHandler.handle(event, extractFormData);
     });
 }
 
-export {getModalDataAjax, addAjaxFormHandler, goToUrl};
+function createAddFormListeners(formHandler, cropper) {
+    return () => {
+        addAjaxFormHandler(formHandler, getFormData);
+        cropper.init(formHandler);
+    };
+}
+
+export {getModalDataAjax, addAjaxFormHandler, goToUrl, getFormData, createAddFormListeners};

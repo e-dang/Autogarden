@@ -17,7 +17,7 @@ class ImageCropper {
         this.cropper = null;
     }
 
-    init(successCb, failCb) {
+    init(formHandler) {
         this._getElements();
 
         this.imgInput.on('change', (event) => {
@@ -27,7 +27,7 @@ class ImageCropper {
             this.imgContainer.html(this._getImageTag(event));
             this._resetCropper();
 
-            this._handleCrop(successCb, failCb);
+            this._handleCrop(formHandler);
             this._handleReset(event);
         });
     }
@@ -61,24 +61,27 @@ class ImageCropper {
         this.cropper = img.data('cropper');
     }
 
-    _handleCrop(successCb, failCb) {
+    _handleCrop(formHandler) {
         this.cropBtn.on('click', (event) => {
             const canvas = this.cropper.getCroppedCanvas({width: 200, height: 200});
             this.imgContainer.html(canvas);
             this._toggleCropResetBtns();
+            $(formHandler.formSelector).off();
 
             canvas.toBlob((blob) => {
-                addAjaxFormHandler(configs.formSelector, successCb, failCb, (form) => {
-                    const filename = $(`#script-${configs.imgInputSelector.substring(1)}`)
-                        .parent()
-                        .children('.custom-file-label')
-                        .text();
-                    const fd = new FormData(form);
-                    fd.append('image', blob, filename);
-                    return fd;
-                });
+                addAjaxFormHandler(formHandler, (form) => this._getImageFormData(form, blob));
             });
         });
+    }
+
+    _getImageFormData(form, blob) {
+        const fd = new FormData(form);
+        const filename = $(`#script-${this.imgInputSelector.substring(1)}`)
+            .parent()
+            .children('.custom-file-label')
+            .text();
+        fd.append('image', blob, filename);
+        return fd;
     }
 
     _handleReset(imgChangeEvent) {

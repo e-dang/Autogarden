@@ -1,6 +1,4 @@
-import {addAjaxFormHandler, goToUrl} from './utils.js';
-import ImageCropper from './imageCropper';
-import $ from 'jquery';
+import {createAjaxImageFormHandler} from './ajaxFormHandler';
 import 'bootstrap';
 
 const configs = {
@@ -9,14 +7,8 @@ const configs = {
     resetBtnSelector: '#resetBtn',
     imgContainerSelector: '#imageContainer',
     formSelector: '#newGardenForm',
+    formContainerSelector: '.modal-body',
 };
-const cropper = new ImageCropper();
 
-function failCb(data) {
-    $('.modal-body').html(data.html);
-    addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
-    cropper.init(goToUrl, failCb);
-}
-
-addAjaxFormHandler(configs.formSelector, goToUrl, failCb);
-cropper.init(goToUrl, failCb);
+const formHandler = createAjaxImageFormHandler(configs);
+formHandler.addFormListeners();
