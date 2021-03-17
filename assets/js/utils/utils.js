@@ -42,4 +42,8 @@ function fitText(id) {
     $(id).fitText(0.8, {maxFontSize: 30});
 }
 
-export {getModalDataAjax, addAjaxFormHandler, goToUrl, getFormData, createAddFormListeners, fitText};
+function getConfigData(id = 'configs') {
+    return JSON.parse(document.getElementById(id).textContent);
+}
+
+export {getModalDataAjax, addAjaxFormHandler, goToUrl, getFormData, createAddFormListeners, fitText, getConfigData};

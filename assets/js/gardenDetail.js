@@ -1,7 +1,7 @@
-import {getModalDataAjax} from './utils/utils.js';
+import {getModalDataAjax, getConfigData} from './utils/utils.js';
 import {createAjaxImageFormHandler} from './utils/ajaxFormHandler';
 
-const configs = JSON.parse(document.getElementById('configs').textContent);
+const configs = getConfigData();
 const imageFormHandler = createAjaxImageFormHandler(configs);
 
 getModalDataAjax(configs.url).then(() => {
