@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'garden_detail_nav.html' with garden=garden_form.instance state='active' %}
@@ -42,5 +43,5 @@
 
 {% block javascript %}
 {{ configs|json_script:'configs' }}
-<script src="{% static 'javascript/gardenUpdate.js' %}"></script>
+{% render_bundle 'gardenUpdate' 'js' %}
 {% endblock %}

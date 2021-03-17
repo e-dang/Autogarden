@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'watering_station_nav.html' with watering_station=form.instance.get_formatter %}
@@ -39,5 +40,5 @@
 
 {% block javascript %}
 {{ configs|json_script:'configs' }}
-<script src="{% static 'javascript/wateringStationUpdate.js' %}"></script>
+{% render_bundle 'wateringStationUpdate' 'js' %}
 {% endblock %}

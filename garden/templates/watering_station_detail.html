@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'watering_station_nav.html' %}
@@ -41,5 +42,5 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'javascript/wateringStationDetail.js' %}"></script>
+{% render_bundle 'wateringStationDetail' 'js' %}
 {% endblock %}
