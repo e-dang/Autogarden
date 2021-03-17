@@ -10,7 +10,7 @@ const formHandler = new AjaxFormHandler({formSelector: '#tokenForm'});
 formHandler.bind(successCb, undefined);
 const imageFormHandler = createAjaxImageFormHandler(configs);
 
-getModalDataAjax(configs.deleteUrl).then(() => {
+getModalDataAjax(configs).then(() => {
     imageFormHandler.addFormListeners();
     addAjaxFormHandler(formHandler, getFormData);
 });

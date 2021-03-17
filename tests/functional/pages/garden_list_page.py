@@ -4,7 +4,7 @@ from garden.forms import NewGardenForm
 from selenium.common.exceptions import WebDriverException
 
 from ..base import wait
-from .elements import Button, ImageInput, SubmitButton, TextInput, CancelButton
+from .elements import Button, CropButton, ImageInput, ResetButton, SubmitButton, TextInput, CancelButton
 from .base_page import BasePage
 
 
@@ -26,14 +26,6 @@ class GardenImageInput(ImageInput):
 
 class UpdateFrequency(TextInput):
     LOCATOR = 'id_update_frequency'
-
-
-class CropButton(Button):
-    LOCATOR = NewGardenForm.CROP_BTN_ID
-
-
-class ResetButton(Button):
-    LOCATOR = NewGardenForm.RESET_BTN_ID
 
 
 class GardenListPage(BasePage):

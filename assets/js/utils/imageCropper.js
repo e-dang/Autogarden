@@ -3,12 +3,16 @@ import 'jquery-cropper';
 import {addAjaxFormHandler} from './utils';
 
 class ImageCropper {
-    constructor(
+    constructor({
+        width = 200,
+        height = 200,
         imgInputSelector = '#id_image',
-        imgContainerSelector = '#imageContainer',
-        cropBtnSelector = '#cropBtn',
-        resetBtnSelector = '#resetBtn',
-    ) {
+        imgContainerSelector = 'div.photo-container',
+        cropBtnSelector = 'input[name="crop"]',
+        resetBtnSelector = 'input[name="reset"]',
+    }) {
+        this.width = width;
+        this.height = height;
         this.imgInputSelector = imgInputSelector;
         this.imgContainerSelector = imgContainerSelector;
         this.cropBtnSelector = cropBtnSelector;
@@ -63,7 +67,7 @@ class ImageCropper {
 
     _handleCrop(formHandler) {
         this.cropBtn.on('click', (event) => {
-            const canvas = this.cropper.getCroppedCanvas({width: 200, height: 200});
+            const canvas = this.cropper.getCroppedCanvas({width: this.width, height: this.height});
             this.imgContainer.html(canvas);
             this._toggleCropResetBtns();
             $(formHandler.formSelector).off();

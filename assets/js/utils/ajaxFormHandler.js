@@ -3,9 +3,8 @@ import ImageCropper from './imageCropper';
 import {goToUrl, createAddFormListeners} from './utils';
 
 class AjaxFormHandler {
-    constructor({formContainerSelector, formSelector}) {
+    constructor({formSelector}) {
         this.formSelector = formSelector;
-        this.formContainerSelector = formContainerSelector;
     }
 
     bind(successCb, failCb) {
@@ -30,7 +29,7 @@ class AjaxFormHandler {
         if (data.success) {
             this.successCb(data);
         } else {
-            $(this.formContainerSelector).html(data.html);
+            $(this.formSelector).replaceWith(data.html);
             this.failCb(data);
         }
     }
@@ -44,7 +43,7 @@ class AjaxImageFormHandler extends AjaxFormHandler {
 
 function createAjaxImageFormHandler(configs) {
     const imageFormHandler = new AjaxImageFormHandler(configs);
-    const addFormListeners = createAddFormListeners(imageFormHandler, new ImageCropper());
+    const addFormListeners = createAddFormListeners(imageFormHandler, new ImageCropper(configs));
     imageFormHandler.bind(goToUrl, addFormListeners);
     return imageFormHandler;
 }

@@ -5,7 +5,7 @@ function goToUrl({url}) {
     window.location = url;
 }
 
-function getModalDataAjax(url) {
+function getModalDataAjax({url}) {
     return new Promise((resolve, reject) => {
         $.ajax({
             type: 'get',

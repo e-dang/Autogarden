@@ -4,7 +4,7 @@ import {createAjaxImageFormHandler} from './utils/ajaxFormHandler';
 const configs = getConfigData();
 const imageFormHandler = createAjaxImageFormHandler(configs);
 
-getModalDataAjax(configs.deleteUrl).then(() => {
+getModalDataAjax(configs).then(() => {
     imageFormHandler.addFormListeners();
 });
 
