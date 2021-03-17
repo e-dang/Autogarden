@@ -5,12 +5,13 @@ function successCb(data) {
     $('#id_uuid').val(data.html);
 }
 
-const configs = getConfigData();
-const formHandler = new AjaxFormHandler({formSelector: '#tokenForm'});
+const tokenConfigs = getConfigData('tokenConfigs');
+const gardenConfigs = getConfigData('gardenConfigs');
+const formHandler = new AjaxFormHandler(tokenConfigs);
 formHandler.bind(successCb, undefined);
-const imageFormHandler = createAjaxImageFormHandler(configs);
+const imageFormHandler = createAjaxImageFormHandler(gardenConfigs);
 
-getModalDataAjax(configs).then(() => {
+getModalDataAjax(gardenConfigs).then(() => {
     imageFormHandler.addFormListeners();
     addAjaxFormHandler(formHandler, getFormData);
 });

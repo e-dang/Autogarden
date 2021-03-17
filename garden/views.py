@@ -118,14 +118,19 @@ class GardenUpdateView(LoginRequiredMixin, View):
             garden_form = GardenForm(instance=garden)
             token_form = TokenForm(initial={'uuid': TokenFormatter(garden.token).uuid})
             token_form.helper.form_action = reverse('token-reset', kwargs={'pk': garden.pk})
-            configs = {
+
+            garden_configs = {
                 'formSelector': f'#{garden_form.FORM_ID}',
                 'url': request.build_absolute_uri(garden.get_delete_url()),
+            }
+            token_configs = {
+                'formSelector': f'#{token_form.FORM_ID}'
             }
             return render(request, 'garden_update.html', context={
                 'token_form': token_form,
                 'garden_form': garden_form,
-                'configs': configs
+                'garden_configs': garden_configs,
+                'token_configs': token_configs
             })
 
     def post(self, request: http.HttpRequest, pk: int) -> http.JsonResponse:

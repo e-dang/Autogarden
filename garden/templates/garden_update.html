@@ -40,6 +40,7 @@
 {% endblock %}
 
 {% block javascript %}
-{{ configs|json_script:'configs' }}
+{{ garden_configs|json_script:'gardenConfigs' }}
+{{ token_configs|json_script:'tokenConfigs' }}
 {% render_bundle 'gardenUpdate' 'js' %}
 {% endblock %}
