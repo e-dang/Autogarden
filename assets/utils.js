@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import 'fittextjs';
 
 function goToUrl({url}) {
     window.location = url;
@@ -37,4 +38,8 @@ function createAddFormListeners(formHandler, cropper) {
     };
 }
 
-export {getModalDataAjax, addAjaxFormHandler, goToUrl, getFormData, createAddFormListeners};
+function fitText(id) {
+    $(id).fitText(0.8, {maxFontSize: 30});
+}
+
+export {getModalDataAjax, addAjaxFormHandler, goToUrl, getFormData, createAddFormListeners, fitText};

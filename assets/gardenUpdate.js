@@ -1,7 +1,5 @@
-import {getModalDataAjax, addAjaxFormHandler, getFormData} from './utils.js';
+import {getModalDataAjax, addAjaxFormHandler, getFormData, fitText} from './utils.js';
 import {AjaxFormHandler, createAjaxImageFormHandler} from './ajaxFormHandler';
-import $ from 'jquery';
-import 'fittextjs';
 
 function successCb(data) {
     $('#id_uuid').val(data.html);
@@ -17,4 +15,4 @@ getModalDataAjax(configs.deleteUrl).then(() => {
     addAjaxFormHandler(formHandler, getFormData);
 });
 
-$('#name').fitText(0.8, {maxFontSize: 30});
+fitText('#name');

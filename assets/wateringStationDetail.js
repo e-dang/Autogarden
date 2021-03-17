@@ -1,5 +1,4 @@
-import $ from 'jquery';
-import 'fittextjs';
+import {fitText} from './utils';
 import './soilMoisture';
 
-$('#name').fitText(0.8, {maxFontSize: 30});
+fitText('#name');
