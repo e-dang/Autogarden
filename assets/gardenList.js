@@ -1,5 +1,4 @@
 import {createAjaxImageFormHandler} from './ajaxFormHandler';
-import 'bootstrap';
 
 const configs = {
     imgInputSelector: '#id_image',

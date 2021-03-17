@@ -2,7 +2,6 @@ import {getModalDataAjax, addAjaxFormHandler, getFormData} from './utils.js';
 import {AjaxFormHandler, createAjaxImageFormHandler} from './ajaxFormHandler';
 import $ from 'jquery';
 import 'fittextjs';
-import 'bootstrap';
 
 function successCb(data) {
     $('#id_uuid').val(data.html);
