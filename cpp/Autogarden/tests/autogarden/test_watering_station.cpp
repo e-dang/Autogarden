@@ -13,21 +13,22 @@ using namespace ::testing;
 class WateringStationTest : public Test {
 protected:
     const int idx           = 0;
+    const bool status       = true;
     const uint32_t duration = 600000;
     const float threshold   = 50.f;
-    std::shared_ptr<MockMoistureSensor> mockSensor;
-    std::shared_ptr<MockPump> mockPump;
-    std::shared_ptr<MockValve> mockValve;
-    std::shared_ptr<MockWateringStationConfigParser> mockParser;
+    std::shared_ptr<NiceMock<MockMoistureSensor>> mockSensor;
+    std::shared_ptr<NiceMock<MockPump>> mockPump;
+    std::shared_ptr<NiceMock<MockValve>> mockValve;
+    std::shared_ptr<NiceMock<MockWateringStationConfigParser>> mockParser;
     std::unique_ptr<WateringStation> station;
 
     void SetUp() {
-        mockSensor = std::make_shared<MockMoistureSensor>();
-        mockPump   = std::make_shared<MockPump>();
-        mockValve  = std::make_shared<MockValve>();
-        mockParser = std::make_shared<MockWateringStationConfigParser>();
-        station =
-          std::make_unique<WateringStation>(idx, duration, threshold, mockPump, mockValve, mockSensor, mockParser);
+        mockSensor = std::make_shared<NiceMock<MockMoistureSensor>>();
+        mockPump   = std::make_shared<NiceMock<MockPump>>();
+        mockValve  = std::make_shared<NiceMock<MockValve>>();
+        mockParser = std::make_shared<NiceMock<MockWateringStationConfigParser>>();
+        station = std::make_unique<WateringStation>(idx, status, duration, threshold, mockPump, mockValve, mockSensor,
+                                                    mockParser);
     }
 };
 
@@ -100,7 +101,7 @@ TEST_F(WateringStationTest, update_returns_false) {
     EXPECT_FLOAT_EQ(station->getThreshold(), threshold);
 }
 
-TEST_F(WateringStationTest, activate_when_reading_is_below_threshold) {
+TEST_F(WateringStationTest, activate_performs_routine_when_reading_is_below_threshold_and_isActive_returns_true) {
     MockArduino mockArduino;
     setMockArduino(&mockArduino);
 
@@ -113,6 +114,68 @@ TEST_F(WateringStationTest, activate_when_reading_is_below_threshold) {
     EXPECT_CALL(mockArduino, _delay(duration));
 
     station->activate();
+
+    setMockArduino(nullptr);
+}
+
+TEST_F(WateringStationTest, activate_doesnt_perform_routine_when_reading_is_above_threshold_and_isActive_returns_true) {
+    MockArduino mockArduino;
+    setMockArduino(&mockArduino);
+
+    const float reading = threshold + 1.;
+    EXPECT_CALL(*mockSensor, readScaled()).WillOnce(Return(reading));
+    EXPECT_CALL(*mockValve, open()).Times(0);
+    EXPECT_CALL(*mockValve, close()).Times(0);
+    EXPECT_CALL(*mockPump, start()).Times(0);
+    EXPECT_CALL(*mockPump, stop()).Times(0);
+    EXPECT_CALL(mockArduino, _delay(duration)).Times(0);
+
+    station->activate();
+
+    setMockArduino(nullptr);
+}
+
+TEST_F(WateringStationTest,
+       activate_doesnt_perform_routine_when_reading_is_below_threshold_and_isActive_returns_false) {
+    MockArduino mockArduino;
+    setMockArduino(&mockArduino);
+    station->setStatus(false);
+
+    const float reading = threshold - 1.;
+    EXPECT_CALL(*mockSensor, readScaled()).WillOnce(Return(reading));
+    EXPECT_CALL(*mockValve, open()).Times(0);
+    EXPECT_CALL(*mockValve, close()).Times(0);
+    EXPECT_CALL(*mockPump, start()).Times(0);
+    EXPECT_CALL(*mockPump, stop()).Times(0);
+    EXPECT_CALL(mockArduino, _delay(duration)).Times(0);
+
+    station->activate();
+
+    setMockArduino(nullptr);
+}
+
+TEST_F(WateringStationTest, isActive_returns_status_true) {
+    station->setStatus(true);
+
+    EXPECT_TRUE(station->isActive());
+}
+
+TEST_F(WateringStationTest, isActive_returns_status_false) {
+    station->setStatus(false);
+
+    EXPECT_FALSE(station->isActive());
+}
+
+TEST_F(WateringStationTest, getData_returns_json_object_containing_data_read_during_call_to_activate) {
+    NiceMock<MockArduino> mockArduino;
+    setMockArduino(&mockArduino);
+    const float reading = threshold - 2.3;
+    ON_CALL(*mockSensor, readScaled()).WillByDefault(Return(reading));
+    station->activate();
+
+    auto retVal = station->getData();
+
+    EXPECT_FLOAT_EQ(retVal["moisture_level"], reading);
 
     setMockArduino(nullptr);
 }
