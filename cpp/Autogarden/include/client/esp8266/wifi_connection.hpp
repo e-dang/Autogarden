@@ -22,6 +22,10 @@ public:
         return WiFi.status() == WL_CONNECTED;
     }
 
+    int getConnectionStrength() const override {
+        return Wifi.RSSI();
+    }
+
 private:
     String __mSSID;
     String __mPassword;
