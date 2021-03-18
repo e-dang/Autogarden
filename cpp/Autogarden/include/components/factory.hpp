@@ -1,5 +1,6 @@
 #pragma once
 
+#include <components/liquid_level_sensor/liquid_level_sensor.hpp>
 #include <components/microcontroller/microcontroller.hpp>
 #include <components/moisture_sensor/moisture_sensor.hpp>
 #include <components/multiplexer/multiplexer.hpp>
@@ -30,6 +31,8 @@ public:
     virtual std::shared_ptr<IMoistureSensor> createMoistureSensor(const String& id, const float& scaler) = 0;
 
     virtual std::shared_ptr<IPump> createPump(const String& id, const int& onValue, const int& offValue) = 0;
+
+    virtual std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const bool& okValue) = 0;
 };
 
 class ComponentFactory : public IComponentFactory {
@@ -88,6 +91,11 @@ public:
     std::shared_ptr<IPump> createPump(const String& id, const int& onValue, const int& offValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalOutput);
         return std::make_shared<Pump>(id, inputPin.release(), onValue, offValue);
+    }
+
+    std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const bool& okValue) override {
+        auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalInput);
+        return std::make_shared<LiquidLevelSensor>(id, inputPin.release(), okValue);
     }
 
 private:
