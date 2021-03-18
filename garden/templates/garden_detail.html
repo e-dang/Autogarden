@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'garden_detail_nav.html' with state='active' %}
@@ -106,35 +107,6 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="/static/javascript/jquery.fittext.js"></script>
-    <script src="/static/javascript/utils.js"></script>
-    <script>
-    $('#name').fitText(0.8, {maxFontSize: 30})
-
-    const configs = {
-        imgInputSelector: '#id_image',
-        cropBtnSelector: '#cropBtn',
-        resetBtnSelector: '#resetBtn',
-        imgContainerSelector: '#imageContainer',
-        formSelector: '#newWateringStationForm',
-        url: "{% url 'watering-station-create' pk=garden.pk %}",
-        formContainerSelector: '.modal-body'
-
-    }
-
-    function successCb(data) {
-        window.location = data.url;
-    }
-
-    function failCb(data) {
-        $(configs.formContainerSelector).html(data.html);
-        addAjaxFormHandler(configs.formSelector, successCb, failCb);
-        addCropImageHandler(configs);
-    }
-
-    getModalDataAjax(configs.url, () => {
-        addAjaxFormHandler(configs.formSelector, successCb, failCb);
-        addCropImageHandler(configs);
-    });
-    </script>
+{{ configs|json_script:'configs' }}
+{% render_bundle 'gardenDetail' 'js' %}
 {% endblock %}

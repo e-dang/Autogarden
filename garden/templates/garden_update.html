@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'garden_detail_nav.html' with garden=garden_form.instance state='active' %}
@@ -20,9 +21,7 @@
             <div class="card-body">
                 {% load crispy_forms_tags %}
                 {% crispy token_form %}
-                <div id="{{garden_form.FORM_CONTAINER_ID}}">
-                    {% crispy garden_form %}
-                </div>
+                {% crispy garden_form %}
             </div>
         </div>
     </div>
@@ -41,21 +40,7 @@
 {% endblock %}
 
 {% block javascript %}
-<script>
-    var configs = {
-        imgInputSelector: '#{{garden_form.image.auto_id}}',
-        cropBtnSelector: '#{{garden_form.CROP_BTN_ID}}',
-        resetBtnSelector: '#{{garden_form.RESET_BTN_ID}}',
-        imgContainerSelector: '#{{garden_form.IMAGE_CONTAINER_ID}}',
-        formSelector: '#{{garden_form.FORM_ID}}',
-        deleteUrl: '{{ garden_form.instance.get_delete_url }}',
-        formContainerSelector: '#{{garden_form.FORM_CONTAINER_ID}}'
-    };
-</script>
-<script src="/static/javascript/utils.js"></script>
-<script src="/static/javascript/garden_update.js"></script>
-<script src="/static/javascript/jquery.fittext.js"></script>
-<script>
-        $('#name').fitText(0.8, {maxFontSize: 30})
-    </script>
+{{ garden_configs|json_script:'gardenConfigs' }}
+{{ token_configs|json_script:'tokenConfigs' }}
+{% render_bundle 'gardenUpdate' 'js' %}
 {% endblock %}

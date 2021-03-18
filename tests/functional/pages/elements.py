@@ -1,4 +1,3 @@
-from garden.forms import GardenForm
 from selenium.webdriver import ActionChains
 from tests.conftest import TEST_IMAGE_DIR
 
@@ -99,8 +98,10 @@ class EditButton(Button):
 
 
 class CropButton(Button):
-    LOCATOR = GardenForm.CROP_BTN_ID
+    LOCATOR = '//input[@name="crop"]'
+    BY = 'find_element_by_xpath'
 
 
 class ResetButton(Button):
-    LOCATOR = GardenForm.RESET_BTN_ID
+    LOCATOR = '//input[@name="reset"]'
+    BY = 'find_element_by_xpath'

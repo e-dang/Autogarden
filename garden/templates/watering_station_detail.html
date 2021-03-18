@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'watering_station_nav.html' %}
@@ -41,9 +42,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script src="/static/javascript/soil_moisture.js"></script>
-    <script src="/static/javascript/jquery.fittext.js"></script>
-    <script>
-        $('#name').fitText(0.8, {maxFontSize: 30})
-    </script>
+{% render_bundle 'wateringStationDetail' 'js' %}
 {% endblock %}

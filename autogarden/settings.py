@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'users',
     'garden.apps.GardenConfig',
     'crispy_forms',
-    'compressor',
+    'webpack_loader',
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -70,6 +70,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+            ],
+            'builtins': [
+                'django.templatetags.static',
             ],
         },
     },
@@ -129,13 +132,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
-COMPRESS_ENABLED = True
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
 )
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'js/',  # must end with slash
+        'STATS_FILE': BASE_DIR / 'static' / 'js' / 'webpack-stats.json',
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+        'LOADER_CLASS': 'autogarden.webpack.CustomWebpackLoader',
+    }
+}
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

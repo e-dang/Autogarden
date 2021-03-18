@@ -36,9 +36,9 @@ class TestGardenListView:
 class TestGardenDetailView:
     @patch('garden.views.render')
     @patch('garden.views.GardenFormatter')
-    def test_GET_passes_garden_formatter_as_context_to_render(self, mock_formatter_class, mock_render, mock_auth_user):
+    def test_GET_passes_garden_formatter_as_context_to_render(self, mock_formatter_class, mock_render, mock_auth_user, rf):
         pk = 0
-        request = HttpRequest()
+        request = rf.get(f'/gardens/{pk}/')
         request.user = mock_auth_user
 
         GardenDetailView().get(request, pk)
@@ -51,9 +51,9 @@ class TestGardenUpdateView:
     @patch('garden.views.reverse')
     @patch('garden.views.render')
     @patch('garden.views.GardenForm')
-    def test_GET_passes_update_garden_formto_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user):
+    def test_GET_passes_update_garden_form_to_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user, rf):
         pk = 1
-        request = HttpRequest()
+        request = rf.get(f'/gardens/{pk}/update')
         request.user = mock_auth_user
 
         GardenUpdateView().get(request, pk)
@@ -63,9 +63,9 @@ class TestGardenUpdateView:
     @patch('garden.views.reverse')
     @patch('garden.views.render')
     @patch('garden.views.TokenForm')
-    def test_GET_passes_token_form_to_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user):
+    def test_GET_passes_token_form_to_context_of_render(self, mock_form, mock_render, mock_reverse, mock_auth_user, rf):
         pk = 1
-        request = HttpRequest()
+        request = rf.get(f'/gardens/{pk}/update')
         request.user = mock_auth_user
 
         GardenUpdateView().get(request, pk)
@@ -77,11 +77,11 @@ class TestGardenUpdateView:
 class TestWateringStationUpdateView:
     @patch('garden.views.render')
     @patch('garden.views.WateringStationForm', autospec=True)
-    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_auth_user):
+    def test_GET_passes_update_watering_station_form_to_context(self, mock_form_class, mock_render, mock_auth_user, rf):
         garden_pk = 1
         ws_pk = 2
         mock_form = mock_form_class.return_value
-        request = HttpRequest()
+        request = rf.get(f'/gardens/{garden_pk}/watering-stations/{ws_pk}/')
         request.user = mock_auth_user
 
         WateringStationUpdateView().get(request, garden_pk, ws_pk)

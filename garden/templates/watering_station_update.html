@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
 
 {% block navbar %}
     {% include 'watering_station_nav.html' with watering_station=form.instance.get_formatter %}
@@ -16,7 +17,7 @@
             <div class="card-header text-center">
                 <h2>Update Watering Station</h2>
             </div>
-            <div id={{form.FORM_CONTAINER_ID}} class="card-body">
+            <div class="card-body">
                 {% load crispy_forms_tags %}
                 {% crispy form %}
             </div>
@@ -38,17 +39,6 @@
 
 
 {% block javascript %}
-<script>
-    var configs = {
-        imgInputSelector: '#{{form.image.auto_id}}',
-        cropBtnSelector: '#{{form.CROP_BTN_ID}}',
-        resetBtnSelector: '#{{form.RESET_BTN_ID}}',
-        imgContainerSelector: '#{{form.IMAGE_CONTAINER_ID}}',
-        formSelector: '#{{form.FORM_ID}}',
-        deleteUrl: '{{ form.instance.get_delete_url }}',
-        formContainerSelector: '#{{form.FORM_CONTAINER_ID}}'
-    };
-</script>
-<script src="/static/javascript/utils.js"></script>
-<script src="/static/javascript/garden_update.js"></script>
+{{ configs|json_script:'configs' }}
+{% render_bundle 'wateringStationUpdate' 'js' %}
 {% endblock %}

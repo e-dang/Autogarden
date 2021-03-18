@@ -1,12 +1,12 @@
 import re
 
-from garden.forms import CropperMixin, WateringStationForm
+from garden.forms import WateringStationForm
 from garden.utils import derive_duration_string
 
 from ..base import wait_for
 from .base_page import BasePage
-from .elements import (Button, CancelButton, ConfirmDeleteButton, DeleteButton,
-                       ImageInput, SubmitButton, TextInput, ToggleButton)
+from .elements import (CancelButton, ConfirmDeleteButton, CropButton, DeleteButton,
+                       ImageInput, ResetButton, SubmitButton, TextInput, ToggleButton)
 
 
 class MoistureThresholdInput(TextInput):
@@ -28,14 +28,6 @@ class StatusCheckBox(ToggleButton):
 class WateringStationImage(ImageInput):
     INPUT_LOCATOR = 'id_image'
     IMAGE_LOCATOR = 'wateringStationImage'
-
-
-class CropButton(Button):
-    LOCATOR = CropperMixin.CROP_BTN_ID
-
-
-class ResetButton(Button):
-    LOCATOR = CropperMixin.RESET_BTN_ID
 
 
 class WateringStationUpdatePage(BasePage):

@@ -51,9 +51,6 @@ class DeleteForm(forms.Form):
 
 
 class CropperMixin(forms.Form):
-    CROP_BTN_ID = 'cropBtn'
-    RESET_BTN_ID = 'resetBtn'
-    IMAGE_CONTAINER_ID = 'imageContainer'
     BUTTON_CSS = 'btn-primary my-2'
 
     def __init__(self, *args, **kwargs):
@@ -63,18 +60,15 @@ class CropperMixin(forms.Form):
                 Column(
                     HTML(f'''
                 <div class="row justify-content-center">
-                    <div id="{self.IMAGE_CONTAINER_ID}" class="photo-container">
+                    <div class="photo-container">
                     </div>
                 </div>
             '''),
                 )
             ),
             FormActions(
-
-                Button('crop', 'Crop', css_id=self.CROP_BTN_ID,
-                       css_class=self.BUTTON_CSS, hidden=True),
-                Button('reset', 'Reset', css_id=self.RESET_BTN_ID,
-                       css_class=self.BUTTON_CSS, hidden=True),
+                Button('crop', 'Crop', css_class=self.BUTTON_CSS, hidden=True),
+                Button('reset', 'Reset', css_class=self.BUTTON_CSS, hidden=True),
                 css_class='form-row justify-content-center'
             ),
             HTML('<hr>')
@@ -102,7 +96,6 @@ class TokenForm(forms.ModelForm):
 class GardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'gardenForm'
     MODAL_ID = 'deleteGardenModal'
-    FORM_CONTAINER_ID = 'formContainer'
 
     update_frequency = CustomDurationField(validators=[validate_duration])
 
@@ -169,7 +162,6 @@ class DeleteGardenForm(DeleteForm):
 class WateringStationForm(forms.ModelForm, CropperMixin):
     MODAL_ID = 'deleteWateringStationModal'
     FORM_ID = 'wateringStationForm'
-    FORM_CONTAINER_ID = 'formContainer'
 
     watering_duration = CustomDurationField(validators=[validate_duration])
     moisture_threshold = forms.IntegerField(validators=[
