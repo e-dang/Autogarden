@@ -1,7 +1,7 @@
 from garden.utils import derive_duration_string
 import pytest
 from django.urls import reverse
-from garden.models import _default_garden_name, _default_update_frequency
+from garden.models import _default_update_frequency
 from tests.assertions import assert_image_files_equal
 
 from .base import Base
@@ -28,11 +28,11 @@ class TestGardenSetup(Base):
         assert list_page.get_number_of_gardens() == 0
 
         # they also see an option to create a new garden, which they click and immediately see a modal that prompts
-        # them for the garden name. The default garden name is displayed in that text box. They are also prompted for
-        # the number of watering stations that are going to be in this garden, an image, and the update interval
+        # them for the garden name. They are also prompted for the number of watering stations that are going to be in
+        # this garden, an image, and the update interval
         list_page.new_garden_button.click()
         self.wait_for_modal_to_be_visible(list_page.modal_id)
-        assert list_page.new_garden_name == _default_garden_name()
+        assert list_page.new_garden_name == ''
         assert list_page.num_watering_stations == ''
         assert list_page.update_frequency == str(derive_duration_string(_default_update_frequency()))
         assert list_page.garden_image
@@ -45,6 +45,8 @@ class TestGardenSetup(Base):
 
         # they enter a negative number for the number of watering stations and hit enter, and they see a error message
         # appear
+        garden_name = 'My New Garden'
+        list_page.new_garden_name = garden_name
         list_page.num_watering_stations = -1
         list_page.update_frequency = -1
         list_page.submit_button.click()
@@ -53,7 +55,6 @@ class TestGardenSetup(Base):
 
         # now they enter a garden name and valid number of watering stations and see a new garden appear in the list of
         # gardens
-        garden_name = 'My New Garden'
         num_watering_stations = 3
         garden_image = 'test_garden_image.png'
         update_frequency = '0:10:00'

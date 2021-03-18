@@ -11,12 +11,11 @@ from garden.formatters import WateringStationFormatter
 @pytest.mark.unit
 class TestGardenModel:
     @pytest.mark.parametrize('field, get_default', [
-        ('name', models._default_garden_name),
         ('is_connected', models._default_is_connected),
         ('update_frequency', models._default_update_frequency),
         ('image', models._default_garden_image)
     ],
-        ids=['name', 'is_connected', 'update_frequency', 'image'])
+        ids=['is_connected', 'update_frequency', 'image'])
     def test_field_is_given_a_default_value(self, field, get_default):
         garden = models.Garden()
 

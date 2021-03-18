@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='Garden',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default=garden.models._default_garden_name, max_length=255)),
+                ('name', models.CharField(max_length=255)),
                 ('image', models.ImageField(default=garden.models._default_garden_image, upload_to='')),
                 ('is_connected', models.BooleanField(default=garden.models._default_is_connected)),
                 ('last_connection_ip', models.GenericIPAddressField(null=True)),
