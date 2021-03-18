@@ -6,7 +6,7 @@ class LiquidLevelSensor : public ILiquidLevelSensor {
 public:
     ~LiquidLevelSensor() = default;
 
-    LiquidLevelSensor(const String& id, ILogicInputPin* inputPin, const bool& okValue = true) :
+    LiquidLevelSensor(const String& id, ILogicInputPin* inputPin, const int& okValue = HIGH) :
         ILiquidLevelSensor(id), __pPin(inputPin), __mOkValue(okValue) {}
 
     const char* read() override {
@@ -31,6 +31,6 @@ protected:
     }
 
 private:
-    bool __mOkValue;
+    int __mOkValue;
     std::unique_ptr<ILogicInputPin> __pPin;
 };

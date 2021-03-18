@@ -32,7 +32,7 @@ public:
 
     virtual std::shared_ptr<IPump> createPump(const String& id, const int& onValue, const int& offValue) = 0;
 
-    virtual std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const bool& okValue) = 0;
+    virtual std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const int& okValue) = 0;
 };
 
 class ComponentFactory : public IComponentFactory {
@@ -93,7 +93,7 @@ public:
         return std::make_shared<Pump>(id, inputPin.release(), onValue, offValue);
     }
 
-    std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const bool& okValue) override {
+    std::shared_ptr<ILiquidLevelSensor> createLiquidLevelSensor(const String& id, const int& okValue) override {
         auto inputPin = __pPinFactory->createLogicInputPin(0, PinMode::DigitalInput);
         return std::make_shared<LiquidLevelSensor>(id, inputPin.release(), okValue);
     }

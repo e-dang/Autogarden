@@ -48,7 +48,7 @@ protected:
     std::vector<std::shared_ptr<IMoistureSensor>> sensors;
 
     const String llSensorId = "llsensor";
-    const bool okValue      = true;
+    const int okValue       = HIGH;
     std::shared_ptr<ILiquidLevelSensor> llSensor;
 
     ComponentFactory factory;
