@@ -11,4 +11,6 @@ public:
     virtual bool update(const JsonObject& configs) = 0;
 
     virtual int getIdx() const = 0;
+
+    virtual JsonObjectConst getData() const = 0;
 };

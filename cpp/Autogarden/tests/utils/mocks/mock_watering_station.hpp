@@ -9,4 +9,5 @@ public:
     MOCK_METHOD(void, activate, (), (override));
     MOCK_METHOD(bool, update, (const JsonObject& configs), (override));
     MOCK_METHOD(int, getIdx, (), (const, override));
+    MOCK_METHOD(JsonObjectConst, getData, (), (const, override));
 };
