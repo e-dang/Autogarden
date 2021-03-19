@@ -31,11 +31,11 @@ class TestGardenAPIView:
     @pytest.fixture(autouse=True)
     def setup(self, auth_api_garden):
         self.garden = auth_api_garden
-        self.url = reverse('api-garden', kwargs={'pk': auth_api_garden.pk})
+        self.url = reverse('api-garden', kwargs={'name': auth_api_garden.name})
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
-        assert self.url == f'/api/gardens/{self.garden.pk}/'
+        assert self.url == f'/api/gardens/{self.garden.name}/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_status_code(self, auth_api_client):
@@ -113,10 +113,10 @@ class TestWateringStationAPIView:
     @pytest.fixture(autouse=True)
     def setup(self, auth_api_garden):
         self.garden = auth_api_garden
-        self.url = reverse('api-watering-stations', kwargs={'pk': self.garden.pk})
+        self.url = reverse('api-watering-stations', kwargs={'name': auth_api_garden.name})
 
     def test_view_has_correct_url(self):
-        assert self.url == f'/api/gardens/{self.garden.pk}/watering-stations/'
+        assert self.url == f'/api/gardens/{self.garden.name}/watering-stations/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_response(self, auth_api_client):

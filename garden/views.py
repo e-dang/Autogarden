@@ -37,14 +37,14 @@ def home(request: http.HttpRequest) -> http.HttpResponse:
 class GardenAPIView(APIView):
     permission_classes = [TokenPermission]
 
-    def get(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
+    def get(self, request: Request, name: str) -> Response:
+        garden = Garden.objects.get(name=name)
         self.check_object_permissions(request, garden)
         serializer = GardenGetSerializer(instance=garden)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def patch(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
+    def patch(self, request: Request, name: str) -> Response:
+        garden = Garden.objects.get(name=name)
         self.check_object_permissions(request, garden)
         serializer = GardenPatchSerializer(data=request.data, instance=garden)
         if serializer.is_valid():
@@ -56,15 +56,15 @@ class GardenAPIView(APIView):
 class WateringStationAPIView(APIView):
     permission_classes = [TokenPermission]
 
-    def get(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
+    def get(self, request: Request, name: str) -> Response:
+        garden = Garden.objects.get(name=name)
         self.check_object_permissions(request, garden)
         watering_stations = garden.watering_stations.all()
         serializer = WateringStationSerializer(watering_stations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
+    def post(self, request: Request, name: str) -> Response:
+        garden = Garden.objects.get(name=name)
         self.check_object_permissions(request, garden)
         for i, station in enumerate(garden.watering_stations.all()):
             station.records.create(**request.data[i])

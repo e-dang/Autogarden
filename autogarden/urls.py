@@ -32,8 +32,8 @@ urlpatterns = [
 
     path('', home, name='home'),
 
-    path(API_PREFIX + 'gardens/<int:pk>/', GardenAPIView.as_view(), name='api-garden'),
-    path(API_PREFIX + 'gardens/<int:pk>/watering-stations/',
+    path(API_PREFIX + 'gardens/<str:name>/', GardenAPIView.as_view(), name='api-garden'),
+    path(API_PREFIX + 'gardens/<str:name>/watering-stations/',
          WateringStationAPIView.as_view(), name='api-watering-stations'),
 
     path('login/', LoginView.as_view(), name='login'),
