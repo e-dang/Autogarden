@@ -2,10 +2,9 @@ import random
 from datetime import timedelta
 from time import sleep
 import pytest
-from garden.models import (Garden, _default_is_connected,
+from garden.models import (Garden,
                            _default_moisture_threshold,
                            _default_status,
-                           _default_update_frequency,
                            _default_watering_duration)
 from garden.utils import derive_duration_string
 from rest_framework import status
