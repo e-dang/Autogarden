@@ -40,6 +40,7 @@ struct AutoGardenConfigs {
     int okValue;
 
     String apiKey;
+    String gardenName;
 
     String ssid;
     String password;
@@ -55,8 +56,8 @@ public:
         __pClientFactory(std::move(clientFactory)) {}
 
     std::unique_ptr<IAutoGarden> create() override {
-        auto client =
-          __pClientFactory->create(__pConfigs->apiKey, __pConfigs->ssid, __pConfigs->password, __pConfigs->rootUrl);
+        auto client     = __pClientFactory->create(__pConfigs->gardenName, __pConfigs->apiKey, __pConfigs->ssid,
+                                               __pConfigs->password, __pConfigs->rootUrl);
         auto controller = __pComponentFactory->createMicroController(
           __pConfigs->microControllerId, __pConfigs->digitalOutput, __pConfigs->digitalInput, __pConfigs->analogOutput,
           __pConfigs->analogInput);

@@ -9,8 +9,8 @@
 
 class APIClient : public IAPIClient {
 public:
-    APIClient(const String& apiKey, const String& rootUrl, std::unique_ptr<IHttpClient>&& client,
-              const String& contentType = "application/json") :
+    APIClient(const String& gardenName, const String& apiKey, const String& rootUrl,
+              std::unique_ptr<IHttpClient>&& client, const String& contentType = "application/json") :
         __mAPIKey(apiKey), __mRootUrl(rootUrl), __mContentType(contentType), __pClient(std::move(client)) {}
 
     DynamicJsonDocument getWateringStationConfigs() override {
@@ -90,7 +90,7 @@ protected:
 
     String _getGardenUrl() const {
         auto url = __mRootUrl + "api/gardens/<?>/";
-        url.replace("<?>", __mAPIKey);
+        url.replace("<?>", gardenName);
         return url;
     }
 
@@ -106,10 +106,11 @@ public:
     APIClientFactory(std::unique_ptr<IHttpClientFactory>&& httpClientFactory) :
         __pHttpClientFactory(std::move(httpClientFactory)) {}
 
-    std::unique_ptr<IAPIClient> create(const String&& apiKey, const String& ssid, const String& password,
-                                       const String& rootUrl, const int& waitTime = 1000) override {
+    std::unique_ptr<IAPIClient> create(const String& gardenName, const String& apiKey, const String& ssid,
+                                       const String& password, const String& rootUrl,
+                                       const int& waitTime = 1000) override {
         auto httpClient = __pHttpClientFactory->create(ssid, password, waitTime);
-        return std::make_unique<APIClient>(apiKey, rootUrl, std::move(httpClient));
+        return std::make_unique<APIClient>(gardenName, apiKey, rootUrl, std::move(httpClient));
     }
 
 private:

@@ -28,6 +28,7 @@ AutoGardenConfigs configs = {
     "llSensor",
     HIGH,
     "",  // apiKey
+    "",  // gardenName
     "",  // ssid
     "",  // wifi password
     ""   // domain name of server
