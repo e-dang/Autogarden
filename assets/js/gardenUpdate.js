@@ -12,9 +12,7 @@ const formHandler = new AjaxFormHandler(tokenConfigs);
 formHandler.bind(successCb, undefined);
 const imageFormHandler = createAjaxImageFormHandler(gardenConfigs);
 
-getModalDataAjax(gardenConfigs).then(() => {
-    imageFormHandler.addFormListeners();
-});
+getModalDataAjax(gardenConfigs);
+imageFormHandler.addFormListeners();
 addAjaxFormHandler(formHandler, getFormData);
-
 fitText('#name');
