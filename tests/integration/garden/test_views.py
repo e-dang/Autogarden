@@ -229,7 +229,7 @@ class TestGardenListView:
     def test_POST_with_valid_data_returns_json_response_with_success_and_redirect_url(self, auth_client, new_garden_form_fields):
         resp = auth_client.post(self.url, data=new_garden_form_fields, follow=False)
 
-        assertions.assert_successful_json_response(resp, resp.wsgi_request.build_absolute_uri(reverse('garden-list')))
+        assertions.assert_successful_json_response(resp, reverse('garden-list'))
 
     @pytest.mark.django_db
     def test_POST_with_invalid_data_returns_json_response_with_failure_and_html(self, auth_client, invalid_new_garden_data):

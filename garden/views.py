@@ -99,7 +99,7 @@ class GardenListView(LoginRequiredMixin, View):
             form.save()
             return JsonResponse({
                 'success': True,
-                'url': request.build_absolute_uri(reverse('garden-list'))
+                'url': reverse('garden-list')
             })
 
         form_html = render_crispy_form(form, context=csrf(request))
@@ -116,7 +116,7 @@ class GardenDetailView(LoginRequiredMixin, View):
             garden.refresh_connection_status()
             configs = {
                 'formSelector': f'#{NewWateringStationForm.FORM_ID}',
-                'url': request.build_absolute_uri(reverse('watering-station-create', kwargs={'pk': pk})),
+                'url': reverse('watering-station-create', kwargs={'pk': pk}),
             }
             return render(request, 'garden_detail.html', context={
                 'garden': GardenFormatter(garden),
@@ -137,7 +137,7 @@ class GardenUpdateView(LoginRequiredMixin, View):
 
             garden_configs = {
                 'formSelector': f'#{garden_form.FORM_ID}',
-                'url': request.build_absolute_uri(garden.get_delete_url()),
+                'url': garden.get_delete_url(),
             }
             token_configs = {
                 'formSelector': f'#{token_form.FORM_ID}'
@@ -276,7 +276,7 @@ class WateringStationUpdateView(LoginRequiredMixin, View):
             form = WateringStationForm(instance=station)
             configs = {
                 'formSelector': f'#{form.FORM_ID}',
-                'url': request.build_absolute_uri(station.get_delete_url()),
+                'url': station.get_delete_url(),
             }
             return render(request, 'watering_station_update.html', context={
                 'form': form,
