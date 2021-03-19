@@ -5,7 +5,7 @@ from garden.utils import build_duration_string
 from selenium.common.exceptions import InvalidElementStateException
 from tests.assertions import assert_image_files_equal
 
-from .base import Base
+from .base import Base, wait_for
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_list_page import GardenListPage
 from .pages.garden_update_page import GardenUpdatePage
@@ -65,7 +65,7 @@ class TestGardenModification(Base):
             pytest.fail('User should not be able to manually update API Key')
 
         update_gpage.reset_api_key_button.click()
-        assert update_gpage.api_key != orig_key
+        assert wait_for(lambda: update_gpage.api_key != orig_key)
         assert '*' not in str(update_gpage.api_key)
 
         # goes back to the garden detail page where they see the new name and image

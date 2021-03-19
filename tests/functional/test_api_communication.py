@@ -10,7 +10,7 @@ from garden.utils import derive_duration_string
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from .base import Base
+from .base import Base, wait_for
 from .pages.garden_detail_page import GardenDetailPage
 from .pages.garden_update_page import GardenUpdatePage
 from .pages.watering_station_detail_page import WateringStationDetailPage
@@ -86,6 +86,7 @@ class TestAPICommunication(Base):
         self.wait_for_page_to_be_loaded(update_gpage)
         update_frequency = timedelta(minutes=7, seconds=20)
         update_gpage.update_garden(update_frequency=derive_duration_string(update_frequency))
+        self.wait_for_page_to_be_loaded(update_gpage)
         update_gpage.garden_detail_nav_button.click()
         self.wait_for_page_to_be_loaded(detail_gpage)
 
@@ -131,7 +132,7 @@ class TestAPICommunication(Base):
 
         # they then click the reset api key button and the api key resets
         update_gpage.reset_api_key_button.click()
-        assert update_gpage.api_key != self.token_uuid
+        assert wait_for(lambda: update_gpage.api_key != self.token_uuid)
         assert '*' not in str(update_gpage.api_key)
 
         # the microcontroller then tries to access the api, but the operation is not allowed
