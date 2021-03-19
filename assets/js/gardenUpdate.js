@@ -10,6 +10,7 @@ const tokenConfigs = getConfigData('tokenConfigs');
 const gardenConfigs = getConfigData('gardenConfigs');
 const formHandler = new AjaxFormHandler(tokenConfigs);
 formHandler.bind(successCb, undefined);
+console.log(successCb, formHandler.successCb);
 const imageFormHandler = createAjaxImageFormHandler(gardenConfigs);
 
 getModalDataAjax(gardenConfigs).then(() => {
