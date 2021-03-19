@@ -56,7 +56,7 @@ class TestGardenModification(Base):
 
         # the user then tries to edit the api key field but fails. Instead they click the Reset button near it
         # and it changes
-        orig_key = update_gpage
+        orig_key = str(update_gpage.api_key)
         try:
             update_gpage.api_key = 'aioufhaiulfhaofjsoieg'
         except InvalidElementStateException:
