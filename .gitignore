@@ -131,3 +131,4 @@ dmypy.json
 !/cpp/Autogarden/lib
 /static
 node_modules
+tests/functional/screenshots

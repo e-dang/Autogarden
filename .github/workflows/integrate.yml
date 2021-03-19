@@ -74,3 +74,10 @@ jobs:
       - name: Functional tests
         run: make test-f
 
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: Collect debug screenshot
+          path: ./tests/functional/screenshots
+          if-no-files-found: ignore
+
