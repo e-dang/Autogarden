@@ -2,15 +2,15 @@ import datetime
 
 from crispy_forms.bootstrap import FieldWithButtons, FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import (Column, HTML, Button, Field, Layout, Row,
+from crispy_forms.layout import (HTML, Button, Column, Field, Layout, Row,
                                  Submit)
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import Q
 
 from .models import Garden, Token, WateringStation, _default_update_frequency
-from .utils import (derive_duration_string,
-                    set_num_watering_stations)
-from django.core.validators import MinValueValidator, MaxValueValidator
+from .utils import derive_duration_string, set_num_watering_stations
 
 REQUIRED_FIELD_ERR_MSG = 'This field is required.'
 INVALID_DURATION_ERR_MSG = 'This field must contain a duration greater than 1 second.'
@@ -96,6 +96,7 @@ class TokenForm(forms.ModelForm):
 class GardenForm(forms.ModelForm, CropperMixin):
     FORM_ID = 'gardenForm'
     MODAL_ID = 'deleteGardenModal'
+    NON_UNIQUE_NAME_ERR_MSG = 'You already have a garden with that name.'
 
     update_frequency = CustomDurationField(validators=[validate_duration])
 
@@ -127,6 +128,13 @@ class GardenForm(forms.ModelForm, CropperMixin):
 
         self.fields['update_frequency'].label = 'Update Frequency'
 
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if self.instance is not None and self.instance.owner.gardens.filter(~Q(pk=self.instance.pk), name=name).exists():
+            raise ValidationError(self.NON_UNIQUE_NAME_ERR_MSG)
+
+        return name
+
 
 class NewGardenForm(GardenForm):
     FORM_ID = 'newGardenForm'
@@ -135,8 +143,9 @@ class NewGardenForm(GardenForm):
     num_watering_stations = forms.IntegerField(label='Number of Watering Stations', validators=[
                                                MinValueValidator(0, MIN_VALUE_ERR_MSG)])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, owner=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.owner = owner
         self.helper.form_action = 'garden-list'
         self.helper.layout.insert(2, Field('num_watering_stations'))
         self.helper.layout[-1] = FormActions(
@@ -147,9 +156,15 @@ class NewGardenForm(GardenForm):
         )
         self.fields['update_frequency'].initial = _default_update_frequency()
 
-    def save(self, owner):
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if self.owner is not None and self.owner.gardens.filter(name=name).exists():
+            raise ValidationError(self.NON_UNIQUE_NAME_ERR_MSG)
+        return name
+
+    def save(self):
         num_watering_stations = self.cleaned_data.pop('num_watering_stations')
-        garden = owner.gardens.create(**self.cleaned_data)
+        garden = self.owner.gardens.create(**self.cleaned_data)
         set_num_watering_stations(garden, num_watering_stations)
         return garden
 

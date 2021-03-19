@@ -74,4 +74,5 @@ class GardenListPage(BasePage):
         self.num_watering_stations = num_watering_stations
         self.garden_image = garden_image
         self.update_frequency = update_frequency
+        self.crop_image_button.click()
         self.submit_button.click()

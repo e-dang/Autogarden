@@ -58,7 +58,6 @@ class TestGardenSetup(Base):
         num_watering_stations = 3
         garden_image = 'test_garden_image.png'
         update_frequency = '0:10:00'
-        list_page.new_garden_name = garden_name
         list_page.num_watering_stations = num_watering_stations
         list_page.update_frequency = update_frequency
         self.perform_image_crop(list_page, garden_image)
@@ -78,3 +77,22 @@ class TestGardenSetup(Base):
         # list page
         list_page.home_button.click()
         self.wait_for_page_to_be_loaded(list_page)
+
+    @pytest.mark.django_db
+    def test_user_cannot_create_a_garden_with_duplicate_name(self):
+        # a user goes to the garden page
+        self.driver.get(self.url)
+        list_page = GardenListPage(self.driver)
+        self.wait_for_page_to_be_loaded(list_page)
+
+        # they then create a new garden
+        garden_name = 'New garden'
+        list_page.add_garden(garden_name, 1, 'test_garden_image.png', '0:10:00')
+        self.wait_for_model_to_disappear(list_page.modal_id)
+
+        # they see the new garden on the page
+        list_page.wait_for_garden_in_list(garden_name)
+
+        # they then try to create a second garden with the same name, but instead they see an error
+        list_page.add_garden(garden_name, 1, 'test_garden_image.png', '0:10:00')
+        self.wait_for_form_error('error_1_id_name')
