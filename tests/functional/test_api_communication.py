@@ -2,10 +2,9 @@ import random
 from datetime import timedelta
 from time import sleep
 import pytest
-from garden.models import (Garden, _default_is_connected,
+from garden.models import (Garden,
                            _default_moisture_threshold,
                            _default_status,
-                           _default_update_frequency,
                            _default_watering_duration)
 from garden.utils import derive_duration_string
 from rest_framework import status
@@ -27,6 +26,7 @@ class TestAPICommunication(Base):
         self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 16
         self.update_frequency = 1
+        self.token_uuid = token_uuid
         self.garden = garden_factory(owner=self.user,
                                      watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True,
@@ -106,7 +106,7 @@ class TestAPICommunication(Base):
 
         # when the MC sends another GET request to the watering station api, it recieves the new updated configs
         # self.send_get_request_to_watering_station_api(self.garden)
-        resp = self.api_client.get(self.get_watering_station_url(self.garden))
+        resp = self.api_client.get(self.get_watering_station_api_url(self.garden))
         assert resp.status_code == status.HTTP_200_OK
         for i, ws_config in enumerate(resp.data, start=1):
             if i == selected_watering_station:
@@ -119,16 +119,39 @@ class TestAPICommunication(Base):
                 assert ws_config['watering_duration'] == _default_watering_duration().total_seconds()
 
         # similarly when it sends a GET request to the garden api, it recieves the new updated configs
-        garden_url = reverse('api-garden', kwargs={'pk': self.garden.pk})
-        resp = self.api_client.get(garden_url)
+        resp = self.api_client.get(self.get_garden_api_url(self.garden))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_frequency'] == update_frequency.total_seconds()
 
-    def get_garden_api_url(self, garden):
-        return reverse('api-garden', kwargs={'pk': garden.pk})
+        # the user then goes to the update garden page
+        update_ws_page.garden_detail_nav_button.click()
+        self.wait_for_page_to_be_loaded(detail_gpage)
+        detail_gpage.edit_button.click()
+        self.wait_for_page_to_be_loaded(update_gpage)
 
-    def get_watering_station_url(self, garden):
-        return reverse('api-watering-stations', kwargs={'pk': garden.pk})
+        # they then click the reset api key button and the api key resets
+        update_gpage.reset_api_key_button.click()
+        assert update_gpage.api_key != self.token_uuid
+        assert '*' not in str(update_gpage.api_key)
+
+        # the microcontroller then tries to access the api, but the operation is not allowed
+        resp = self.api_client.get(self.get_watering_station_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.get(self.get_garden_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.post(self.get_watering_station_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.patch(self.get_garden_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def get_garden_api_url(self, garden):
+        return reverse('api-garden', kwargs={'name': garden.name})
+
+    def get_watering_station_api_url(self, garden):
+        return reverse('api-watering-stations', kwargs={'name': garden.name})
 
     def send_patch_request_to_garden_api(self, garden, data):
         garden_url = self.get_garden_api_url(garden)
@@ -151,7 +174,7 @@ class TestAPICommunication(Base):
         return resp.data
 
     def send_get_request_to_watering_station_api(self, garden):
-        watering_station_url = self.get_watering_station_url(garden)
+        watering_station_url = self.get_watering_station_api_url(garden)
 
         resp = self.api_client.get(watering_station_url)
 
@@ -165,7 +188,7 @@ class TestAPICommunication(Base):
         return resp.data
 
     def send_post_request_to_watering_station_api(self, garden, data):
-        watering_station_url = self.get_watering_station_url(garden)
+        watering_station_url = self.get_watering_station_api_url(garden)
 
         resp = self.api_client.post(watering_station_url, data=data, format='json')
         assert resp.status_code == status.HTTP_201_CREATED

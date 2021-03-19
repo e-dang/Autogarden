@@ -47,16 +47,21 @@ protected:
     const float sensorScaler = 512. / 1023.;
     std::vector<std::shared_ptr<IMoistureSensor>> sensors;
 
+    const String llSensorId = "llsensor";
+    const int okValue       = HIGH;
+    std::shared_ptr<ILiquidLevelSensor> llSensor;
+
     ComponentFactory factory;
 
     NiceMock<MockArduino> mockArduino;
 
     ObjectWiringTest() : factory(std::make_unique<SignalFactory>(), std::make_unique<PinFactory>()) {
-        controller = factory.createMicroController(controllerId, { pin0, pin1, pin2, pin3, pin4, pin5, pin6 }, {},
+        controller = factory.createMicroController(controllerId, { pin0, pin1, pin2, pin3, pin4, pin5 }, { pin6 },
                                                    { pin7, pin8 }, { pin9 });
         dMux       = factory.createMultiplexer(dMuxId, numDMuxInputs, numDMuxOutputs, dMuxMode);
         aMux       = factory.createMultiplexer(aMuxId, numAMuxInputs, numAMuxOutputs, aMuxMode);
         reg        = factory.createShiftRegister(regId, regNumOutputs, regDirection);
+        llSensor   = factory.createLiquidLevelSensor(llSensorId, okValue);
 
         for (int i = 0; i < numDMuxOutputs; i++) {
             auto id = valveId + String(i);
@@ -105,6 +110,20 @@ TEST_F(ObjectWiringTest, moisture_sensor_to_microcontroller) {
 
     EXPECT_EQ(sensor->readRaw(), value);
     EXPECT_FLOAT_EQ(sensor->readScaled(), static_cast<float>(value) * sensorScaler);
+
+    setMockArduino(nullptr);
+}
+
+TEST_F(ObjectWiringTest, liquid_level_sensor_to_microcontroller) {
+    const bool readValue = !okValue;
+    setMockArduino(&mockArduino);
+
+    ASSERT_TRUE(controller->appendChild(llSensor));
+    assertWiringIsCorrect(controller.get(), llSensor.get());
+
+    EXPECT_CALL(mockArduino, _digitalRead(pin6)).WillOnce(Return(readValue));
+
+    EXPECT_EQ(llSensor->read(), llSensor->LOW_VALUE);
 
     setMockArduino(nullptr);
 }

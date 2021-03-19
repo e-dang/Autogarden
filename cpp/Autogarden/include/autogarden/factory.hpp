@@ -36,8 +36,11 @@ struct AutoGardenConfigs {
     int valveOnValue;
     int valveOffValue;
 
-    ServerConfigs serverConfigs;
-    uint32_t millisecondDelay;
+    String liquidLevelSensorId;
+    int okValue;
+
+    String apiKey;
+    String gardenName;
 
     String ssid;
     String password;
@@ -53,13 +56,17 @@ public:
         __pClientFactory(std::move(clientFactory)) {}
 
     std::unique_ptr<IAutoGarden> create() override {
-        auto client     = __pClientFactory->create(__pConfigs->ssid, __pConfigs->password, __pConfigs->rootUrl);
+        auto client     = __pClientFactory->create(__pConfigs->gardenName, __pConfigs->apiKey, __pConfigs->ssid,
+                                               __pConfigs->password, __pConfigs->rootUrl);
         auto controller = __pComponentFactory->createMicroController(
           __pConfigs->microControllerId, __pConfigs->digitalOutput, __pConfigs->digitalInput, __pConfigs->analogOutput,
           __pConfigs->analogInput);
+        auto liquidLevelSensor =
+          __pComponentFactory->createLiquidLevelSensor(__pConfigs->liquidLevelSensorId, __pConfigs->okValue);
         auto wateringStations = _createWateringStations(controller.get());
-        return std::make_unique<AutoGarden>(__pConfigs->serverConfigs, std::move(client), std::move(wateringStations),
-                                            std::move(controller));
+
+        return std::make_unique<AutoGarden>(std::move(client), std::move(wateringStations), std::move(controller),
+                                            std::move(liquidLevelSensor));
     }
 
 private:

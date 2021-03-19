@@ -7,6 +7,7 @@ struct HttpRequest {
     String url;
     String method;
     String contentType;
+    String authorization;
     DynamicJsonDocument data;
 
     HttpRequest() : url(), method(), contentType(), data(0) {}
@@ -39,6 +40,10 @@ public:
     virtual HttpResponse get(const HttpRequest& request) = 0;
 
     virtual HttpResponse post(const HttpRequest& request) = 0;
+
+    virtual HttpResponse patch(const HttpRequest& request) = 0;
+
+    virtual int getConnectionStrength() const = 0;
 };
 
 class IHttpClientFactory {

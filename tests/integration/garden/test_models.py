@@ -2,10 +2,11 @@ from datetime import datetime, timedelta
 
 import pytest
 import pytz
+from django.db.utils import IntegrityError
+from tests.assertions import assert_unordered_data_eq
 
 from garden.formatters import WateringStationFormatter
 from garden.models import Garden, Token, WateringStation
-from tests.assertions import assert_unordered_data_eq
 
 
 @pytest.mark.integration
@@ -182,6 +183,14 @@ class TestGardenModel:
         ret_val = garden.plant_types
 
         assert_unordered_data_eq(ret_val, plant_types)
+
+    @pytest.mark.django_db
+    def test_a_user_cannot_have_two_gardens_with_the_same_name(self, user, garden_factory):
+        garden_name = 'New Garden'
+        garden_factory(owner=user, name=garden_name)
+
+        with pytest.raises(IntegrityError):
+            garden_factory(owner=user, name=garden_name)
 
 
 @pytest.mark.integration

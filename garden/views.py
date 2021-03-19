@@ -37,38 +37,54 @@ def home(request: http.HttpRequest) -> http.HttpResponse:
 class GardenAPIView(APIView):
     permission_classes = [TokenPermission]
 
-    def get(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
-        self.check_object_permissions(request, garden)
-        serializer = GardenGetSerializer(instance=garden)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request: Request, name: str) -> Response:
+        try:
+            garden = Garden.objects.get(name=name)
+        except Garden.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            self.check_object_permissions(request, garden)
+            serializer = GardenGetSerializer(instance=garden)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def patch(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
-        self.check_object_permissions(request, garden)
-        serializer = GardenPatchSerializer(data=request.data, instance=garden)
-        if serializer.is_valid():
-            serializer.save(request)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def patch(self, request: Request, name: str) -> Response:
+        try:
+            garden = Garden.objects.get(name=name)
+        except Garden.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            self.check_object_permissions(request, garden)
+            serializer = GardenPatchSerializer(data=request.data, instance=garden)
+            if serializer.is_valid():
+                serializer.save(request)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WateringStationAPIView(APIView):
     permission_classes = [TokenPermission]
 
-    def get(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
-        self.check_object_permissions(request, garden)
-        watering_stations = garden.watering_stations.all()
-        serializer = WateringStationSerializer(watering_stations, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request: Request, name: str) -> Response:
+        try:
+            garden = Garden.objects.get(name=name)
+        except Garden.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            self.check_object_permissions(request, garden)
+            watering_stations = garden.watering_stations.all()
+            serializer = WateringStationSerializer(watering_stations, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request: Request, pk: int) -> Response:
-        garden = Garden.objects.get(pk=pk)
-        self.check_object_permissions(request, garden)
-        for i, station in enumerate(garden.watering_stations.all()):
-            station.records.create(**request.data[i])
-        return Response({}, status=status.HTTP_201_CREATED)
+    def post(self, request: Request, name: str) -> Response:
+        try:
+            garden = Garden.objects.get(name=name)
+        except Garden.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            self.check_object_permissions(request, garden)
+            for i, station in enumerate(garden.watering_stations.all()):
+                station.records.create(**request.data[i])
+            return Response({}, status=status.HTTP_201_CREATED)
 
 
 class GardenListView(LoginRequiredMixin, View):
@@ -78,9 +94,9 @@ class GardenListView(LoginRequiredMixin, View):
         return render(request, 'garden_list.html', context={'gardens': gardens, 'form': form})
 
     def post(self, request: http.HttpRequest) -> http.JsonResponse:
-        form = NewGardenForm(request.POST, request.FILES)
+        form = NewGardenForm(owner=request.user, data=request.POST, files=request.FILES)
         if form.is_valid():
-            form.save(request.user)
+            form.save()
             return JsonResponse({
                 'success': True,
                 'url': request.build_absolute_uri(reverse('garden-list'))

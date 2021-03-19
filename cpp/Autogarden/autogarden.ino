@@ -3,7 +3,7 @@
 AutoGardenConfigs configs = {
     "controller",
     { D2, D3, D4, D8, D9, D5, D6 },
-    {},
+    { D11 },
     {},
     { A0 },
     "reg",
@@ -25,12 +25,13 @@ AutoGardenConfigs configs = {
     "valve",
     HIGH,
     LOW,
-    { 16,    // num watering stations
-      "" },  // random UUID
-    60000,   // milliseconds delay per loop
-    "",      // ssid
-    "",      // wifi password
-    ""       // domain name of server
+    "llSensor",
+    HIGH,
+    "",  // apiKey
+    "",  // gardenName
+    "",  // ssid
+    "",  // wifi password
+    ""   // domain name of server
 };
 
 std::unique_ptr<IAutoGarden> autogarden;
@@ -46,12 +47,9 @@ std::unique_ptr<IAutoGarden> createAutoGarden() {
 void setup() {
     Serial.begin(9600);
     autogarden = createAutoGarden();
-    autogarden->initializePins();
-    autogarden->initializeServer();
+    autogarden->initialize();
 }
 
 void loop() {
-    autogarden->refreshWateringStations();
     autogarden->run();
-    delay(configs.millisecondDelay);
 }

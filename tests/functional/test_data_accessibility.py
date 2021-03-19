@@ -77,16 +77,18 @@ class TestDataAccessability(Base):
         self.assert_404_error()
 
         # the user then tries to use the api to view and modify the other users data, but that doesnt work as well
-        resp = api_client.get(self.create_api_url(garden.get_absolute_url()))
+        garden_api_url = self.create_api_url(f'/gardens/{garden.name}/')
+        resp = api_client.get(garden_api_url)
         self.assert_403_forbidden(resp)
 
-        resp = api_client.patch(self.create_api_url(garden.get_absolute_url()))
+        resp = api_client.patch(garden_api_url)
         self.assert_403_forbidden(resp)
 
-        resp = api_client.get(self.create_api_url(garden.get_watering_stations_url()))
+        watering_stations_api_url = self.create_api_url(f'/gardens/{garden.name}/watering-stations/')
+        resp = api_client.get(watering_stations_api_url)
         self.assert_403_forbidden(resp)
 
-        resp = api_client.post(self.create_api_url(garden.get_watering_stations_url()))
+        resp = api_client.post(watering_stations_api_url)
         self.assert_403_forbidden(resp)
 
     def assert_404_error(self):

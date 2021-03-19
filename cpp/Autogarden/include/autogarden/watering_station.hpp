@@ -6,19 +6,23 @@
 
 class WateringStation : public IWateringStation {
 public:
-    WateringStation(const int& idx, const uint32_t& duration, const float& threshold, std::shared_ptr<IPump> pump,
-                    std::shared_ptr<IValve> valve, std::shared_ptr<IMoistureSensor> sensor,
+    WateringStation(const int& idx, const bool& status, const uint32_t& duration, const float& threshold,
+                    std::shared_ptr<IPump> pump, std::shared_ptr<IValve> valve, std::shared_ptr<IMoistureSensor> sensor,
                     std::shared_ptr<IWateringStationConfigParser<WateringStationConfigs>> parser) :
         __mIdx(idx),
+        __mStatus(status),
         __mDuration(duration),
         __mThreshold(threshold),
+        __mCurrData(256),
         __pPump(pump),
         __pValve(valve),
         __pSensor(sensor),
         __pParser(parser) {}
 
     void activate() override {
-        if (__pSensor->readScaled() < __mThreshold) {
+        auto reading                  = __pSensor->readScaled();
+        __mCurrData["moisture_level"] = reading;
+        if (isActive() && reading < __mThreshold) {
             __pValve->open();
             __pPump->start();
             delay(__mDuration);
@@ -30,6 +34,7 @@ public:
     bool update(const JsonObject& configs) override {
         auto parsedConfigs = __pParser->parse(configs);
         if (setThreshold(parsedConfigs.threshold)) {
+            setStatus(parsedConfigs.status);
             setDuration(parsedConfigs.duration);
             return true;
         }
@@ -48,6 +53,10 @@ public:
         return true;
     }
 
+    void setStatus(const bool& status) {
+        __mStatus = status;
+    }
+
     int getIdx() const override {
         return __mIdx;
     }
@@ -60,10 +69,20 @@ public:
         return __mThreshold;
     }
 
+    bool isActive() const {
+        return __mStatus;
+    }
+
+    JsonObjectConst getData() const override {
+        return __mCurrData.as<JsonObjectConst>();
+    }
+
 private:
     int __mIdx;
+    bool __mStatus;
     uint32_t __mDuration;
     float __mThreshold;
+    DynamicJsonDocument __mCurrData;
     std::shared_ptr<IPump> __pPump;
     std::shared_ptr<IValve> __pValve;
     std::shared_ptr<IMoistureSensor> __pSensor;

@@ -6,8 +6,9 @@
 
 class MockAPIClient : public IAPIClient {
 public:
-    MOCK_METHOD(void, initializeServer, (const DynamicJsonDocument& request), (override));
-    MOCK_METHOD(DynamicJsonDocument, fetchConfigs, (), (override));
-    MOCK_METHOD(String, getWateringStationsUrl, (), (const, override));
-    MOCK_METHOD(String, getInitializationUrl, (), (const, override));
+    MOCK_METHOD(DynamicJsonDocument, getWateringStationConfigs, (), (const, override));
+    MOCK_METHOD(DynamicJsonDocument, getGardenConfigs, (), (const, override));
+    MOCK_METHOD(void, sendGardenData, (const DynamicJsonDocument& data), (const, override));
+    MOCK_METHOD(void, sendWateringStationData, (const DynamicJsonDocument& data), (const, override));
+    MOCK_METHOD(int, getConnectionStrength, (), (const, override));
 };

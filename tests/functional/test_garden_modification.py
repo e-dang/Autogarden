@@ -66,6 +66,7 @@ class TestGardenModification(Base):
 
         update_gpage.reset_api_key_button.click()
         assert update_gpage.api_key != orig_key
+        assert '*' not in str(update_gpage.api_key)
 
         # goes back to the garden detail page where they see the new name and image
         update_gpage.garden_detail_nav_button.click()

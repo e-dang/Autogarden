@@ -41,6 +41,26 @@ public:
         return response;
     }
 
+    HttpResponse patch(const HttpRequest& request) override {
+        HttpResponse response;
+        if (request.method != "patch") {
+            response.processingError = true;
+            return response;
+        }
+
+        __connect();
+
+        __preprocess(request);
+        response.statusCode = __mClient.PATCH(request.toString());
+        __postprocess(response);
+
+        return response;
+    }
+
+    int getConnectionStrength() const {
+        return __pConnection->getConnectionStrength();
+    }
+
 private:
     void __connect() {
         if (!__pConnection->isConnected())
@@ -50,6 +70,7 @@ private:
     void __preprocess(const HttpRequest& request) {
         __mClient.begin(request.url);
         __mClient.addHeader("Content-Type", request.contentType);
+        __mClient.addHeader("Authorization", "Token " + request.authorization);
     }
 
     void __postprocess(HttpResponse& response) {

@@ -7,19 +7,21 @@ class IAPIClient {
 public:
     virtual ~IAPIClient() = default;
 
-    virtual void initializeServer(const DynamicJsonDocument& request) = 0;
+    virtual DynamicJsonDocument getWateringStationConfigs() const = 0;
 
-    virtual DynamicJsonDocument fetchConfigs() = 0;
+    virtual DynamicJsonDocument getGardenConfigs() const = 0;
 
-    virtual String getWateringStationsUrl() const = 0;
+    virtual void sendGardenData(const DynamicJsonDocument& data) const = 0;
 
-    virtual String getInitializationUrl() const = 0;
+    virtual void sendWateringStationData(const DynamicJsonDocument& data) const = 0;
+
+    virtual int getConnectionStrength() const = 0;
 };
 
 class IAPIClientFactory {
 public:
     virtual ~IAPIClientFactory() = default;
 
-    virtual std::unique_ptr<IAPIClient> create(const String& ssid, const String& password, const String& rootUrl,
-                                               const int& waitTime = 1000) = 0;
+    virtual std::unique_ptr<IAPIClient> create(const String& apiKey, const String& ssid, const String& password,
+                                               const String& rootUrl, const int& waitTime = 1000) = 0;
 };

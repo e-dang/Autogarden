@@ -8,6 +8,7 @@
 struct WateringStationConfigs {
     uint32_t duration;
     float threshold;
+    bool status;
 };
 
 class WateringStationConfigParser : public IWateringStationConfigParser<WateringStationConfigs> {
@@ -18,7 +19,8 @@ public:
         __pParser->parse(configs["watering_duration"]);
         auto duration  = __pParser->getMilliSeconds();
         auto threshold = configs["moisture_threshold"];
-        return { duration, threshold };
+        auto status    = configs["status"];
+        return { duration, threshold, status };
     }
 
 private:

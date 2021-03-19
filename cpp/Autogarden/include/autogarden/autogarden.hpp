@@ -5,57 +5,85 @@
 #include <client/interfaces/api_client.hpp>
 #include <components/components.hpp>
 
-struct ServerConfigs {
-    int numWateringStations;
-    const char* uuid;
-
-    DynamicJsonDocument toJson() const {
-        DynamicJsonDocument doc(1024);
-        doc["uuid"]                = uuid;
-        doc["numWateringStations"] = numWateringStations;
-        doc.shrinkToFit();
-        return doc;
-    }
-};
-
 class AutoGarden : public IAutoGarden {
 public:
-    AutoGarden(const ServerConfigs& configs, std::unique_ptr<IAPIClient>&& client,
-               std::vector<std::unique_ptr<IWateringStation>>&& wateringStations,
-               std::unique_ptr<IMicroController>&& controller) :
-        __mServerConfigs(configs),
+    AutoGarden(std::unique_ptr<IAPIClient>&& client, std::vector<std::unique_ptr<IWateringStation>>&& wateringStations,
+               std::unique_ptr<IMicroController>&& controller,
+               std::unique_ptr<ILiquidLevelSensor>&& liquidLevelSensor) :
         __pClient(std::move(client)),
         __mWateringStations(std::move(wateringStations)),
-        __pMicroController(std::move(controller)) {}
+        __pMicroController(std::move(controller)),
+        __pLiquidLevelSensor(std::move(liquidLevelSensor)) {}
 
-    bool initializePins() override {
+    bool initialize() override {
         return __pMicroController->initialize();
     }
 
-    void initializeServer() override {
-        __pClient->initializeServer(__mServerConfigs.toJson());
-    }
-
-    void refreshWateringStations() override {
-        auto configs = __pClient->fetchConfigs();
-        __updateWateringStations(configs.as<JsonArray>());
-    }
-
     void run() override {
-        for (auto& station : __mWateringStations) {
-            station->activate();
-        }
+        updateGardenConfigs();
+        updateWateringStationConfigs();
+
+        activateWateringStations();
+
+        sendGardenData();
+        sendWateringStationData();
+
+        delay(__mUpdateFrequency);
     }
 
-private:
-    void __updateWateringStations(const JsonArray& configs) {
+    void updateWateringStationConfigs() {
+        auto configs = __pClient->getWateringStationConfigs();
         for (auto& station : __mWateringStations) {
             station->update(configs[station->getIdx()].as<JsonObject>());
         }
     }
 
+    void updateGardenConfigs() {
+        auto configs       = __pClient->getGardenConfigs();
+        __mUpdateFrequency = configs["update_frequency"].as<uint64_t>();
+    }
+
+    void activateWateringStations() {
+        for (auto& station : __mWateringStations) {
+            station->activate();
+        }
+    }
+
+    void sendGardenData() {
+        auto data = __getGardenData();
+        __pClient->sendGardenData(data);
+    }
+
+    void sendWateringStationData() {
+        auto data = __getWateringStationData();
+        __pClient->sendWateringStationData(data);
+    }
+
+    uint64_t getUpdateFrequency() const {
+        return __mUpdateFrequency;
+    }
+
 private:
-    ServerConfigs __mServerConfigs;
+    DynamicJsonDocument __getGardenData() {
+        DynamicJsonDocument data(1024);
+        data["water_level"]         = __pLiquidLevelSensor->read();
+        data["connection_strength"] = __pClient->getConnectionStrength();
+        data.shrinkToFit();
+        return data;
+    }
+
+    DynamicJsonDocument __getWateringStationData() {
+        DynamicJsonDocument data(1024);
+        for (auto& station : __mWateringStations) {
+            data.add(station->getData());
+        }
+        data.shrinkToFit();
+        return data;
+    }
+
+private:
+    uint64_t __mUpdateFrequency;
+    std::unique_ptr<ILiquidLevelSensor> __pLiquidLevelSensor;
     std::unique_ptr<IAPIClient> __pClient;
     std::unique_ptr<IMicroController> __pMicroController;
     std::vector<std::unique_ptr<IWateringStation>> __mWateringStations;

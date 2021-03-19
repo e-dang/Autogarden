@@ -20,10 +20,6 @@ def _default_watering_duration():
     return timedelta(minutes=1)
 
 
-def _default_garden_name():
-    return 'My Garden'
-
-
 def _default_is_connected():
     return False
 
@@ -49,7 +45,7 @@ class Garden(models.Model):
     ]
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='gardens', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, default=_default_garden_name)
+    name = models.CharField(max_length=255, db_index=True)
     image = models.ImageField(default=_default_garden_image)
     is_connected = models.BooleanField(default=_default_is_connected)
     last_connection_ip = models.GenericIPAddressField(null=True)
@@ -57,6 +53,9 @@ class Garden(models.Model):
     update_frequency = models.DurationField(default=_default_update_frequency)
     connection_strength = models.SmallIntegerField(null=True)
     water_level = models.CharField(choices=WATER_LEVEL_CHOICES, max_length=2, null=True)
+
+    class Meta:
+        unique_together = ['owner', 'name']
 
     def __str__(self):
         return self.name

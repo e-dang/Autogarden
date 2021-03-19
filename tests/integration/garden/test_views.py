@@ -28,14 +28,17 @@ def test_home_redirects_to_garden_list_view(auth_client):
 
 @pytest.mark.integration
 class TestGardenAPIView:
+    def create_url(self, name):
+        return reverse('api-garden', kwargs={'name': name})
+
     @pytest.fixture(autouse=True)
     def setup(self, auth_api_garden):
         self.garden = auth_api_garden
-        self.url = reverse('api-garden', kwargs={'pk': auth_api_garden.pk})
+        self.url = self.create_url(auth_api_garden.name)
 
     @pytest.mark.django_db
     def test_view_has_correct_url(self):
-        assert self.url == f'/api/gardens/{self.garden.pk}/'
+        assert self.url == f'/api/gardens/{self.garden.name}/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_status_code(self, auth_api_client):
@@ -107,16 +110,28 @@ class TestGardenAPIView:
 
         assert resp.status_code == status.HTTP_403_FORBIDDEN
 
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['get', 'patch'], ids=['get', 'patch'])
+    def test_method_returns_400_status_code_when_no_garden_with_specified_name_exists(self, auth_api_client, method):
+        url = self.create_url('name-that-doesnt-exist')
+
+        resp = getattr(auth_api_client, method)(url)
+
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
 
 @pytest.mark.integration
 class TestWateringStationAPIView:
+    def create_url(self, name):
+        return reverse('api-watering-stations', kwargs={'name': name})
+
     @pytest.fixture(autouse=True)
     def setup(self, auth_api_garden):
         self.garden = auth_api_garden
-        self.url = reverse('api-watering-stations', kwargs={'pk': self.garden.pk})
+        self.url = self.create_url(self.garden.name)
 
     def test_view_has_correct_url(self):
-        assert self.url == f'/api/gardens/{self.garden.pk}/watering-stations/'
+        assert self.url == f'/api/gardens/{self.garden.name}/watering-stations/'
 
     @pytest.mark.django_db
     def test_GET_returns_200_response(self, auth_api_client):
@@ -169,6 +184,15 @@ class TestWateringStationAPIView:
         resp = getattr(api_client, method)(self.url)
 
         assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.django_db
+    @pytest.mark.parametrize('method', ['get', 'post'], ids=['get', 'post'])
+    def test_method_returns_400_status_code_when_no_garden_with_specified_name_exists(self, auth_api_client, method):
+        url = self.create_url('name-that-doesnt-exist')
+
+        resp = getattr(auth_api_client, method)(url)
+
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.integration
