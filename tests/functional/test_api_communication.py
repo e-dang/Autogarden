@@ -26,6 +26,7 @@ class TestAPICommunication(Base):
         self.user = user_factory(email=self.email, password=test_password)
         self.num_watering_stations = 16
         self.update_frequency = 1
+        self.token_uuid = token_uuid
         self.garden = garden_factory(owner=self.user,
                                      watering_stations=self.num_watering_stations,
                                      watering_stations__defaults=True,
@@ -121,6 +122,30 @@ class TestAPICommunication(Base):
         resp = self.api_client.get(self.get_garden_api_url(self.garden))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['update_frequency'] == update_frequency.total_seconds()
+
+        # the user then goes to the update garden page
+        update_ws_page.garden_detail_nav_button.click()
+        self.wait_for_page_to_be_loaded(detail_gpage)
+        detail_gpage.edit_button.click()
+        self.wait_for_page_to_be_loaded(update_gpage)
+
+        # they then click the reset api key button and the api key resets
+        update_gpage.reset_api_key_button.click()
+        assert update_gpage.api_key != self.token_uuid
+        assert '*' not in str(update_gpage.api_key)
+
+        # the microcontroller then tries to access the api, but the operation is not allowed
+        resp = self.api_client.get(self.get_watering_station_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.get(self.get_garden_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.post(self.get_watering_station_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+        resp = self.api_client.patch(self.get_garden_api_url(self.garden))
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     def get_garden_api_url(self, garden):
         return reverse('api-garden', kwargs={'name': garden.name})
