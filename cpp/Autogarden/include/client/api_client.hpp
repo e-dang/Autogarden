@@ -11,9 +11,13 @@ class APIClient : public IAPIClient {
 public:
     APIClient(const String& gardenName, const String& apiKey, const String& rootUrl,
               std::unique_ptr<IHttpClient>&& client, const String& contentType = "application/json") :
-        __mAPIKey(apiKey), __mRootUrl(rootUrl), __mContentType(contentType), __pClient(std::move(client)) {}
+        __mGardenName(gardenName),
+        __mAPIKey(apiKey),
+        __mRootUrl(rootUrl),
+        __mContentType(contentType),
+        __pClient(std::move(client)) {}
 
-    DynamicJsonDocument getWateringStationConfigs() override {
+    DynamicJsonDocument getWateringStationConfigs() const override {
         HttpRequest request;
         request.url           = _getWateringStationsUrl();
         request.method        = "get";
@@ -30,7 +34,7 @@ public:
         return response.getJsonData();
     }
 
-    DynamicJsonDocument getGardenConfigs() override {
+    DynamicJsonDocument getGardenConfigs() const override {
         HttpRequest request;
         request.url           = _getGardenUrl();
         request.method        = "get";
@@ -80,7 +84,7 @@ public:
     }
 
     int getConnectionStrength() const override {
-        return __pClient->getConnectionStrength()
+        return __pClient->getConnectionStrength();
     }
 
 protected:
@@ -90,11 +94,12 @@ protected:
 
     String _getGardenUrl() const {
         auto url = __mRootUrl + "api/gardens/<?>/";
-        url.replace("<?>", gardenName);
+        url.replace("<?>", __mGardenName);
         return url;
     }
 
 private:
+    String __mGardenName;
     String __mRootUrl;
     String __mContentType;
     String __mAPIKey;

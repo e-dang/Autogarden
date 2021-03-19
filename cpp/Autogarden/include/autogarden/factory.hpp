@@ -41,6 +41,7 @@ struct AutoGardenConfigs {
 
     String apiKey;
     String gardenName;
+    int numWateringStations;
 
     String ssid;
     String password;
@@ -66,7 +67,7 @@ public:
         auto wateringStations = _createWateringStations(controller.get());
 
         return std::make_unique<AutoGarden>(std::move(client), std::move(wateringStations), std::move(controller),
-                                            std::move(liquidLevelSensor));
+                                            liquidLevelSensor);
     }
 
 private:
@@ -88,7 +89,7 @@ private:
         shiftRegister->appendChild(aMux);
 
         auto configParser = std::make_shared<WateringStationConfigParser>(std::make_unique<DurationParser>());
-        for (int i = 0; i < __pConfigs->serverConfigs.numWateringStations; i++) {
+        for (int i = 0; i < __pConfigs->numWateringStations; i++) {
             auto sensor =
               __pComponentFactory->createMoistureSensor(__pConfigs->sensorId + String(i), __pConfigs->sensorScaler);
             auto valve = __pComponentFactory->createValve(__pConfigs->valveId + String(i), __pConfigs->valveOnValue,
@@ -97,7 +98,7 @@ private:
             dMux->appendChild(valve);
             aMux->appendChild(sensor);
             wateringStations.emplace_back(
-              std::make_unique<WateringStation>(i, 0, 0, pump, valve, sensor, configParser));
+              std::make_unique<WateringStation>(i, true, 0, 0, pump, valve, sensor, configParser));
         }
 
         return wateringStations;

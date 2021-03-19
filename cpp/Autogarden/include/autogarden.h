@@ -1,5 +1,6 @@
+#define ARDUINOJSON_USE_LONG_LONG 1
+
 #ifdef ARDUINO  // clang-format off
-#define
 
 #include <memory> // clang-format off
 namespace std

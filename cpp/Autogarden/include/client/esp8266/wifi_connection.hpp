@@ -23,7 +23,7 @@ public:
     }
 
     int getConnectionStrength() const override {
-        return Wifi.RSSI();
+        return WiFi.RSSI();
     }
 
 private:
