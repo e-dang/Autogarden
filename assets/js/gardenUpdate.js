@@ -14,7 +14,7 @@ const imageFormHandler = createAjaxImageFormHandler(gardenConfigs);
 
 getModalDataAjax(gardenConfigs).then(() => {
     imageFormHandler.addFormListeners();
-    addAjaxFormHandler(formHandler, getFormData);
 });
+addAjaxFormHandler(formHandler, getFormData);
 
 fitText('#name');
