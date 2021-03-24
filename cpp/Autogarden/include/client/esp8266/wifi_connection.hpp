@@ -13,7 +13,6 @@ public:
     void connect() override {
         WiFi.begin(__mSSID, __mPassword);
         while (!isConnected()) {
-            Serial.println("Connecting...");
             delay(__mWaitTime);
         }
     }
@@ -23,7 +22,7 @@ public:
     }
 
     int getConnectionStrength() const override {
-        return Wifi.RSSI();
+        return WiFi.RSSI();
     }
 
 private:

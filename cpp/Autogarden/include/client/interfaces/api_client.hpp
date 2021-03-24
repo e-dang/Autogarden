@@ -22,6 +22,7 @@ class IAPIClientFactory {
 public:
     virtual ~IAPIClientFactory() = default;
 
-    virtual std::unique_ptr<IAPIClient> create(const String& apiKey, const String& ssid, const String& password,
-                                               const String& rootUrl, const int& waitTime = 1000) = 0;
+    virtual std::unique_ptr<IAPIClient> create(const String& gardenName, const String& apiKey, const String& ssid,
+                                               const String& password, const String& rootUrl,
+                                               const int& waitTime = 1000) = 0;
 };

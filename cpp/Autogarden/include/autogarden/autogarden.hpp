@@ -8,12 +8,11 @@
 class AutoGarden : public IAutoGarden {
 public:
     AutoGarden(std::unique_ptr<IAPIClient>&& client, std::vector<std::unique_ptr<IWateringStation>>&& wateringStations,
-               std::unique_ptr<IMicroController>&& controller,
-               std::unique_ptr<ILiquidLevelSensor>&& liquidLevelSensor) :
+               std::unique_ptr<IMicroController>&& controller, std::shared_ptr<ILiquidLevelSensor> liquidLevelSensor) :
         __pClient(std::move(client)),
         __mWateringStations(std::move(wateringStations)),
         __pMicroController(std::move(controller)),
-        __pLiquidLevelSensor(std::move(liquidLevelSensor)) {}
+        __pLiquidLevelSensor(liquidLevelSensor) {}
 
     bool initialize() override {
         return __pMicroController->initialize();
@@ -83,7 +82,7 @@ private:
 
 private:
     uint64_t __mUpdateFrequency;
-    std::unique_ptr<ILiquidLevelSensor> __pLiquidLevelSensor;
+    std::shared_ptr<ILiquidLevelSensor> __pLiquidLevelSensor;
     std::unique_ptr<IAPIClient> __pClient;
     std::unique_ptr<IMicroController> __pMicroController;
     std::vector<std::unique_ptr<IWateringStation>> __mWateringStations;
