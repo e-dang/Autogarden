@@ -15,7 +15,9 @@ public:
         __mAPIKey(apiKey),
         __mRootUrl(rootUrl),
         __mContentType(contentType),
-        __pClient(std::move(client)) {}
+        __pClient(std::move(client)) {
+        __mGardenName.replace(" ", "%20");
+    }
 
     DynamicJsonDocument getWateringStationConfigs() const override {
         HttpRequest request;
