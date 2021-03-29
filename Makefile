@@ -33,8 +33,3 @@ test:
 	pytest -m integration && \
 	pytest -m functional && \
 	make test-cpp
-
-heroku-deploy:
-	python3 manage.py migrate && \
-	mkdir ./static && \
-	python3 manage.py collectstatic
