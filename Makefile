@@ -33,3 +33,7 @@ test:
 	pytest -m integration && \
 	pytest -m functional && \
 	make test-cpp
+
+deploy: install build
+	python3 manage.py migrate && \
+	python3 manage.py collectstatic
