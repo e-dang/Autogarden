@@ -93,6 +93,6 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.7.8
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: e-dang-my-autogarden
+          heroku_app_name: my-autogarden
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           branch: main
