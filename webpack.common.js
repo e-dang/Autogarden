@@ -14,7 +14,7 @@ module.exports = {
     },
     output: {
         filename: '[name]-[contenthash].js',
-        path: path.resolve(__dirname, './static/js'),
+        path: path.resolve(__dirname, './assets/bundles'),
     },
     plugins: [new BundleTracker({filename: './webpack-stats.json'}), new CleanWebpackPlugin()],
     module: {
