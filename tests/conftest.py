@@ -67,7 +67,7 @@ def api_client():
 @pytest.fixture
 def use_tmp_static_dir(settings, tmp_path):
     image_name = _default_garden_image()
-    src_path = settings.BASE_DIR / 'garden' / 'static' / 'images' / image_name
+    src_path = settings.BASE_DIR / 'assets' / 'images' / image_name
     static_dir = tmp_path / 'static'
     static_dir.mkdir()
     image_dir = static_dir / 'images'

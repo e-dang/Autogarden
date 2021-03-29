@@ -132,3 +132,4 @@ dmypy.json
 /static
 node_modules
 tests/functional/screenshots
+assets/bundles
