@@ -84,3 +84,15 @@ jobs:
           path: ./tests/functional/screenshots
           if-no-files-found: ignore
 
+      - name: Get source branch name on pull request
+        run: echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'pull_request' }}
+
+      - name: Deploy to heroku
+        if: ${{ env.BRANCH_NAME == 'main' }}
+        uses: akhileshns/heroku-deploy@v3.7.8
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: e-dang-my-autogarden
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          branch: main
