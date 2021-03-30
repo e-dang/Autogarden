@@ -33,7 +33,7 @@ def _default_status():
 
 
 def _default_garden_image():
-    return 'default_garden.png'
+    return 'default_garden.jpg'
 
 
 class Garden(models.Model):
