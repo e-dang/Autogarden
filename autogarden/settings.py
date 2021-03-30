@@ -141,8 +141,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [
-    BASE_DIR / 'assets' / 'bundles',
-    BASE_DIR / 'assets' / 'images',
+    ['bundles', BASE_DIR / 'assets' / 'bundles'],
+    ['images', BASE_DIR / 'assets' / 'images', ]
 ]
 
 STATICFILES_FINDERS = (
@@ -153,7 +153,7 @@ STATICFILES_FINDERS = (
 WEBPACK_LOADER = {
     'DEFAULT': {
         'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': './',  # must end with slash
+        'BUNDLE_DIR_NAME': 'bundles/',  # must end with slash
         'STATS_FILE': BASE_DIR / 'assets' / 'bundles' / 'webpack-stats.json',
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,
