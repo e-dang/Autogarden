@@ -51,13 +51,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'autogarden.urls'
@@ -182,5 +182,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ['EMAIL']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']
 
-if 'DJANGO_DEV_MODE_FALSE' in os.environ:  # enable cloudinary in production
+if 'DJANGO_DEV_MODE_FALSE' in os.environ:
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
