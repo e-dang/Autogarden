@@ -1,5 +1,10 @@
 @import 'bootstrap.css';
 
+body,
+html {
+    height: 100%;
+}
+
 .asteriskField {
     display: none;
 }
@@ -47,4 +52,22 @@ hr {
 
 .list-group-item-action:hover {
     background-color: var(--gray);
+}
+
+#mainContent {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+.fade-in {
+    -webkit-transition: background 3s linear;
+    -moz-transition: background 3s linear;
+    -o-transition: background 3s linear;
+    -ms-transition: background 3s linear;
+    transition: background 3s linear;
 }
