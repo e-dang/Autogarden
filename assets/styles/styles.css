@@ -54,7 +54,7 @@ hr {
     background-color: var(--gray);
 }
 
-#mainContent {
+#background {
     height: 100%;
     width: 100%;
     position: absolute;

@@ -12,7 +12,7 @@ const imageUrls = [
 ];
 
 class ImageRotator {
-    constructor(urls = imageUrls, componentSelector = '#mainContent', timeout = 60000) {
+    constructor(urls = imageUrls, componentSelector = '#background', timeout = 60000) {
         this.prevIdx = null;
         this.urls = urls;
         this.componentSelector = componentSelector;
