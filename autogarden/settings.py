@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'webpack_loader',
     'django_cleanup.apps.CleanupConfig',
+    'cloudinary_storage',
+    'cloudinary'
 ]
 
 MIDDLEWARE = [
@@ -179,3 +181,6 @@ EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ['EMAIL']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_PASSWORD']
+
+if 'DJANGO_DEV_MODE_FALSE' in os.environ:  # enable cloudinary in production
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
