@@ -67,7 +67,11 @@ class ImageCropper {
 
     _handleCrop(formHandler) {
         this.cropBtn.on('click', (event) => {
-            const canvas = this.cropper.getCroppedCanvas({width: this.width, height: this.height});
+            const canvas = this.cropper.getCroppedCanvas({
+                width: this.width,
+                height: this.height,
+                imageSmoothingQuality: 'high',
+            });
             this.imgContainer.html(canvas);
             this._toggleCropResetBtns();
             $(formHandler.formSelector).off();

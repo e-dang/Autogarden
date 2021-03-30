@@ -66,14 +66,11 @@ def api_client():
 
 @pytest.fixture
 def use_tmp_static_dir(settings, tmp_path):
-    image_name = _default_garden_image()
-    src_path = settings.BASE_DIR / 'assets' / 'images' / image_name
+    src_path = settings.BASE_DIR / 'assets' / 'images'
     static_dir = tmp_path / 'static'
     static_dir.mkdir()
     image_dir = static_dir / 'images'
-    image_dir.mkdir()
-    dest_path = image_dir / image_name
-    shutil.copyfile(src_path, dest_path)
+    shutil.copytree(src_path, image_dir)
     settings.STATIC_ROOT = static_dir
     settings.MEDIA_ROOT = image_dir
 
