@@ -1,14 +1,14 @@
 import $ from 'jquery';
 
 const imageUrls = [
-    '/images/markus-spiske-4PG6wLlVag4-unsplash.jpg',
-    '/images/markus-spiske-vrbZVyX2k4I-unsplash.jpg',
-    '/images/markus-spiske-Yy-dHQP-Ax0-unsplash.jpg',
-    '/images/markus-spiske-B-2mkX1rjjY-unsplash.jpg',
-    '/images/markus-spiske-IRrUkB8Fq-0-unsplash.jpg',
-    '/images/markus-spiske-lq2A2ki2w2Y-unsplash.jpg',
-    '/images/markus-spiske-p4lNiLlog8g-unsplash.jpg',
-    '/images/markus-spiske-Wnr2ohKUIYw-unsplash.jpg',
+    '/static/images/markus-spiske-4PG6wLlVag4-unsplash.jpg',
+    '/static/images/markus-spiske-vrbZVyX2k4I-unsplash.jpg',
+    '/static/images/markus-spiske-Yy-dHQP-Ax0-unsplash.jpg',
+    '/static/images/markus-spiske-B-2mkX1rjjY-unsplash.jpg',
+    '/static/images/markus-spiske-IRrUkB8Fq-0-unsplash.jpg',
+    '/static/images/markus-spiske-lq2A2ki2w2Y-unsplash.jpg',
+    '/static/images/markus-spiske-p4lNiLlog8g-unsplash.jpg',
+    '/static/images/markus-spiske-Wnr2ohKUIYw-unsplash.jpg',
 ];
 
 class ImageRotator {
