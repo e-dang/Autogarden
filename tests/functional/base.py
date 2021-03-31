@@ -6,7 +6,8 @@ from selenium.common.exceptions import WebDriverException
 from tests.management.commands.create_session import \
     create_authenticated_session, create_pre_authenticated_session
 
-TIMEOUT = 10
+from django.conf import settings
+TIMEOUT = 2
 
 
 def wait(fn):
@@ -43,7 +44,11 @@ class Base:
 
     @wait
     def wait_for_page_to_be_loaded(self, page):
+        with open(f'{settings.BASE_DIR}/node_modules/jquery/dist/jquery.js', errors='ignore') as file:
+            self.driver.execute_script(file.read())
         assert page.has_correct_url()
+        assert self.driver.execute_script('return $.active') == 0
+        assert self.driver.execute_script('return document.readyState') == 'complete'
 
     def wait_for_modal_to_be_visible(self, modal_id):
         wait_for_true(lambda: self.driver.find_element_by_id(modal_id).is_displayed())
