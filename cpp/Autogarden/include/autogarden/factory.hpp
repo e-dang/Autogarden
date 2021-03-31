@@ -65,6 +65,7 @@ public:
         auto liquidLevelSensor =
           __pComponentFactory->createLiquidLevelSensor(__pConfigs->liquidLevelSensorId, __pConfigs->okValue);
         auto wateringStations = _createWateringStations(controller.get());
+        controller->appendChild(liquidLevelSensor);
 
         return std::make_unique<AutoGarden>(std::move(client), std::move(wateringStations), std::move(controller),
                                             liquidLevelSensor);
@@ -88,7 +89,7 @@ private:
         shiftRegister->appendChild(dMux);
         shiftRegister->appendChild(aMux);
 
-        auto configParser = std::make_shared<WateringStationConfigParser>(std::make_unique<DurationParser>());
+        auto configParser = std::make_shared<WateringStationConfigParser>();
         for (int i = 0; i < __pConfigs->numWateringStations; i++) {
             auto sensor =
               __pComponentFactory->createMoistureSensor(__pConfigs->sensorId + String(i), __pConfigs->sensorScaler);

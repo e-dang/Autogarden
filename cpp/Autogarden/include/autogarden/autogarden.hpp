@@ -39,7 +39,7 @@ public:
 
     void updateGardenConfigs() {
         auto configs       = __pClient->getGardenConfigs();
-        __mUpdateFrequency = configs["update_frequency"].as<uint64_t>();
+        __mUpdateFrequency = configs["update_frequency"].as<uint64_t>() * 1000;
     }
 
     void activateWateringStations() {

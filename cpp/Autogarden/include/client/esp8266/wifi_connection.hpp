@@ -13,6 +13,7 @@ public:
     void connect() override {
         WiFi.begin(__mSSID, __mPassword);
         while (!isConnected()) {
+            Serial.println("Connecting...");
             delay(__mWaitTime);
         }
     }

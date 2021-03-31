@@ -71,7 +71,7 @@ public:
 
     void sendWateringStationData(const DynamicJsonDocument& data) const override {
         HttpRequest request;
-        request.url           = _getGardenUrl();
+        request.url           = _getWateringStationsUrl();
         request.method        = "post";
         request.contentType   = __mContentType;
         request.authorization = __mAPIKey;
