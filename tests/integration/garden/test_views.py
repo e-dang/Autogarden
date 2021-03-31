@@ -12,9 +12,10 @@ from rest_framework.reverse import reverse
 from tests import assertions
 
 from garden.forms import MIN_VALUE_ERR_MSG, REQUIRED_FIELD_ERR_MSG
-from garden.models import Garden, WateringStation
+from garden.models import Garden, WateringStation, WateringStationRecord
 from garden.serializers import GardenGetSerializer, WateringStationSerializer
 from garden.utils import derive_duration_string
+from garden.views import WS_RECORDS_NUM_HOURS, WateringStationAPIView
 
 
 @pytest.mark.integration
@@ -193,6 +194,38 @@ class TestWateringStationAPIView:
         resp = getattr(auth_api_client, method)(url)
 
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def setup_ws_records(self, watering_station, watering_station_record_factory):
+        new_records = watering_station_record_factory.create_batch(
+            2, watering_station=watering_station)
+        old_records = []
+        for record in watering_station_record_factory.create_batch(20, watering_station=watering_station):
+            record.created = datetime.now(pytz.UTC) - timedelta(hours=WS_RECORDS_NUM_HOURS + 1)
+            record.save()
+            old_records.append(record)
+
+        return old_records, new_records
+
+    @pytest.mark.django_db
+    def test_prune_records_deletes_all_records_that_are_older_than_WS_RECORDS_NUM_HOURS(self, watering_station, watering_station_record_factory):
+        old_records, _ = self.setup_ws_records(watering_station, watering_station_record_factory)
+        view = WateringStationAPIView()
+
+        view.prune_records(watering_station.garden)
+
+        for record in old_records:
+            with pytest.raises(WateringStationRecord.DoesNotExist):
+                record.refresh_from_db()
+
+    @pytest.mark.django_db
+    def test_prune_records_doesnt_delete_records_that_are_newer_than_WS_RECORDS_NUM_HOURS(self, watering_station, watering_station_record_factory):
+        _, new_records = self.setup_ws_records(watering_station, watering_station_record_factory)
+        view = WateringStationAPIView()
+
+        view.prune_records(watering_station.garden)
+
+        for record in new_records:
+            record.refresh_from_db()  # shouldnt raise
 
 
 @pytest.mark.integration

@@ -29,6 +29,8 @@ from .permissions import TokenPermission
 from .serializers import (GardenGetSerializer, GardenPatchSerializer,
                           WateringStationSerializer)
 
+WS_RECORDS_NUM_HOURS = 12
+
 
 def home(request: http.HttpRequest) -> http.HttpResponse:
     return redirect(reverse('garden-list'))
@@ -82,9 +84,18 @@ class WateringStationAPIView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             self.check_object_permissions(request, garden)
+            self.prune_records(garden)
             for i, station in enumerate(garden.watering_stations.all()):
                 station.records.create(**request.data[i])
             return Response({}, status=status.HTTP_201_CREATED)
+
+    def prune_records(self, garden: Garden) -> None:
+        """
+        This method is purely for keeping the number of database rows below 1000 for free deployment on heroku.
+        """
+        cut_off_time = datetime.now(pytz.UTC) - timedelta(hours=WS_RECORDS_NUM_HOURS)
+        for watering_station in garden.watering_stations.all():
+            watering_station.records.filter(created__lt=cut_off_time).delete()
 
 
 class GardenListView(LoginRequiredMixin, View):
@@ -332,7 +343,7 @@ class WateringStationRecordListView(LoginRequiredMixin, View):
         else:
             labels = []
             data = []
-            cut_off_time = datetime.now(pytz.UTC) - timedelta(hours=12)
+            cut_off_time = datetime.now(pytz.UTC) - timedelta(hours=WS_RECORDS_NUM_HOURS)
             for record in watering_station.records.filter(created__gte=cut_off_time).order_by('created'):
                 labels.append(record.created)
                 data.append(record.moisture_level)
