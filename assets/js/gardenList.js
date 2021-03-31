@@ -4,7 +4,5 @@ const configs = {
     formSelector: '#newGardenForm',
 };
 
-$.ready(() => {
-    const formHandler = createAjaxImageFormHandler(configs);
-    formHandler.addFormListeners();
-});
+const formHandler = createAjaxImageFormHandler(configs);
+formHandler.addFormListeners();
