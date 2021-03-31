@@ -7,7 +7,7 @@ from tests.management.commands.create_session import \
     create_authenticated_session, create_pre_authenticated_session
 
 from django.conf import settings
-TIMEOUT = 2
+TIMEOUT = 10
 
 
 def wait(fn):
