@@ -11,13 +11,10 @@ protected:
     const float threshold   = 50.;
     const bool status       = true;
     DynamicJsonDocument doc;
-    NiceMock<MockDurationParser>* mockDurationParser;
-    std::unique_ptr<NiceMock<MockDurationParser>> tmpMockDurationParser;
     std::unique_ptr<WateringStationConfigParser> parser;
 
-    WateringStationConfigParserTest() : doc(1024), tmpMockDurationParser(new NiceMock<MockDurationParser>()) {
-        mockDurationParser        = tmpMockDurationParser.get();
-        parser                    = std::make_unique<WateringStationConfigParser>(std::move(tmpMockDurationParser));
+    WateringStationConfigParserTest() : doc(1024) {
+        parser                    = std::make_unique<WateringStationConfigParser>();
         doc["watering_duration"]  = duration;
         doc["moisture_threshold"] = threshold;
         doc["status"]             = status;
@@ -25,11 +22,9 @@ protected:
 };
 
 TEST_F(WateringStationConfigParserTest, parse_returns_configs_with_duration_correctly_parsed) {
-    EXPECT_CALL(*mockDurationParser, getMilliSeconds()).WillOnce(Return(duration));
-
     auto configs = parser->parse(doc.as<JsonObject>());
 
-    EXPECT_EQ(configs.duration, duration);
+    EXPECT_EQ(configs.duration, duration * 1000);
 }
 
 TEST_F(WateringStationConfigParserTest, parse_returns_configs_with_threshold_correctly_parsed) {
