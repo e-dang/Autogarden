@@ -70,7 +70,7 @@ TEST_F(AutoGardenTest, updateGardenConfigs_sets_update_frequency_on_autogarden_i
 
     autogarden->updateGardenConfigs();
 
-    EXPECT_EQ(autogarden->getUpdateFrequency(), updateFrequency);
+    EXPECT_EQ(autogarden->getUpdateFrequency(), updateFrequency * 1000);
 }
 
 TEST_F(AutoGardenTest, activateWateringStations_calls_activate_on_each_watering_station) {
