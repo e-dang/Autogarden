@@ -1,7 +1,7 @@
 from selenium.webdriver import ActionChains
 from tests.conftest import TEST_IMAGE_DIR
 
-from ..base import wait_for
+from ..base import wait_for, wait_for_ajax
 
 
 class TextInput:
@@ -52,6 +52,7 @@ class Button:
 
     def click(self):
         self._get_element().click()
+        wait_for_ajax(self.instance.driver)
 
     def _get_element(self):
         return wait_for(lambda: getattr(self.instance.driver, self.BY)(self.LOCATOR))

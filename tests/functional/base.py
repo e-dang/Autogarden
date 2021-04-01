@@ -3,8 +3,8 @@ import time
 import pytest
 from django.conf import settings
 from selenium.common.exceptions import WebDriverException
-from tests.management.commands.create_session import \
-    create_authenticated_session, create_pre_authenticated_session
+from tests.management.commands.create_session import (
+    create_authenticated_session, create_pre_authenticated_session)
 
 TIMEOUT = 10
 
@@ -35,6 +35,14 @@ def wait_for_true(fn):
             raise WebDriverException('Function never evaluated to True')
 
 
+@wait
+def wait_for_ajax(driver):
+    with open(f'{settings.BASE_DIR}/node_modules/jquery/dist/jquery.js', errors='ignore') as file:
+        driver.execute_script(file.read())
+    assert driver.execute_script('return $.active') == 0
+    assert driver.execute_script('return document.readyState') == 'complete'
+
+
 @pytest.mark.functional
 @pytest.mark.usefixtures('driver_init')
 class Base:
@@ -44,6 +52,7 @@ class Base:
     @wait
     def wait_for_page_to_be_loaded(self, page):
         assert page.has_correct_url()
+        wait_for_ajax(self.driver)
 
     def wait_for_modal_to_be_visible(self, modal_id):
         wait_for_true(lambda: self.driver.find_element_by_id(modal_id).is_displayed())

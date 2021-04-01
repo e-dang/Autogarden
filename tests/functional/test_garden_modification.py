@@ -65,8 +65,8 @@ class TestGardenModification(Base):
             pytest.fail('User should not be able to manually update API Key')
 
         update_gpage.reset_api_key_button.click()
-        assert wait_for(lambda: update_gpage.api_key != orig_key)
-        assert '*' not in str(update_gpage.api_key)
+        assert wait_for(lambda: '*' not in str(update_gpage.api_key))
+        assert update_gpage.api_key != orig_key
 
         # goes back to the garden detail page where they see the new name and image
         update_gpage.garden_detail_nav_button.click()

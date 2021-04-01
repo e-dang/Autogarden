@@ -132,8 +132,8 @@ class TestAPICommunication(Base):
 
         # they then click the reset api key button and the api key resets
         update_gpage.reset_api_key_button.click()
-        assert wait_for(lambda: update_gpage.api_key != self.token_uuid)
-        assert '*' not in str(update_gpage.api_key)
+        assert wait_for(lambda: '*' not in str(update_gpage.api_key))
+        assert update_gpage.api_key != self.token_uuid
 
         # the microcontroller then tries to access the api, but the operation is not allowed
         resp = self.api_client.get(self.get_watering_station_api_url(self.garden))
