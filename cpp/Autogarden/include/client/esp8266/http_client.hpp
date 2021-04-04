@@ -7,7 +7,7 @@
 
 class ESP8266HttpClient : public IHttpClient {
 public:
-    ESP8266HttpClient(std::unique_ptr<IWifiConnection>&& connection) : __pConnection(std::move(connection)) {}
+    ESP8266HttpClient(std::unique_ptr<IWifiConnection>&& connection) : _pConnection(std::move(connection)) {}
 
     HttpResponse get(const HttpRequest& request) override {
         HttpResponse response;
@@ -16,11 +16,11 @@ public:
             return response;
         }
 
-        __connect();
+        _connect();
 
-        __preprocess(request);
-        response.statusCode = __mClient.GET();
-        __postprocess(response);
+        _preprocess(request);
+        response.statusCode = _mClient.GET();
+        _postprocess(response);
 
         return response;
     }
@@ -32,11 +32,11 @@ public:
             return response;
         }
 
-        __connect();
+        _connect();
 
-        __preprocess(request);
-        response.statusCode = __mClient.POST(request.toString());
-        __postprocess(response);
+        _preprocess(request);
+        response.statusCode = _mClient.POST(request.toString());
+        _postprocess(response);
 
         return response;
     }
@@ -48,40 +48,40 @@ public:
             return response;
         }
 
-        __connect();
+        _connect();
 
-        __preprocess(request);
-        response.statusCode = __mClient.PATCH(request.toString());
-        __postprocess(response);
+        _preprocess(request);
+        response.statusCode = _mClient.PATCH(request.toString());
+        _postprocess(response);
 
         return response;
     }
 
     int getConnectionStrength() const {
-        return __pConnection->getConnectionStrength();
+        return _pConnection->getConnectionStrength();
     }
 
-private:
-    void __connect() {
-        if (!__pConnection->isConnected())
-            __pConnection->connect();
+protected:
+    void _connect() {
+        if (!_pConnection->isConnected())
+            _pConnection->connect();
     }
 
-    void __preprocess(const HttpRequest& request) {
-        __mClient.begin(request.url);
-        __mClient.addHeader("Content-Type", request.contentType);
-        __mClient.addHeader("Authorization", "Token " + request.authorization);
+    virtual void _preprocess(const HttpRequest& request) {
+        _mClient.begin(request.url);
+        _mClient.addHeader("Content-Type", request.contentType);
+        _mClient.addHeader("Authorization", "Token " + request.authorization);
     }
 
-    void __postprocess(HttpResponse& response) {
-        response.data            = __mClient.getString();
+    void _postprocess(HttpResponse& response) {
+        response.data            = _mClient.getString();
         response.processingError = false;
-        __mClient.end();
+        _mClient.end();
     }
 
-private:
-    HTTPClient __mClient;
-    std::unique_ptr<IWifiConnection> __pConnection;
+protected:
+    HTTPClient _mClient;
+    std::unique_ptr<IWifiConnection> _pConnection;
 };
 
 class ESP8266HttpClientFactory : public IHttpClientFactory {

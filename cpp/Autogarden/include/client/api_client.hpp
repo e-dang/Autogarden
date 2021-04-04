@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 
 #include <client/esp8266/http_client.hpp>
+#include <client/esp8266/https_client.hpp>
 #include <client/interfaces/api_client.hpp>
 #include <client/interfaces/http_client.hpp>
 
@@ -43,9 +44,11 @@ public:
         request.contentType   = __mContentType;
         request.authorization = __mAPIKey;
 
+        Serial.println("Getting url " + request.url);
         HttpResponse response;
         while (true) {
             response = __pClient->get(request);
+            Serial.println(String(response.statusCode));
             if (response.statusCode > 0)
                 break;
         }
