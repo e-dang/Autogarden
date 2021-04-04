@@ -29,6 +29,7 @@ AutoGardenConfigs configs = {
     HIGH,
     "",  // apiKey
     "",  // gardenName
+    0,   // number of watering stations
     "",  // ssid
     "",  // wifi password
     ""   // domain name of server
@@ -39,7 +40,8 @@ std::unique_ptr<IAutoGarden> autogarden;
 std::unique_ptr<IAutoGarden> createAutoGarden() {
     auto componentFactory =
       std::make_unique<ComponentFactory>(std::make_unique<SignalFactory>(), std::make_unique<PinFactory>());
-    auto clientFactory = std::make_unique<APIClientFactory>(std::make_unique<ESP8266HttpClientFactory>());
+    auto clientFactory = std::make_unique<APIClientFactory>(
+      std::make_unique<ESP8266HttpsClientFactory>());  // change client here for http versus https
     AutoGardenFactory factory(&configs, std::move(componentFactory), std::move(clientFactory));
     return factory.create();
 }
