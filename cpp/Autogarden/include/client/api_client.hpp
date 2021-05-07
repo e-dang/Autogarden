@@ -44,11 +44,9 @@ public:
         request.contentType   = __mContentType;
         request.authorization = __mAPIKey;
 
-        Serial.println("Getting url " + request.url);
         HttpResponse response;
         while (true) {
             response = __pClient->get(request);
-            Serial.println(String(response.statusCode));
             if (response.statusCode > 0)
                 break;
         }

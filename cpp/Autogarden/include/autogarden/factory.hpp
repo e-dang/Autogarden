@@ -110,3 +110,63 @@ private:
     std::unique_ptr<IComponentFactory> __pComponentFactory;
     std::unique_ptr<IAPIClientFactory> __pClientFactory;
 };
+
+struct SimpleAutoGardenConfigs {
+    String microControllerId;
+    std::initializer_list<int> digitalOutput;
+    std::initializer_list<int> digitalInput;
+    std::initializer_list<int> analogOutput;
+    std::initializer_list<int> analogInput;
+
+    String pumpId;
+    int pumpOnValue;
+    int pumpOffValue;
+
+    String apiKey;
+    String gardenName;
+
+    String ssid;
+    String password;
+    String rootUrl;
+};
+
+class SimpleAutoGardenFactory : public IAutoGardenFactory {
+public:
+    SimpleAutoGardenFactory(SimpleAutoGardenConfigs* configs, std::unique_ptr<IComponentFactory>&& componentFactory,
+                            std::unique_ptr<IAPIClientFactory>&& clientFactory) :
+        __pConfigs(configs),
+        __pComponentFactory(std::move(componentFactory)),
+        __pClientFactory(std::move(clientFactory)) {}
+
+    std::unique_ptr<IAutoGarden> create() override {
+        auto client     = __pClientFactory->create(__pConfigs->gardenName, __pConfigs->apiKey, __pConfigs->ssid,
+                                               __pConfigs->password, __pConfigs->rootUrl);
+        auto controller = __pComponentFactory->createMicroController(
+          __pConfigs->microControllerId, __pConfigs->digitalOutput, __pConfigs->digitalInput, __pConfigs->analogOutput,
+          __pConfigs->analogInput);
+        auto wateringStations = _createWateringStations(controller.get());
+
+        return std::make_unique<SimpleAutoGarden>(std::move(client), std::move(wateringStations),
+                                                  std::move(controller));
+    }
+
+private:
+    std::vector<std::unique_ptr<IWateringStation>> _createWateringStations(Component* controller) {
+        std::vector<std::unique_ptr<IWateringStation>> wateringStations;
+
+        auto pump =
+          __pComponentFactory->createPump(__pConfigs->pumpId, __pConfigs->pumpOnValue, __pConfigs->pumpOffValue);
+
+        controller->appendChild(pump);
+
+        auto configParser = std::make_shared<WateringStationConfigParser>();
+        wateringStations.emplace_back(std::make_unique<SimpleWateringStation>(0, true, 0, pump, configParser));
+
+        return wateringStations;
+    }
+
+private:
+    SimpleAutoGardenConfigs* __pConfigs;
+    std::unique_ptr<IComponentFactory> __pComponentFactory;
+    std::unique_ptr<IAPIClientFactory> __pClientFactory;
+};

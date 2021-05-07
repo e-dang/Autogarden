@@ -88,3 +88,58 @@ private:
     std::shared_ptr<IMoistureSensor> __pSensor;
     std::shared_ptr<IWateringStationConfigParser<WateringStationConfigs>> __pParser;
 };
+
+class SimpleWateringStation : public IWateringStation {
+public:
+    SimpleWateringStation(const int& idx, const bool& status, const uint32_t& duration, std::shared_ptr<IPump> pump,
+                          std::shared_ptr<IWateringStationConfigParser<WateringStationConfigs>> parser) :
+        __mIdx(idx), __mStatus(status), __mDuration(duration), __mCurrData(256), __pPump(pump), __pParser(parser) {}
+
+    void activate() override {
+        __mCurrData["moisture_level"] = 0.;
+        if (isActive()) {
+            __pPump->start();
+            delay(__mDuration);
+            __pPump->stop();
+        }
+    }
+
+    bool update(const JsonObject& configs) override {
+        auto parsedConfigs = __pParser->parse(configs);
+        setStatus(parsedConfigs.status);
+        setDuration(parsedConfigs.duration);
+        return true;
+    }
+
+    void setDuration(const uint32_t& duration) {
+        __mDuration = duration;
+    }
+
+    void setStatus(const bool& status) {
+        __mStatus = status;
+    }
+
+    int getIdx() const override {
+        return __mIdx;
+    }
+
+    uint32_t getDuration() const {
+        return __mDuration;
+    }
+
+    bool isActive() const {
+        return __mStatus;
+    }
+
+    JsonObjectConst getData() const override {
+        return __mCurrData.as<JsonObjectConst>();
+    }
+
+private:
+    int __mIdx;
+    bool __mStatus;
+    uint32_t __mDuration;
+    DynamicJsonDocument __mCurrData;
+    std::shared_ptr<IPump> __pPump;
+    std::shared_ptr<IWateringStationConfigParser<WateringStationConfigs>> __pParser;
+};
